@@ -1,0 +1,516 @@
+/* ============================================
+   Kraal — Login Page
+   Dark left panel · Clean right form
+   Fonts: Fraunces (display) + Sora (body)
+   ============================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,800;1,600&family=Sora:wght@300;400;500;600&display=swap");
+
+:root {
+  --g-deep: #152410;
+  --g-mid: #2d5a27;
+  --g-bright: #4a8a40;
+  --amber: #c8841a;
+  --cream: #faf8f3;
+  --border: #e4ddd2;
+  --text: #18170f;
+  --muted: #706c62;
+  --faint: #a8a49e;
+  --error-bg: #fdf1f0;
+  --error-bd: #f5c6c0;
+  --error-c: #c0392b;
+  --white: #ffffff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Sora", system-ui, sans-serif;
+}
+
+/* ── LEFT PANEL ── */
+.login-panel-left {
+  width: 420px;
+  flex-shrink: 0;
+  background: var(--g-deep);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* subtle grain overlay */
+.login-panel-left::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* warm radial glow */
+.login-panel-left::after {
+  content: "";
+  position: absolute;
+  top: -120px;
+  right: -80px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    rgba(200, 132, 26, 0.1) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.lpl-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 40px 44px;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+  font-family: "Fraunces", serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: auto;
+}
+
+/* Floating emoji art */
+.lpl-art {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 220px;
+}
+
+.lpa {
+  position: absolute;
+  font-size: 3.2rem;
+  animation: floatArt 5s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4));
+}
+
+.lpa-1 {
+  top: 20px;
+  left: 30px;
+  font-size: 3.6rem;
+  animation-delay: 0s;
+}
+.lpa-2 {
+  top: 10px;
+  right: 40px;
+  font-size: 2.8rem;
+  animation-delay: 0.8s;
+}
+.lpa-3 {
+  bottom: 40px;
+  left: 20px;
+  font-size: 2.6rem;
+  animation-delay: 1.6s;
+}
+.lpa-4 {
+  bottom: 20px;
+  right: 30px;
+  font-size: 3rem;
+  animation-delay: 2.4s;
+}
+.lpa-5 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  animation-delay: 3.2s;
+}
+
+@keyframes floatArt {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+  66% {
+    transform: translateY(6px) rotate(-2deg);
+  }
+}
+
+.lpa-5 {
+  animation-name: floatCenter;
+}
+@keyframes floatCenter {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -54%) scale(1.06);
+  }
+}
+
+.lpl-copy {
+  margin-bottom: 32px;
+}
+
+.lpl-copy h2 {
+  font-family: "Fraunces", serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+
+.lpl-copy p {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.lpl-stats {
+  display: flex;
+  gap: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lps strong {
+  font-family: "Fraunces", serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.lps span {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── RIGHT PANEL ── */
+.login-panel-right {
+  flex: 1;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+
+.login-form-wrap {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: formIn 0.5s ease both;
+}
+
+@keyframes formIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-header h1 {
+  font-family: "Fraunces", serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.login-header p {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.login-header a {
+  color: var(--g-mid);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-header a:hover {
+  text-decoration: underline;
+}
+
+/* Google btn */
+.btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 20px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.93rem;
+  font-weight: 600;
+  font-family: "Sora", sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.btn-google:hover:not(:disabled) {
+  border-color: #aaa;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-google:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Divider */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--faint);
+  font-size: 0.78rem;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Fields */
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forgot-link {
+  font-size: 0.78rem;
+  color: var(--g-mid);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.login-field input {
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.93rem;
+  font-family: "Sora", sans-serif;
+  color: var(--text);
+  background: white;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  width: 100%;
+}
+
+.login-field input:focus {
+  border-color: var(--g-mid);
+  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-right: 44px;
+}
+
+.toggle-pass {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color 0.15s;
+}
+
+.toggle-pass:hover {
+  color: var(--g-mid);
+}
+
+/* Error */
+.login-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-bd);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  color: var(--error-c);
+  line-height: 1.4;
+  animation: errorShake 0.3s ease;
+}
+
+@keyframes errorShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+/* Sign in button */
+.btn-signin {
+  width: 100%;
+  padding: 13px 20px;
+  background: var(--g-mid);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: "Sora", sans-serif;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s,
+    box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 4px;
+}
+
+.btn-signin:hover:not(:disabled) {
+  background: var(--g-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(45, 90, 39, 0.3);
+}
+
+.btn-signin:active:not(:disabled) {
+  transform: scale(0.99);
+}
+.btn-signin:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinner inside button */
+.btn-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-register-nudge {
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--muted);
+  padding-top: 4px;
+}
+
+.login-register-nudge a {
+  color: var(--g-mid);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-register-nudge a:hover {
+  text-decoration: underline;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 760px) {
+  .login-panel-left {
+    display: none;
+  }
+  .login-panel-right {
+    padding: 40px 24px;
+  }
+}

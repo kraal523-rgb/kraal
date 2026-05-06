@@ -1,0 +1,30 @@
+{
+  "name": "kraal-upload",
+  "main": "worker.js",
+  "compatibility_date": "2025-01-01",
+
+  // R2 bucket binding — Worker accesses it as env.BUCKET
+  // The bucket name here must match what you created in the dashboard
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "kraal-media"
+    }
+  ],
+
+  // Secrets (set via wrangler secret put, never hardcode here):
+  //   wrangler secret put FIREBASE_PROJECT_ID
+  //   wrangler secret put ALLOWED_ORIGINS      e.g. https://kraalmarket.com,http://localhost:5173
+
+  "env": {
+    "production": {
+      "name": "kraal-upload-prod",
+      "r2_buckets": [
+        {
+          "binding": "BUCKET",
+          "bucket_name": "kraal-media-prod"
+        }
+      ]
+    }
+  }
+}

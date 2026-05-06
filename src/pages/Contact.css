@@ -1,0 +1,442 @@
+/* ── Contact.css ── */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --kraal-green: #2d5a27;
+  --kraal-dark: #1a2a18;
+  --kraal-cream: #f7f3ed;
+  --text-body: #3d4a3a;
+  --text-muted: #7a8a76;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.contact-page {
+  font-family: "DM Sans", sans-serif;
+  color: var(--text-body);
+  background: var(--kraal-cream);
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+.contact-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  background: rgba(247, 243, 237, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(45, 90, 39, 0.1);
+}
+
+.contact-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--kraal-dark);
+  text-decoration: none;
+}
+
+.contact-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.contact-nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.contact-nav-links a:hover {
+  color: var(--kraal-green);
+}
+
+.contact-nav-cta {
+  background: var(--kraal-green) !important;
+  color: white !important;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600 !important;
+}
+
+/* ── HERO ── */
+.contact-hero {
+  background: linear-gradient(
+    135deg,
+    var(--kraal-dark) 0%,
+    var(--kraal-green) 100%
+  );
+  padding: 80px 48px 72px;
+  text-align: center;
+}
+
+.contact-hero-inner {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.contact-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 16px;
+}
+
+.contact-hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.contact-hero-sub {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ── CONTACT OPTIONS ── */
+.contact-options-section {
+  background: white;
+  padding: 56px 48px;
+  border-bottom: 1px solid #e8e2da;
+}
+
+.contact-options-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.contact-option-card {
+  background: var(--kraal-cream);
+  border-radius: 16px;
+  padding: 32px 24px;
+  border: 1px solid #e8e2da;
+  transition:
+    transform 0.22s,
+    box-shadow 0.22s;
+}
+
+.contact-option-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(45, 90, 39, 0.1);
+}
+
+.coc-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 14px;
+}
+
+.contact-option-card h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--kraal-dark);
+  margin-bottom: 8px;
+}
+
+.contact-option-card p {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.coc-link {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--kraal-green);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.coc-link:hover {
+  color: var(--kraal-dark);
+}
+
+.coc-address {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── BODY ── */
+.contact-body {
+  padding: 80px 48px;
+  background: var(--kraal-cream);
+}
+
+.contact-body-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+}
+
+/* ── FORM ── */
+.contact-form-wrap h2,
+.contact-faq h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--kraal-dark);
+  margin-bottom: 8px;
+}
+
+.contact-form-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cf-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cf-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-body);
+  letter-spacing: 0.03em;
+}
+
+.cf-group input,
+.cf-group select,
+.cf-group textarea {
+  padding: 12px 14px;
+  border: 1.5px solid #d8d2ca;
+  border-radius: 10px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.92rem;
+  color: var(--kraal-dark);
+  background: white;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: none;
+}
+
+.cf-group input:focus,
+.cf-group select:focus,
+.cf-group textarea:focus {
+  border-color: var(--kraal-green);
+}
+
+.contact-send-btn {
+  background: var(--kraal-green);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-start;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.contact-send-btn:hover:not(:disabled) {
+  background: var(--kraal-dark);
+  transform: translateY(-2px);
+}
+
+.contact-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── SENT STATE ── */
+.contact-sent {
+  text-align: center;
+  padding: 48px 24px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e8e2da;
+}
+
+.sent-check {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--kraal-green);
+  color: white;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.contact-sent h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+  color: var(--kraal-dark);
+  margin-bottom: 10px;
+}
+
+.contact-sent p {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+/* ── FAQ ── */
+.contact-faq h2 {
+  margin-bottom: 28px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid #e8e2da;
+}
+
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  background: none;
+  border: none;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kraal-dark);
+  cursor: pointer;
+  text-align: left;
+  gap: 12px;
+  transition: color 0.2s;
+}
+
+.faq-q:hover {
+  color: var(--kraal-green);
+}
+
+.faq-chevron {
+  font-size: 1.2rem;
+  color: var(--kraal-green);
+  flex-shrink: 0;
+  font-weight: 400;
+}
+
+.faq-a {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  padding: 0 0 18px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── FOOTER ── */
+.contact-footer {
+  background: var(--kraal-dark);
+  padding: 24px 48px;
+}
+
+.contact-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.contact-footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.contact-footer-links a {
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.contact-footer-links a:hover {
+  color: white;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .contact-nav {
+    padding: 14px 24px;
+  }
+  .contact-hero {
+    padding: 60px 24px;
+  }
+  .contact-options-section {
+    padding: 40px 24px;
+  }
+  .contact-options-inner {
+    grid-template-columns: 1fr;
+  }
+  .contact-body {
+    padding: 56px 24px;
+  }
+  .contact-body-inner {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .cf-row {
+    grid-template-columns: 1fr;
+  }
+  .contact-footer {
+    padding: 20px 24px;
+  }
+  .contact-footer-inner {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
