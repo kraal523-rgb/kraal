@@ -10,20 +10,15 @@ import Login           from './pages/Login'
 import Register        from './pages/auth/Register'
 import SellerDashboard from './pages/SellerDashboard'
 import SellAnimal      from './pages/seller/SellAnimal'
-import About   from './pages/About'
-import Contact from './pages/Contact'
-import Terms   from './pages/Terms'
-// ─────────────────────────────────────────────
-// Protected route — redirects to /login if not
-// signed in, and passes the attempted URL so
-// the user is sent back there after signing in.
-// ─────────────────────────────────────────────
+import About           from './pages/About'
+import Contact         from './pages/Contact'
+import Terms           from './pages/Terms'
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuthStore()
   const location = useLocation()
 
   if (loading) {
-    // Avoid flashing the login page on a hard refresh
     return (
       <div style={{
         minHeight: '100vh',
@@ -50,24 +45,16 @@ function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    // Save where they were trying to go
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   return children
 }
 
-// ─────────────────────────────────────────────
-// Auth initialiser — lives inside BrowserRouter
-// so it can access the store but doesn't render
-// anything itself.
-// ─────────────────────────────────────────────
 function AuthInit() {
   const init = useAuthStore((s) => s.init)
 
   useEffect(() => {
-    // init() starts the Firebase onAuthStateChanged listener
-    // and returns the unsubscribe function for cleanup.
     const unsubscribe = init()
     return unsubscribe
   }, [init])
@@ -76,27 +63,70 @@ function AuthInit() {
 }
 
 // ─────────────────────────────────────────────
-// App
+// Blocks right-click and copy shortcuts globally
 // ─────────────────────────────────────────────
+function useContentProtection() {
+  useEffect(() => {
+    // Block right-click context menu
+    const handleContextMenu = (e) => e.preventDefault()
+
+    // Block copy-related keyboard shortcuts
+    const handleKeyDown = (e) => {
+      const key = e.key.toLowerCase()
+      if (
+        e.ctrlKey && ['c', 'u', 's', 'a', 'p', 'x'].includes(key) ||
+        e.metaKey && ['c', 'u', 's', 'a', 'p', 'x'].includes(key) || // Mac ⌘
+        e.key === 'F12' ||                                              // DevTools
+        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key))     // DevTools shortcuts
+      ) {
+        e.preventDefault()
+      }
+    }
+
+    // Block the copy event itself (catches all copy attempts)
+    const handleCopy = (e) => e.preventDefault()
+
+    // Block cut
+    const handleCut = (e) => e.preventDefault()
+
+    // Disable text selection via CSS
+    document.body.style.userSelect = 'none'
+    document.body.style.webkitUserSelect = 'none'
+
+    document.addEventListener('contextmenu', handleContextMenu)
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('copy', handleCopy)
+    document.addEventListener('cut', handleCut)
+
+    return () => {
+      document.body.style.userSelect = ''
+      document.body.style.webkitUserSelect = ''
+      document.removeEventListener('contextmenu', handleContextMenu)
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('copy', handleCopy)
+      document.removeEventListener('cut', handleCut)
+    }
+  }, [])
+}
+
 function App() {
+  useContentProtection() // 👈 add this
+
   return (
     <BrowserRouter>
-      {/* Starts Firebase auth listener once, at the root */}
       <AuthInit />
 
       <Routes>
-        {/* ── Public routes ── */}
         <Route path="/"              element={<Home />} />
         <Route path="/home"          element={<Navigate to="/" replace />} />
         <Route path="/marketplace"   element={<Marketplace />} />
         <Route path="/listings/:id"  element={<ListingDetail />} />
         <Route path="/login"         element={<Login />} />
         <Route path="/register"      element={<Register />} />
-        <Route path="/about"   element={<About />} />
-<Route path="/contact" element={<Contact />} />
-<Route path="/terms"   element={<Terms />} />
+        <Route path="/about"         element={<About />} />
+        <Route path="/contact"       element={<Contact />} />
+        <Route path="/terms"         element={<Terms />} />
 
-        {/* ── Protected routes (must be signed in) ── */}
         <Route
           path="/seller/dashboard"
           element={
@@ -114,7 +144,6 @@ function App() {
           }
         />
 
-        {/* ── Catch-all ── */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
