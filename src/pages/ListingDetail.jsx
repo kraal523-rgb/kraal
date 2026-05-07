@@ -86,35 +86,33 @@ useEffect(() => {
     fetchListing();
   }, [id, navigate]);
 
-  const whatsappUrl = () => {
-    const num = (listing.seller?.whatsapp || "").replace(/\D/g, "");
-    const msg = encodeURIComponent(
-      `Hi, I saw your listing on Kraal: "${listing.title}" for ${listing.currency} ${listing.price}. Is it still available?`,
-    );
-    return `https://wa.me/${num}?text=${msg}`;
-  };
-
+ const whatsappUrl = () => {
+  if (!listing) return "#";
+  const num = (listing.seller?.whatsapp || "").replace(/\D/g, "");
+  const msg = encodeURIComponent(
+    `Hi, I saw your listing on Kraal: "${listing.title}" for ${listing.currency} ${listing.price}. Is it still available?`
+  );
+  return `https://wa.me/${num}?text=${msg}`;
+};
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const totalPrice =
-    listing.pricePerHead && listing.quantity > 1
-      ? listing.price * listing.quantity
-      : listing.price;
+  
 
-  if (loading)
-   
-      if (loading) return (
+ if (loading) return (
   <div className="ld-loading">
     <div className="ld-spinner" />
     <p>Loading listing…</p>
   </div>
 );
    if (!listing) return null;
-
+const totalPrice =
+    listing.pricePerHead && listing.quantity > 1
+      ? listing.price * listing.quantity
+      : listing.price;
   return (
     <div className="ld-page">
       {/* ── BREADCRUMB ── */}
