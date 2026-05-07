@@ -1,6 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo-black.svg";
 import imgCattle from "../assets/pngegg__5.png";
 import imgGoats from "../assets/pngegg__6.png";
@@ -60,652 +62,6 @@ const LOCATIONS = [
   "Zvishavane",
 ];
 
-const LISTINGS = [
-  // Cattle
-  {
-    id: 1,
-    category: "cattle",
-    emoji: "🐄",
-    title: "10× Brahman Bulls",
-    location: "Marondera, Mashonaland",
-    price: 1200,
-    currency: "USD",
-    unit: "per head",
-    badge: "Verified",
-    age: "3 yrs",
-    weight: "520kg",
-    qty: 10,
-    daysAgo: 1,
-    seller: "Takudzwa M.",
-    sellerRating: 4.9,
-    views: 234,
-    breed: "Brahman",
-    desc: "Excellent temperament, all vaccinated and dewormed. Ready for breeding or fattening.",
-  },
-  {
-    id: 2,
-    category: "cattle",
-    emoji: "🐄",
-    title: "5× Nguni Cows",
-    location: "Gweru, Midlands",
-    price: 850,
-    currency: "USD",
-    unit: "per head",
-    badge: "Pedigree",
-    age: "4 yrs",
-    weight: "380kg",
-    qty: 5,
-    daysAgo: 2,
-    seller: "Farai C.",
-    sellerRating: 4.7,
-    views: 189,
-    breed: "Nguni",
-    desc: "Indigenous breed, disease-resistant and low maintenance. Perfect for communal farming.",
-  },
-  {
-    id: 3,
-    category: "cattle",
-    emoji: "🐂",
-    title: "2× Ankole Bulls",
-    location: "Bulawayo, Matabeleland",
-    price: 1500,
-    currency: "USD",
-    unit: "per head",
-    badge: "Premium",
-    age: "5 yrs",
-    weight: "600kg",
-    qty: 2,
-    daysAgo: 3,
-    seller: "Sithembile N.",
-    sellerRating: 5.0,
-    views: 312,
-    breed: "Ankole",
-    desc: "Majestic long-horned Ankole bulls. Exceptional genetics, excellent for upgrading your herd.",
-  },
-  {
-    id: 4,
-    category: "cattle",
-    emoji: "🐄",
-    title: "20× Hereford Heifers",
-    location: "Harare, Mashonaland",
-    price: 720,
-    currency: "USD",
-    unit: "per head",
-    badge: "Vaccinated",
-    age: "18 mo",
-    weight: "280kg",
-    qty: 20,
-    daysAgo: 1,
-    seller: "Joseph M.",
-    sellerRating: 4.8,
-    views: 156,
-    breed: "Hereford",
-    desc: "Young heifers ready for breeding. All up to date on vaccinations and dipping.",
-  },
-  {
-    id: 5,
-    category: "cattle",
-    emoji: "🐄",
-    title: "8× Simmental Cows",
-    location: "Chinhoyi, Mashonaland",
-    price: 980,
-    currency: "USD",
-    unit: "per head",
-    badge: "Milking",
-    age: "3 yrs",
-    weight: "450kg",
-    qty: 8,
-    daysAgo: 4,
-    seller: "Blessing N.",
-    sellerRating: 4.6,
-    views: 98,
-    breed: "Simmental",
-    desc: "High-yielding dairy crosses. Currently producing 12–15L/day. Calm and easy to handle.",
-  },
-
-  // Goats
-  {
-    id: 6,
-    category: "goats",
-    emoji: "🐐",
-    title: "25× Boer Goats",
-    location: "Gweru, Midlands",
-    price: 175,
-    currency: "USD",
-    unit: "per head",
-    badge: "Vaccinated",
-    age: "18 mo",
-    weight: "45kg",
-    qty: 25,
-    daysAgo: 2,
-    seller: "Rudo T.",
-    sellerRating: 4.8,
-    views: 201,
-    breed: "Boer",
-    desc: "Top-quality meat goats. Healthy and robust with great conformation.",
-  },
-  {
-    id: 7,
-    category: "goats",
-    emoji: "🐐",
-    title: "12× Kalahari Red Does",
-    location: "Masvingo, Masvingo",
-    price: 220,
-    currency: "USD",
-    unit: "per head",
-    badge: "Registered",
-    age: "2 yrs",
-    weight: "55kg",
-    qty: 12,
-    daysAgo: 1,
-    seller: "Chipo M.",
-    sellerRating: 4.9,
-    views: 145,
-    breed: "Kalahari",
-    desc: "Registered Kalahari Red does with papers. Excellent mothering ability.",
-  },
-  {
-    id: 8,
-    category: "goats",
-    emoji: "🐐",
-    title: "50× Indigenous Goats",
-    location: "Beitbridge, Matabeleland",
-    price: 85,
-    currency: "USD",
-    unit: "per head",
-    badge: "Bulk Deal",
-    age: "Mixed",
-    weight: "30kg",
-    qty: 50,
-    daysAgo: 3,
-    seller: "Admire K.",
-    sellerRating: 4.5,
-    views: 87,
-    breed: "Indigenous",
-    desc: "Hardy local goats adapted to dry conditions. Suitable for meat or milk production.",
-  },
-
-  // Sheep
-  {
-    id: 9,
-    category: "sheep",
-    emoji: "🐑",
-    title: "15× Merino Ewes",
-    location: "Bulawayo, Matabeleland",
-    price: 220,
-    currency: "USD",
-    unit: "per head",
-    badge: "Pedigree",
-    age: "2 yrs",
-    weight: "60kg",
-    qty: 15,
-    daysAgo: 3,
-    seller: "Thandi N.",
-    sellerRating: 4.7,
-    views: 122,
-    breed: "Merino",
-    desc: "Fine wool Merino ewes with excellent fleece quality. All in-lamb.",
-  },
-  {
-    id: 10,
-    category: "sheep",
-    emoji: "🐑",
-    title: "30× Dorper Lambs",
-    location: "Marondera, Mashonaland",
-    price: 120,
-    currency: "USD",
-    unit: "per head",
-    badge: "Weaned",
-    age: "3 mo",
-    weight: "18kg",
-    qty: 30,
-    daysAgo: 2,
-    seller: "Takudzwa M.",
-    sellerRating: 4.9,
-    views: 168,
-    breed: "Dorper",
-    desc: "Fast-growing Dorper lambs ready for fattening. Good muscle development.",
-  },
-  {
-    id: 11,
-    category: "sheep",
-    emoji: "🐑",
-    title: "6× Mutton Merino Rams",
-    location: "Gweru, Midlands",
-    price: 350,
-    currency: "USD",
-    unit: "per head",
-    badge: "Registered",
-    age: "3 yrs",
-    weight: "90kg",
-    qty: 6,
-    daysAgo: 5,
-    seller: "Farai C.",
-    sellerRating: 4.7,
-    views: 76,
-    breed: "Mutton Merino",
-    desc: "Stud rams with registration papers. Proven breeders with multiple seasons.",
-  },
-
-  // Chickens
-  {
-    id: 12,
-    category: "chicken",
-    emoji: "🐓",
-    title: "200× Road Runners",
-    location: "Mutare, Manicaland",
-    price: 8,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Bulk Discount",
-    age: "16 wks",
-    weight: "1.2kg",
-    qty: 200,
-    daysAgo: 1,
-    seller: "Sithembile N.",
-    sellerRating: 5.0,
-    views: 389,
-    breed: "Indigenous",
-    desc: "Free-range Road Runners raised on natural feed. No antibiotics, no hormones.",
-  },
-  {
-    id: 13,
-    category: "chicken",
-    emoji: "🐓",
-    title: "500× Day-Old Chicks",
-    location: "Harare, Mashonaland",
-    price: 1.5,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Hatchery",
-    age: "1 day",
-    weight: "0.05kg",
-    qty: 500,
-    daysAgo: 1,
-    seller: "Sunrise Farm",
-    sellerRating: 4.8,
-    views: 512,
-    breed: "Broiler",
-    desc: "Day-old Cobb 500 broiler chicks from certified hatchery. 95%+ hatch rate.",
-  },
-  {
-    id: 14,
-    category: "chicken",
-    emoji: "🐔",
-    title: "80× Point-of-Lay Hens",
-    location: "Chinhoyi, Mashonaland",
-    price: 12,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Laying",
-    age: "18 wks",
-    weight: "1.8kg",
-    qty: 80,
-    daysAgo: 2,
-    seller: "Green Valley",
-    sellerRating: 4.6,
-    views: 234,
-    breed: "Hyline",
-    desc: "Hyline laying hens at point of lay. Currently producing 90%+ lay rate.",
-  },
-
-  // Pigs
-  {
-    id: 15,
-    category: "pigs",
-    emoji: "🐖",
-    title: "8× Duroc Piglets",
-    location: "Chinhoyi, Mashonaland",
-    price: 95,
-    currency: "USD",
-    unit: "per head",
-    badge: "Weaned",
-    age: "8 wks",
-    weight: "12kg",
-    qty: 8,
-    daysAgo: 2,
-    seller: "Joseph M.",
-    sellerRating: 4.8,
-    views: 143,
-    breed: "Duroc",
-    desc: "Purebred Duroc piglets, weaned and eating well. Great growth rates expected.",
-  },
-  {
-    id: 16,
-    category: "pigs",
-    emoji: "🐷",
-    title: "3× Large White Sows",
-    location: "Harare, Mashonaland",
-    price: 380,
-    currency: "USD",
-    unit: "per head",
-    badge: "Proven",
-    age: "2 yrs",
-    weight: "180kg",
-    qty: 3,
-    daysAgo: 4,
-    seller: "Kudzai P.",
-    sellerRating: 4.9,
-    views: 98,
-    breed: "Large White",
-    desc: "Proven sows with 2 litters recorded. Average of 11 piglets per litter.",
-  },
-  {
-    id: 17,
-    category: "pigs",
-    emoji: "🐖",
-    title: "1× Landrace Boar",
-    location: "Gweru, Midlands",
-    price: 650,
-    currency: "USD",
-    unit: "per head",
-    badge: "Registered",
-    age: "18 mo",
-    weight: "220kg",
-    qty: 1,
-    daysAgo: 6,
-    seller: "Rudo T.",
-    sellerRating: 4.8,
-    views: 67,
-    breed: "Landrace",
-    desc: "Stud boar with registration papers. Excellent libido and semen quality.",
-  },
-
-  // Horses
-  {
-    id: 18,
-    category: "horses",
-    emoji: "🐴",
-    title: "3× Thoroughbred Mares",
-    location: "Harare, Mashonaland",
-    price: 3800,
-    currency: "USD",
-    unit: "per head",
-    badge: "Registered",
-    age: "5 yrs",
-    weight: "500kg",
-    qty: 3,
-    daysAgo: 4,
-    seller: "Harare Stud",
-    sellerRating: 5.0,
-    views: 201,
-    breed: "Thoroughbred",
-    desc: "Registered Thoroughbred mares with full racing history available on request.",
-  },
-  {
-    id: 19,
-    category: "horses",
-    emoji: "🐎",
-    title: "2× Quarter Horse Geldings",
-    location: "Bulawayo, Matabeleland",
-    price: 2200,
-    currency: "USD",
-    unit: "per head",
-    badge: "Broken In",
-    age: "6 yrs",
-    weight: "480kg",
-    qty: 2,
-    daysAgo: 7,
-    seller: "Ndlovu Ranch",
-    sellerRating: 4.7,
-    views: 134,
-    breed: "Quarter Horse",
-    desc: "Well-trained geldings, suitable for trail riding, farm work, or leisure.",
-  },
-
-  // Ducks
-  {
-    id: 20,
-    category: "ducks",
-    emoji: "🦆",
-    title: "40× Muscovy Ducks",
-    location: "Mutare, Manicaland",
-    price: 18,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Free Range",
-    age: "12 wks",
-    weight: "2.5kg",
-    qty: 40,
-    daysAgo: 2,
-    seller: "Chipo M.",
-    sellerRating: 4.9,
-    views: 89,
-    breed: "Muscovy",
-    desc: "Hardy free-range Muscovy ducks, excellent foragers and good for meat.",
-  },
-  {
-    id: 21,
-    category: "ducks",
-    emoji: "🦆",
-    title: "20× Pekin Ducks",
-    location: "Marondera, Mashonaland",
-    price: 22,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Meat Breed",
-    age: "10 wks",
-    weight: "3kg",
-    qty: 20,
-    daysAgo: 5,
-    seller: "Admire K.",
-    sellerRating: 4.5,
-    views: 56,
-    breed: "Pekin",
-    desc: "Fast-growing Pekin ducks, ready for processing or further fattening.",
-  },
-
-  // Guinea Fowl
-  {
-    id: 22,
-    category: "guinea",
-    emoji: "🐦",
-    title: "100× Guinea Fowl Keets",
-    location: "Gweru, Midlands",
-    price: 4,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Hatchery",
-    age: "2 wks",
-    weight: "0.1kg",
-    qty: 100,
-    daysAgo: 1,
-    seller: "Kudzai P.",
-    sellerRating: 4.9,
-    views: 178,
-    breed: "Helmeted",
-    desc: "2-week-old guinea fowl keets from disease-free parent flock.",
-  },
-  {
-    id: 23,
-    category: "guinea",
-    emoji: "🐦",
-    title: "30× Adult Guinea Fowl",
-    location: "Masvingo, Masvingo",
-    price: 15,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Free Range",
-    age: "8 mo",
-    weight: "1.5kg",
-    qty: 30,
-    daysAgo: 3,
-    seller: "Blessing N.",
-    sellerRating: 4.6,
-    views: 67,
-    breed: "Helmeted",
-    desc: "Free-ranging adults, excellent tick control birds. Selling due to relocation.",
-  },
-
-  // Rabbits
-  {
-    id: 24,
-    category: "rabbits",
-    emoji: "🐇",
-    title: "20× New Zealand Whites",
-    location: "Harare, Mashonaland",
-    price: 25,
-    currency: "USD",
-    unit: "per head",
-    badge: "Breeding",
-    age: "3 mo",
-    weight: "2kg",
-    qty: 20,
-    daysAgo: 2,
-    seller: "Sunrise Farm",
-    sellerRating: 4.8,
-    views: 112,
-    breed: "NZ White",
-    desc: "Young rabbits ready for breeding or meat. Fast growth rate, good FCR.",
-  },
-  {
-    id: 25,
-    category: "rabbits",
-    emoji: "🐇",
-    title: "5× Angora Rabbits",
-    location: "Bulawayo, Matabeleland",
-    price: 65,
-    currency: "USD",
-    unit: "per head",
-    badge: "Fibre Breed",
-    age: "6 mo",
-    weight: "3.5kg",
-    qty: 5,
-    daysAgo: 4,
-    seller: "Thandi N.",
-    sellerRating: 4.7,
-    views: 78,
-    breed: "Angora",
-    desc: "Fluffy Angora rabbits for wool production. Gentle temperament, easy to groom.",
-  },
-
-  // Turkey
-  {
-    id: 26,
-    category: "turkey",
-    emoji: "🦃",
-    title: "15× Bronze Turkeys",
-    location: "Chinhoyi, Mashonaland",
-    price: 45,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Free Range",
-    age: "20 wks",
-    weight: "6kg",
-    qty: 15,
-    daysAgo: 3,
-    seller: "Green Valley",
-    sellerRating: 4.6,
-    views: 89,
-    breed: "Bronze",
-    desc: "Heritage Bronze turkeys raised free-range. Perfect for festive season.",
-  },
-  {
-    id: 27,
-    category: "turkey",
-    emoji: "🦃",
-    title: "50× Turkey Poults",
-    location: "Marondera, Mashonaland",
-    price: 12,
-    currency: "USD",
-    unit: "per bird",
-    badge: "Vaccinated",
-    age: "4 wks",
-    weight: "0.5kg",
-    qty: 50,
-    daysAgo: 2,
-    seller: "Joseph M.",
-    sellerRating: 4.8,
-    views: 134,
-    breed: "Broad-Breasted White",
-    desc: "4-week-old turkey poults, vaccinated against common diseases.",
-  },
-
-  // Dogs
-  {
-    id: 28,
-    category: "dogs",
-    emoji: "🐕",
-    title: "6× Boerboel Puppies",
-    location: "Harare, Mashonaland",
-    price: 280,
-    currency: "USD",
-    unit: "per puppy",
-    badge: "Registered",
-    age: "8 wks",
-    weight: "5kg",
-    qty: 6,
-    daysAgo: 1,
-    seller: "Harare Stud",
-    sellerRating: 5.0,
-    views: 456,
-    breed: "Boerboel",
-    desc: "SABBS registered Boerboel puppies from champion parents. Both parents on site.",
-  },
-  {
-    id: 29,
-    category: "dogs",
-    emoji: "🐕",
-    title: "2× German Shepherd Adults",
-    location: "Bulawayo, Matabeleland",
-    price: 450,
-    currency: "USD",
-    unit: "per dog",
-    badge: "Trained",
-    age: "2 yrs",
-    weight: "32kg",
-    qty: 2,
-    daysAgo: 5,
-    seller: "Ndlovu Ranch",
-    sellerRating: 4.7,
-    views: 201,
-    breed: "German Shepherd",
-    desc: "Trained guard dogs with KUSA papers. Excellent with families and livestock.",
-  },
-
-  // Donkeys
-  {
-    id: 30,
-    category: "donkeys",
-    emoji: "🫏",
-    title: "4× Working Donkeys",
-    location: "Masvingo, Masvingo",
-    price: 180,
-    currency: "USD",
-    unit: "per head",
-    badge: "Trained",
-    age: "4 yrs",
-    weight: "180kg",
-    qty: 4,
-    daysAgo: 3,
-    seller: "Admire K.",
-    sellerRating: 4.5,
-    views: 67,
-    breed: "Standard",
-    desc: "Strong working donkeys trained for cart and pack work. Well-tempered.",
-  },
-  {
-    id: 31,
-    category: "donkeys",
-    emoji: "🫏",
-    title: "2× Miniature Donkeys",
-    location: "Harare, Mashonaland",
-    price: 350,
-    currency: "USD",
-    unit: "per head",
-    badge: "Friendly",
-    age: "3 yrs",
-    weight: "80kg",
-    qty: 2,
-    daysAgo: 6,
-    seller: "Chipo M.",
-    sellerRating: 4.9,
-    views: 89,
-    breed: "Miniature",
-    desc: "Charming miniature donkeys, great for petting farms or companionship.",
-  },
-];
-
 const PRICE_TICKER = [
   { label: "Brahman Bull", price: "USD 1,200", trend: "up" },
   { label: "Nguni Cow", price: "USD 850", trend: "up" },
@@ -717,6 +73,7 @@ const PRICE_TICKER = [
   { label: "Bronze Turkey", price: "USD 45", trend: "up" },
   { label: "Ankole Bull", price: "USD 1,500", trend: "up" },
 ];
+
 const BANNER_ADS = [
   {
     id: 1,
@@ -742,7 +99,7 @@ const VIDEO_ADS = [
   {
     id: 1,
     company: "ProNutro Feeds",
-    thumbnail: null, // replace with image URL
+    thumbnail: null,
     videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     label: "Sponsored",
   },
@@ -754,12 +111,43 @@ const VIDEO_ADS = [
     label: "Sponsored",
   },
 ];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+function getDaysAgo(createdAt) {
+  if (!createdAt?.seconds) return 0;
+  return Math.floor((Date.now() / 1000 - createdAt.seconds) / 86400);
+}
+
+function getCategoryEmoji(category) {
+  const map = {
+    cattle: "🐄",
+    goats: "🐐",
+    sheep: "🐑",
+    chicken: "🐓",
+    guinea: "🐦",
+    ducks: "🦆",
+    rabbits: "🐇",
+    turkey: "🦃",
+    pigs: "🐖",
+    horses: "🐴",
+    dogs: "🐕",
+    donkeys: "🫏",
+  };
+  return map[category] || "🐾";
+}
+
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function Marketplace() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // ── Firestore state ──
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ── Filter / UI state ──
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const [category, setCategory] = useState(
     searchParams.get("category") || "all",
@@ -776,11 +164,35 @@ export default function Marketplace() {
   const [activeModal, setActiveModal] = useState(null);
   const [visibleCards, setVisibleCards] = useState(new Set());
   const [page, setPage] = useState(1);
+  const [activeBanner, setActiveBanner] = useState(0);
   const PER_PAGE = 12;
-const [activeBanner, setActiveBanner] = useState(0);
   const cardRefs = useRef({});
 
-  // Sync URL params
+  // ── Fetch from Firestore ──
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const q = query(
+          collection(db, "listings"),
+          where("status", "==", "active"),
+          orderBy("createdAt", "desc"),
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setListings(data);
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
+
+  // ── Sync URL params ──
   useEffect(() => {
     const params = {};
     if (search) params.q = search;
@@ -790,7 +202,7 @@ const [activeBanner, setActiveBanner] = useState(0);
     setPage(1);
   }, [search, category, location]);
 
-  // Card entrance animations
+  // ── Card entrance animations ──
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -805,26 +217,33 @@ const [activeBanner, setActiveBanner] = useState(0);
     Object.values(cardRefs.current).forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
   });
-useEffect(() => {
-  const t = setInterval(() => {
-    setActiveBanner((i) => (i + 1) % BANNER_ADS.length);
-  }, 5000);
-  return () => clearInterval(t);
-}, []);
-  // Filtered + sorted listings
+
+  // ── Banner rotation ──
+  useEffect(() => {
+    const t = setInterval(() => {
+      setActiveBanner((i) => (i + 1) % BANNER_ADS.length);
+    }, 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  // ── FIX 1: filtered now uses `listings` (Firestore data), not hardcoded array ──
   const filtered = useMemo(() => {
-    let list = [...LISTINGS];
+    let list = [...listings];
+
     if (category && category !== "all")
       list = list.filter((l) => l.category === category);
+
     if (location && location !== "All Locations")
-      list = list.filter((l) => l.location.includes(location));
+      list = list.filter((l) => l.location?.includes(location));
+
     if (search.trim())
       list = list.filter((l) =>
-        [l.title, l.breed, l.location, l.desc]
+        [l.title, l.breed, l.location, l.description]
           .join(" ")
           .toLowerCase()
           .includes(search.toLowerCase()),
       );
+
     if (priceMin) list = list.filter((l) => l.price >= Number(priceMin));
     if (priceMax) list = list.filter((l) => l.price <= Number(priceMax));
 
@@ -836,14 +255,15 @@ useEffect(() => {
         list.sort((a, b) => b.price - a.price);
         break;
       case "popular":
-        list.sort((a, b) => b.views - a.views);
+        list.sort((a, b) => (b.views || 0) - (a.views || 0));
         break;
       default:
-        list.sort((a, b) => a.daysAgo - b.daysAgo);
+        // newest: already sorted by createdAt desc from Firestore
         break;
     }
+
     return list;
-  }, [category, location, search, priceMin, priceMax, sortBy]);
+  }, [listings, category, location, search, priceMin, priceMax, sortBy]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -866,9 +286,11 @@ useEffect(() => {
     setPage(1);
   };
 
+  // ── FIX 2: activeListing now looks up from `listings` (Firestore data) ──
   const activeListing = activeModal
-    ? LISTINGS.find((l) => l.id === activeModal)
+    ? listings.find((l) => l.id === activeModal)
     : null;
+
   const hasFilters =
     search ||
     category !== "all" ||
@@ -902,12 +324,12 @@ useEffect(() => {
       {/* ── NAV ── */}
       <nav className="mp-nav">
         <div className="mp-nav-inner">
-         <Link to="/" className="mp-nav-logo">
+          <Link to="/" className="mp-nav-logo">
             <img src={logo} style={{ width: "120px" }} alt="Kraal" />
             <span>Market</span>
           </Link>
           <div className={`mp-nav-links ${menuOpen ? "open" : ""}`}>
-           <Link to="/marketplace" className="active">
+            <Link to="/marketplace" className="active">
               Browse Animals
             </Link>
             <Link to="/marketplace?category=cattle">Cattle</Link>
@@ -915,7 +337,7 @@ useEffect(() => {
             <Link to="/about">About</Link>
           </div>
           <div className="mp-nav-actions">
-           <Link to="/login" className="mp-nav-signin">
+            <Link to="/login" className="mp-nav-signin">
               Sign in
             </Link>
             <Link to="/register" className="mp-nav-cta">
@@ -953,7 +375,6 @@ useEffect(() => {
             </p>
           </div>
 
-          {/* Main search bar */}
           <form
             className="mp-searchbar"
             onSubmit={(e) => {
@@ -1012,148 +433,201 @@ useEffect(() => {
       {/* ── MAIN LAYOUT ── */}
       <div className="mp-layout">
         {/* ── SIDEBAR ── */}
-      <aside className={`mp-sidebar ${sidebarOpen ? "open" : ""}`}>
-  {/* ── BANNER AD ── */}
-  <div className="mp-ad-banner" style={{
-    background: BANNER_ADS[activeBanner].bg,
-  }}>
-    <span className="mp-ad-label">Ad</span>
-    <p className="mp-ad-company">{BANNER_ADS[activeBanner].company}</p>
-    <p className="mp-ad-tagline">{BANNER_ADS[activeBanner].tagline}</p>
-    
-    <a  href={BANNER_ADS[activeBanner].url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mp-ad-cta"
-      style={{ color: BANNER_ADS[activeBanner].accent, borderColor: BANNER_ADS[activeBanner].accent }}
-    >
-      {BANNER_ADS[activeBanner].cta} →
-    </a>
-    <div className="mp-ad-dots">
-      {BANNER_ADS.map((_, i) => (
-        <button
-          key={i}
-          className={`mp-ad-dot ${i === activeBanner ? "active" : ""}`}
-          onClick={() => setActiveBanner(i)}
-        />
-      ))}
-    </div>
-  </div>
+        <aside className={`mp-sidebar ${sidebarOpen ? "open" : ""}`}>
+          {/* Banner Ad */}
+          <div
+            className="mp-ad-banner"
+            style={{ background: BANNER_ADS[activeBanner].bg }}
+          >
+            <span className="mp-ad-label">Ad</span>
+            <p className="mp-ad-company">{BANNER_ADS[activeBanner].company}</p>
+            <p className="mp-ad-tagline">{BANNER_ADS[activeBanner].tagline}</p>
+            <a
+              href={BANNER_ADS[activeBanner].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mp-ad-cta"
+              style={{
+                color: BANNER_ADS[activeBanner].accent,
+                borderColor: BANNER_ADS[activeBanner].accent,
+              }}
+            >
+              {BANNER_ADS[activeBanner].cta} →
+            </a>
+            <div className="mp-ad-dots">
+              {BANNER_ADS.map((_, i) => (
+                <button
+                  key={i}
+                  className={`mp-ad-dot ${i === activeBanner ? "active" : ""}`}
+                  onClick={() => setActiveBanner(i)}
+                />
+              ))}
+            </div>
+          </div>
 
-  {/* ── EXISTING FILTERS ── */}
-  <div className="mp-sidebar-header">
-    <h3>Filters</h3>
-    {hasFilters && (
-      <button className="mp-clear-btn" onClick={clearFilters}>
-        Clear all
-      </button>
-    )}
-    <button className="mp-sidebar-close" onClick={() => setSidebarOpen(false)}>
-      ✕
-    </button>
-  </div>
+          {/* Filters header */}
+          <div className="mp-sidebar-header">
+            <h3>Filters</h3>
+            {hasFilters && (
+              <button className="mp-clear-btn" onClick={clearFilters}>
+                Clear all
+              </button>
+            )}
+            <button
+              className="mp-sidebar-close"
+              onClick={() => setSidebarOpen(false)}
+            >
+              ✕
+            </button>
+          </div>
 
-  {/* Location */}
-  <div className="mp-filter-group">
-    <label className="mp-filter-label">📍 Location</label>
-    <select
-      className="mp-filter-select"
-      value={location}
-      onChange={(e) => { setLocation(e.target.value); setPage(1); }}
-    >
-      {LOCATIONS.map((l) => <option key={l}>{l}</option>)}
-    </select>
-  </div>
+          {/* Location */}
+          <div className="mp-filter-group">
+            <label className="mp-filter-label">📍 Location</label>
+            <select
+              className="mp-filter-select"
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setPage(1);
+              }}
+            >
+              {LOCATIONS.map((l) => (
+                <option key={l}>{l}</option>
+              ))}
+            </select>
+          </div>
 
-  {/* Price range */}
-  <div className="mp-filter-group">
-    <label className="mp-filter-label">💵 Price Range (USD)</label>
-    <div className="mp-price-inputs">
-      <input type="number" placeholder="Min" value={priceMin}
-        onChange={(e) => { setPriceMin(e.target.value); setPage(1); }}
-        className="mp-price-input" />
-      <span className="mp-price-dash">–</span>
-      <input type="number" placeholder="Max" value={priceMax}
-        onChange={(e) => { setPriceMax(e.target.value); setPage(1); }}
-        className="mp-price-input" />
-    </div>
-  </div>
+          {/* Price range */}
+          <div className="mp-filter-group">
+            <label className="mp-filter-label">💵 Price Range (USD)</label>
+            <div className="mp-price-inputs">
+              <input
+                type="number"
+                placeholder="Min"
+                value={priceMin}
+                onChange={(e) => {
+                  setPriceMin(e.target.value);
+                  setPage(1);
+                }}
+                className="mp-price-input"
+              />
+              <span className="mp-price-dash">–</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={priceMax}
+                onChange={(e) => {
+                  setPriceMax(e.target.value);
+                  setPage(1);
+                }}
+                className="mp-price-input"
+              />
+            </div>
+          </div>
 
-  {/* Quick price filters */}
-  <div className="mp-filter-group">
-    <label className="mp-filter-label">Quick Price</label>
-    <div className="mp-quick-prices">
-      {[
-        { label: "Under $50", min: "", max: "50" },
-        { label: "$50–$200", min: "50", max: "200" },
-        { label: "$200–$500", min: "200", max: "500" },
-        { label: "$500–$1,000", min: "500", max: "1000" },
-        { label: "Over $1,000", min: "1000", max: "" },
-      ].map((q) => (
-        <button key={q.label}
-          className={`mp-quick-price ${priceMin === q.min && priceMax === q.max ? "active" : ""}`}
-          onClick={() => { setPriceMin(q.min); setPriceMax(q.max); setPage(1); }}
-        >
-          {q.label}
-        </button>
-      ))}
-    </div>
-  </div>
+          {/* Quick price filters */}
+          <div className="mp-filter-group">
+            <label className="mp-filter-label">Quick Price</label>
+            <div className="mp-quick-prices">
+              {[
+                { label: "Under $50", min: "", max: "50" },
+                { label: "$50–$200", min: "50", max: "200" },
+                { label: "$200–$500", min: "200", max: "500" },
+                { label: "$500–$1,000", min: "500", max: "1000" },
+                { label: "Over $1,000", min: "1000", max: "" },
+              ].map((q) => (
+                <button
+                  key={q.label}
+                  className={`mp-quick-price ${priceMin === q.min && priceMax === q.max ? "active" : ""}`}
+                  onClick={() => {
+                    setPriceMin(q.min);
+                    setPriceMax(q.max);
+                    setPage(1);
+                  }}
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-  {/* Animal category */}
-  <div className="mp-filter-group">
-    <label className="mp-filter-label">🐾 Animal Type</label>
-    <div className="mp-cat-filter-list">
-      {CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
-        <button key={cat.id}
-          className={`mp-cat-filter-item ${category === cat.id ? "active" : ""}`}
-          onClick={() => { setCategory(cat.id); setPage(1); setSidebarOpen(false); }}
-        >
-          {cat.img
-            ? <img src={cat.img} alt={cat.label} className="mp-cfi-img" />
-            : <span>🐾</span>}
-          <span>{cat.label}</span>
-          <span className="mp-cfi-count">
-            {LISTINGS.filter((l) => l.category === cat.id).length}
-          </span>
-        </button>
-      ))}
-    </div>
-  </div>
+          {/* Animal category list */}
+          <div className="mp-filter-group">
+            <label className="mp-filter-label">🐾 Animal Type</label>
+            <div className="mp-cat-filter-list">
+              {CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
+                <button
+                  key={cat.id}
+                  className={`mp-cat-filter-item ${category === cat.id ? "active" : ""}`}
+                  onClick={() => {
+                    setCategory(cat.id);
+                    setPage(1);
+                    setSidebarOpen(false);
+                  }}
+                >
+                  {cat.img ? (
+                    <img src={cat.img} alt={cat.label} className="mp-cfi-img" />
+                  ) : (
+                    <span>🐾</span>
+                  )}
+                  <span>{cat.label}</span>
+                  {/* FIX 1 also: category counts use live listings */}
+                  <span className="mp-cfi-count">
+                    {listings.filter((l) => l.category === cat.id).length}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-  {savedItems.size > 0 && (
-    <div className="mp-filter-group">
-      <label className="mp-filter-label">❤️ Saved ({savedItems.size})</label>
-      <button className="mp-saved-btn" onClick={() => { setCategory("all"); setSearch(""); }}>
-        View saved listings
-      </button>
-    </div>
-  )}
+          {savedItems.size > 0 && (
+            <div className="mp-filter-group">
+              <label className="mp-filter-label">
+                ❤️ Saved ({savedItems.size})
+              </label>
+              <button
+                className="mp-saved-btn"
+                onClick={() => {
+                  setCategory("all");
+                  setSearch("");
+                }}
+              >
+                View saved listings
+              </button>
+            </div>
+          )}
 
-  {/* ── VIDEO ADS ── */}
-  <div className="mp-video-ads">
-    <p className="mp-video-ads-label">Sponsored</p>
-    {VIDEO_ADS.map((ad) => (
-      <a key={ad.id} href={ad.videoUrl} target="_blank" rel="noopener noreferrer"
-        className="mp-video-ad">
-        <div className="mp-video-thumb">
-          {ad.thumbnail
-            ? <img src={ad.thumbnail} alt={ad.company} />
-            : <div className="mp-video-placeholder">
-                <span className="mp-play-icon">▶</span>
-              </div>
-          }
-        </div>
-        <div className="mp-video-info">
-          <p className="mp-video-company">{ad.company}</p>
-          <span className="mp-video-tag">{ad.label}</span>
-        </div>
-      </a>
-    ))}
-  </div>
-</aside>
+          {/* Video Ads */}
+          <div className="mp-video-ads">
+            <p className="mp-video-ads-label">Sponsored</p>
+            {VIDEO_ADS.map((ad) => (
+              <a
+                key={ad.id}
+                href={ad.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mp-video-ad"
+              >
+                <div className="mp-video-thumb">
+                  {ad.thumbnail ? (
+                    <img src={ad.thumbnail} alt={ad.company} />
+                  ) : (
+                    <div className="mp-video-placeholder">
+                      <span className="mp-play-icon">▶</span>
+                    </div>
+                  )}
+                </div>
+                <div className="mp-video-info">
+                  <p className="mp-video-company">{ad.company}</p>
+                  <span className="mp-video-tag">{ad.label}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </aside>
 
-        {/* ── SIDEBAR OVERLAY ── */}
+        {/* Sidebar overlay */}
         {sidebarOpen && (
           <div
             className="mp-sidebar-overlay"
@@ -1208,7 +682,7 @@ useEffect(() => {
               )}
               {location !== "All Locations" && (
                 <span className="mp-chip">
-                  📍 {location}{" "}
+                  📍 {location}
                   <button onClick={() => setLocation("All Locations")}>
                     ✕
                   </button>
@@ -1233,8 +707,26 @@ useEffect(() => {
             </div>
           )}
 
+          {/* Loading skeletons */}
+          {loading && (
+            <div className="mp-grid">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="mp-card skeleton">
+                  <div
+                    className="mp-card-media"
+                    style={{ background: "#eee" }}
+                  />
+                  <div className="mp-card-body">
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line short" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Empty state */}
-          {paginated.length === 0 && (
+          {!loading && paginated.length === 0 && (
             <div className="mp-empty">
               <span className="mp-empty-emoji">🐾</span>
               <h3>No listings found</h3>
@@ -1246,98 +738,160 @@ useEffect(() => {
           )}
 
           {/* Grid */}
-          <div className="mp-grid">
-            {paginated.map((listing, i) => (
-              <div
-                key={listing.id}
-                ref={(el) => (cardRefs.current[listing.id] = el)}
-                data-id={listing.id}
-                className={`mp-card ${visibleCards.has(String(listing.id)) ? "visible" : ""}`}
-                style={{ animationDelay: `${(i % PER_PAGE) * 0.05}s` }}
-              >
-                {/* Card image / emoji area */}
-                <div
-                  className="mp-card-media"
-                  onClick={() => setActiveModal(listing.id)}
-                >
-                  <div className="mp-card-emoji-wrap">
-                    <span className="mp-card-emoji">{listing.emoji}</span>
-                  </div>
-                  <div className="mp-card-badges">
-                    <span className="mp-card-badge">{listing.badge}</span>
-                    <span className="mp-card-days">
-                      {listing.daysAgo === 0
-                        ? "Today"
-                        : listing.daysAgo === 1
-                          ? "Today"
-                          : `${listing.daysAgo}d ago`}
-                    </span>
-                  </div>
-                  <button
-                    className={`mp-save-btn ${savedItems.has(listing.id) ? "saved" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleSave(listing.id);
-                    }}
-                    aria-label="Save listing"
+          {!loading && paginated.length > 0 && (
+            <div className="mp-grid">
+              {paginated.map((listing, i) => {
+                // FIX 3: compute daysAgo from Firestore Timestamp
+                const daysAgo = getDaysAgo(listing.createdAt);
+                const emoji =
+                  listing.emoji || getCategoryEmoji(listing.category);
+                const firstPhoto = listing.photos?.[0]?.url;
+
+                return (
+                  <div
+                    key={listing.id}
+                    ref={(el) => (cardRefs.current[listing.id] = el)}
+                    data-id={listing.id}
+                    className={`mp-card ${visibleCards.has(String(listing.id)) ? "visible" : ""}`}
+                    style={{ animationDelay: `${(i % PER_PAGE) * 0.05}s` }}
                   >
-                    {savedItems.has(listing.id) ? "❤️" : "🤍"}
-                  </button>
-                </div>
-
-                {/* Card body */}
-                <div
-                  className="mp-card-body"
-                  onClick={() => setActiveModal(listing.id)}
-                >
-                  <h3 className="mp-card-title">{listing.title}</h3>
-                  <p className="mp-card-location">📍 {listing.location}</p>
-
-                  <div className="mp-card-meta">
-                    <span className="mp-meta-tag">🏷 {listing.breed}</span>
-                    <span className="mp-meta-tag">⚖️ {listing.weight}</span>
-                    <span className="mp-meta-tag">📅 {listing.age}</span>
-                  </div>
-
-                  <p className="mp-card-desc">{listing.desc.slice(0, 80)}…</p>
-
-                  <div className="mp-card-seller">
-                    <div className="mp-seller-avatar">
-                      {listing.seller
-                        .split(" ")
-                        .map((w) => w[0])
-                        .join("")
-                        .slice(0, 2)}
+                    {/* Card media */}
+                    <div
+                      className="mp-card-media"
+                      onClick={() => setActiveModal(listing.id)}
+                    >
+                      {firstPhoto ? (
+                        <img
+                          src={firstPhoto}
+                          alt={listing.title}
+                          className="mp-card-image"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className="mp-card-emoji-wrap"
+                        style={{ display: firstPhoto ? "none" : "flex" }}
+                      >
+                        <span className="mp-card-emoji">{emoji}</span>
+                      </div>
+                      <div className="mp-card-badges">
+                        <span className="mp-card-badge">
+                          {listing.vaccinated
+                            ? "Vaccinated"
+                            : listing.badge || listing.condition || "Listed"}
+                        </span>
+                        {/* FIX 3: use computed daysAgo */}
+                        <span className="mp-card-days">
+                          {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
+                        </span>
+                      </div>
+                      <button
+                        className={`mp-save-btn ${savedItems.has(listing.id) ? "saved" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSave(listing.id);
+                        }}
+                        aria-label="Save listing"
+                      >
+                        {savedItems.has(listing.id) ? "❤️" : "🤍"}
+                      </button>
                     </div>
-                    <div className="mp-seller-info">
-                      <span className="mp-seller-name">{listing.seller}</span>
-                      <span className="mp-seller-rating">
-                        ★ {listing.sellerRating}
-                      </span>
-                    </div>
-                    <span className="mp-card-views">👁 {listing.views}</span>
-                  </div>
-                </div>
 
-                {/* Card footer */}
-                <div className="mp-card-footer">
-                  <div className="mp-card-price">
-                    <strong>${listing.price.toLocaleString()}</strong>
-                    <span>{listing.unit}</span>
+                    {/* Card body */}
+                    <div
+                      className="mp-card-body"
+                      onClick={() => setActiveModal(listing.id)}
+                    >
+                      <h3 className="mp-card-title">{listing.title}</h3>
+                      <p className="mp-card-location">
+                        📍{" "}
+                        {listing.city ||
+                          listing.location ||
+                          listing.province ||
+                          "Zimbabwe"}
+                      </p>
+
+                      <div className="mp-card-meta">
+                        {listing.breed && (
+                          <span className="mp-meta-tag">
+                            🏷 {listing.breed}
+                          </span>
+                        )}
+                        {listing.weight && (
+                          <span className="mp-meta-tag">
+                            ⚖️ {listing.weight}
+                          </span>
+                        )}
+                        {listing.age && (
+                          <span className="mp-meta-tag">📅 {listing.age}</span>
+                        )}
+                      </div>
+
+                      <p className="mp-card-desc">
+                        {(listing.description || listing.desc || "").slice(
+                          0,
+                          80,
+                        )}
+                        …
+                      </p>
+
+                      <div className="mp-card-seller">
+                        <div className="mp-seller-avatar">
+                          {(listing.sellerName || listing.seller || "?")
+                            .split(" ")
+                            .map((w) => w[0])
+                            .join("")
+                            .slice(0, 2)}
+                        </div>
+                        <div className="mp-seller-info">
+                          <span className="mp-seller-name">
+                            {listing.sellerName || listing.seller || "Seller"}
+                          </span>
+                          {listing.sellerRating && (
+                            <span className="mp-seller-rating">
+                              ★ {listing.sellerRating}
+                            </span>
+                          )}
+                        </div>
+                        {listing.views && (
+                          <span className="mp-card-views">
+                            👁 {listing.views}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Card footer */}
+                    <div className="mp-card-footer">
+                      <div className="mp-card-price">
+                        <strong>
+                          {listing.currency || "USD"}{" "}
+                          {listing.price?.toLocaleString()}
+                        </strong>
+                        <span>
+                          {listing.pricePerHead
+                            ? "per head"
+                            : listing.unit || "per lot"}
+                        </span>
+                      </div>
+                      <button
+                        className="mp-enquire-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveModal(listing.id);
+                        }}
+                      >
+                        Enquire
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    className="mp-enquire-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveModal(listing.id);
-                    }}
-                  >
-                    Enquire
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -1395,11 +949,26 @@ useEffect(() => {
             </button>
 
             <div className="mp-modal-header">
-              <div className="mp-modal-emoji">{activeListing.emoji}</div>
+              <div className="mp-modal-emoji">
+                {activeListing.emoji ||
+                  getCategoryEmoji(activeListing.category)}
+              </div>
               <div className="mp-modal-title-block">
-                <span className="mp-modal-badge">{activeListing.badge}</span>
+                <span className="mp-modal-badge">
+                  {activeListing.vaccinated
+                    ? "Vaccinated"
+                    : activeListing.badge ||
+                      activeListing.condition ||
+                      "Listed"}
+                </span>
                 <h2>{activeListing.title}</h2>
-                <p className="mp-modal-location">📍 {activeListing.location}</p>
+                <p className="mp-modal-location">
+                  📍{" "}
+                  {activeListing.city ||
+                    activeListing.location ||
+                    activeListing.province ||
+                    "Zimbabwe"}
+                </p>
               </div>
             </div>
 
@@ -1412,51 +981,82 @@ useEffect(() => {
                     { label: "Weight", value: activeListing.weight },
                     {
                       label: "Quantity",
-                      value: `${activeListing.qty} available`,
+                      value: activeListing.qty
+                        ? `${activeListing.qty} available`
+                        : "—",
                     },
                     {
                       label: "Listed",
-                      value:
-                        activeListing.daysAgo <= 1
+                      // FIX 3: compute daysAgo from Timestamp in modal too
+                      value: (() => {
+                        const d = getDaysAgo(activeListing.createdAt);
+                        return d === 0
                           ? "Today"
-                          : `${activeListing.daysAgo} days ago`,
+                          : `${d} day${d !== 1 ? "s" : ""} ago`;
+                      })(),
                     },
-                    { label: "Views", value: `${activeListing.views} views` },
-                  ].map((d) => (
-                    <div key={d.label} className="mp-modal-detail">
-                      <span className="mp-modal-detail-label">{d.label}</span>
-                      <span className="mp-modal-detail-value">{d.value}</span>
-                    </div>
-                  ))}
+                    {
+                      label: "Views",
+                      value: activeListing.views
+                        ? `${activeListing.views} views`
+                        : "—",
+                    },
+                  ]
+                    .filter((d) => d.value)
+                    .map((d) => (
+                      <div key={d.label} className="mp-modal-detail">
+                        <span className="mp-modal-detail-label">{d.label}</span>
+                        <span className="mp-modal-detail-value">{d.value}</span>
+                      </div>
+                    ))}
                 </div>
 
                 <div className="mp-modal-desc">
                   <h4>Description</h4>
-                  <p>{activeListing.desc}</p>
+                  <p>
+                    {activeListing.description ||
+                      activeListing.desc ||
+                      "No description provided."}
+                  </p>
                 </div>
 
                 <div className="mp-modal-seller">
                   <div className="mp-modal-seller-avatar">
-                    {activeListing.seller
+                    {(activeListing.sellerName || activeListing.seller || "?")
                       .split(" ")
                       .map((w) => w[0])
                       .join("")
                       .slice(0, 2)}
                   </div>
                   <div>
-                    <strong>{activeListing.seller}</strong>
-                    <div className="mp-modal-stars">{"★".repeat(5)}</div>
-                    <span className="mp-modal-rating">
-                      {activeListing.sellerRating} / 5.0
-                    </span>
+                    <strong>
+                      {activeListing.sellerName ||
+                        activeListing.seller ||
+                        "Seller"}
+                    </strong>
+                    {activeListing.sellerRating && (
+                      <>
+                        <div className="mp-modal-stars">{"★".repeat(5)}</div>
+                        <span className="mp-modal-rating">
+                          {activeListing.sellerRating} / 5.0
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="mp-modal-action-panel">
                 <div className="mp-modal-price">
-                  <strong>${activeListing.price.toLocaleString()}</strong>
-                  <span>{activeListing.unit}</span>
+                  <strong>
+                    {activeListing.currency || "USD"}{" "}
+                    {activeListing.price?.toLocaleString()}
+                  </strong>
+                  <span>
+                    {activeListing.pricePerHead
+                      ? "per head"
+                      : activeListing.unit || "per lot"}
+                  </span>
                 </div>
 
                 <a
@@ -1507,20 +1107,20 @@ useEffect(() => {
             <div className="mp-footer-col">
               <strong>Marketplace</strong>
               <Link to="/marketplace">Browse all</Link>
-             <Link to="/marketplace?category=cattle">Cattle</Link>
+              <Link to="/marketplace?category=cattle">Cattle</Link>
               <Link to="/marketplace?category=goats">Goats</Link>
             </div>
             <div className="mp-footer-col">
               <strong>Sellers</strong>
-             <Link to="/register">Start selling</Link>
-             <Link to="/sell">Post listing</Link>
-             <Link to="/pricing">Pricing</Link>
+              <Link to="/register">Start selling</Link>
+              <Link to="/sell">Post listing</Link>
+              <Link to="/pricing">Pricing</Link>
             </div>
             <div className="mp-footer-col">
               <strong>Company</strong>
               <Link to="/about">About Kraal</Link>
-             <Link to="/contact">Contact</Link>
-             <Link to="/terms">Terms</Link>
+              <Link to="/contact">Contact</Link>
+              <Link to="/terms">Terms</Link>
             </div>
           </div>
         </div>
@@ -1552,6 +1152,7 @@ function SearchIcon() {
     </svg>
   );
 }
+
 function FilterIcon() {
   return (
     <svg
@@ -1569,6 +1170,7 @@ function FilterIcon() {
     </svg>
   );
 }
+
 function WhatsAppIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">

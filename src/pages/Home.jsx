@@ -858,7 +858,23 @@ useEffect(() => {
     </div>
   );
 }
-
+function getCategoryEmoji(categoryId) {
+  const map = {
+    cattle: "🐄",
+    goats: "🐐",
+    sheep: "🐑",
+    chicken: "🐓",
+    guinea: "🦅",
+    ducks: "🦆",
+    rabbits: "🐇",
+    turkey: "🦃",
+    pigs: "🐖",
+    horses: "🐴",
+    dogs: "🐕",
+    donkeys: "🫏",
+  };
+  return map[categoryId] || "🐾";
+}
 function SearchIcon() {
   return (
     <svg
