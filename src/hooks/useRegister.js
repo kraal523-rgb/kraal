@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { auth } from '../lib/firebase';
 import { uploadImage } from '../lib/cloudflare';
 import useAuthStore from '../store/useAuthStore';
-import { updateProfile } from 'firebase/auth';
+import { updateProfile, onAuthStateChanged } from 'firebase/auth';
 export const STEPS = {
   ACCOUNT: 0,
   BUSINESS: 1,
@@ -74,7 +74,23 @@ export function useRegister() {
         : [...f.livestockTypes, type],
     }));
   };
-
+const getAuthenticatedUser = () => {
+  return new Promise((resolve, reject) => {
+    // If already signed in, return immediately
+    if (auth.currentUser) {
+      resolve(auth.currentUser);
+      return;
+    }
+    // Otherwise wait for auth state
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      if (user) resolve(user);
+      else reject(new Error('No authenticated user found'));
+    });
+    // Timeout after 5 seconds
+    setTimeout(() => reject(new Error('Auth timeout')), 5000);
+  });
+};
   // Step 0: Create Firebase Auth account
 const submitAccount = async () => {
   setError(null);
@@ -115,17 +131,11 @@ const submitFinal = async () => {
   setError(null);
   setLoading(true);
   try {
-    const user = auth.currentUser;
-    if (!user) throw new Error('No authenticated user found');
+    // ✅ Wait for auth to be ready
+    const user = await getAuthenticatedUser();
+    console.log('User:', user.uid, user.email);
 
-    // 🔍 DEBUG - remove these after fixing
-    console.log('=== submitFinal DEBUG ===');
-    console.log('User UID:', user.uid);
-    console.log('User email:', user.email);
-    console.log('WORKER_URL:', import.meta.env.VITE_UPLOAD_WORKER_URL);
-
-    const token = await user.getIdToken(true); // true = force refresh
-   console.log('Full token:', token);
+    const token = await user.getIdToken(true);
     console.log('Token length:', token.length);
 
     if (form.businessName) {
@@ -134,31 +144,8 @@ const submitFinal = async () => {
 
     let photoUrl = null;
     if (form.profilePhoto) {
-      console.log('Attempting upload...');
-      console.log('File:', form.profilePhoto.name, form.profilePhoto.type, form.profilePhoto.size);
-
-      // 🔍 Raw fetch test so we can see exact Worker response
-      const formData = new FormData();
-      formData.append('file', form.profilePhoto);
-      formData.append('folder', 'sellers');
-
-      const testRes = await fetch(`${import.meta.env.VITE_UPLOAD_WORKER_URL}/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const testData = await testRes.json();
-      console.log('Worker status:', testRes.status);
-      console.log('Worker response:', testData); // ← this tells us exactly why it's 403
-
-      if (!testRes.ok) {
-        throw new Error(testData.error || `Upload failed (${testRes.status})`);
-      }
-
-      photoUrl = testData.url;
+      const result = await uploadImage(form.profilePhoto, 'sellers', token);
+      photoUrl = result.url;
     }
 
     await createSellerProfile(user.uid, {
