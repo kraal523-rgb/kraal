@@ -194,7 +194,7 @@ export default function Terms() {
       {/* ── FOOTER ── */}
       <footer className="terms-footer">
         <div className="terms-footer-inner">
-          <span>© 2025 Kraal Market Ltd · Harare, Zimbabwe</span>
+          <span>© 2026 Kraal Market Ltd · Harare, Zimbabwe</span>
           <div className="terms-footer-links">
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>

@@ -115,30 +115,69 @@ const submitFinal = async () => {
   setError(null);
   setLoading(true);
   try {
-    const user = firebaseUser || auth.currentUser;
+    const user = auth.currentUser;
     if (!user) throw new Error('No authenticated user found');
 
-    // ✅ Set displayName so it shows in the dashboard
+    // 🔍 DEBUG - remove these after fixing
+    console.log('=== submitFinal DEBUG ===');
+    console.log('User UID:', user.uid);
+    console.log('User email:', user.email);
+    console.log('WORKER_URL:', import.meta.env.VITE_UPLOAD_WORKER_URL);
+
+    const token = await user.getIdToken(true); // true = force refresh
+   console.log('Full token:', token);
+    console.log('Token length:', token.length);
+
     if (form.businessName) {
       await updateProfile(user, { displayName: form.businessName });
     }
 
     let photoUrl = null;
     if (form.profilePhoto) {
-      const token = await user.getIdToken();
-      const result = await uploadImage(form.profilePhoto, 'sellers', token);
-      photoUrl = result.url;
+      console.log('Attempting upload...');
+      console.log('File:', form.profilePhoto.name, form.profilePhoto.type, form.profilePhoto.size);
+
+      // 🔍 Raw fetch test so we can see exact Worker response
+      const formData = new FormData();
+      formData.append('file', form.profilePhoto);
+      formData.append('folder', 'sellers');
+
+      const testRes = await fetch(`${import.meta.env.VITE_UPLOAD_WORKER_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const testData = await testRes.json();
+      console.log('Worker status:', testRes.status);
+      console.log('Worker response:', testData); // ← this tells us exactly why it's 403
+
+      if (!testRes.ok) {
+        throw new Error(testData.error || `Upload failed (${testRes.status})`);
+      }
+
+      photoUrl = testData.url;
     }
 
     await createSellerProfile(user.uid, {
       email: form.email || user.email,
       businessName: form.businessName,
-      // ... rest stays the same
+      phone: form.phone,
+      whatsapp: form.whatsapp || form.phone,
+      livestockTypes: form.livestockTypes,
+      description: form.description || '',
+      country: form.country,
+      province: form.province,
+      city: form.city,
+      address: form.address || '',
       photoUrl,
     });
 
     setStep(STEPS.DONE);
   } catch (e) {
+    console.error('submitFinal error:', e.message);
     setError(e.message);
   } finally {
     setLoading(false);

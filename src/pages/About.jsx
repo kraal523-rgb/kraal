@@ -244,7 +244,7 @@ export default function About() {
       {/* ── FOOTER ── */}
       <footer className="about-footer">
         <div className="about-footer-inner">
-          <span>© 2025 Kraal Market Ltd · Harare, Zimbabwe</span>
+          <span>© 2026 Kraal Market Ltd · Harare, Zimbabwe</span>
           <div className="about-footer-links">
             <Link to="/terms">Terms</Link>
             <Link to="/contact">Contact</Link>

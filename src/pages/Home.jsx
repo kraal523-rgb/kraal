@@ -848,7 +848,7 @@ useEffect(() => {
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Kraal. Built with ❤️ in Zimbabwe 🇿🇼
+            © {new Date().getFullYear()} Kraal. Built with Love in Zimbabwe 🇿🇼
           </span>
           <span className="footer-tagline">
             From the farm gate to the world.

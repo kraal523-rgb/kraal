@@ -1,18 +1,3 @@
-/**
- * lib/cloudflare.js
- *
- * Client-side utility for uploading images to R2 via the Kraal Worker proxy.
- *
- * Required .env variables:
- *   VITE_UPLOAD_WORKER_URL   https://kraal-upload.your-subdomain.workers.dev
- *
- * Usage:
- *   // Seller profile logo
- *   const { url } = await uploadImage(file, 'sellers', await user.getIdToken());
- *
- *   // Livestock listing photo(s)
- *   const urls = await uploadListingPhotos(files, await user.getIdToken());
- */
 
 const WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL;
 

@@ -1478,7 +1478,7 @@ export default function Marketplace() {
         </div>
         <div className="mp-footer-bottom">
           <span>
-            © {new Date().getFullYear()} Kraal. Built with ❤️ in Zimbabwe 🇿🇼
+            © {new Date().getFullYear()} Kraal. Built with Love in Zimbabwe 🇿🇼
           </span>
           <span>From the farm gate to the world.</span>
         </div>

@@ -72,7 +72,9 @@ function useContentProtection() {
 
     // Block copy-related keyboard shortcuts
     const handleKeyDown = (e) => {
-      const key = e.key.toLowerCase()
+       if (!e.key) return  // guard against undefined
+  const key = e.key.toLowerCase()
+
       if (
         e.ctrlKey && ['c', 'u', 's', 'a', 'p', 'x'].includes(key) ||
         e.metaKey && ['c', 'u', 's', 'a', 'p', 'x'].includes(key) || // Mac ⌘

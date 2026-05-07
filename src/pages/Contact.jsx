@@ -247,7 +247,7 @@ export default function Contact() {
       {/* ── FOOTER ── */}
       <footer className="contact-footer">
         <div className="contact-footer-inner">
-          <span>© 2025 Kraal Market Ltd · Harare, Zimbabwe</span>
+          <span>© 2026 Kraal Market Ltd · Harare, Zimbabwe</span>
           <div className="contact-footer-links">
             <Link to="/about">About</Link>
             <Link to="/terms">Terms</Link>
