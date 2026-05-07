@@ -291,7 +291,7 @@ useEffect(() => {
         <div className="nav-inner">
           <a href="/" className="nav-logo">
             <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-            <span>Market</span>
+            
           </a>
           <div className={`nav-links ${menuOpen ? "open" : ""}`}>
             <a href="/marketplace">Browse Animals</a>
