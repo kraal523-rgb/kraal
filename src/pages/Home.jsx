@@ -304,7 +304,7 @@ useEffect(() => {
               Sign in
             </a>
             <a href="/register" className="nav-cta">
-              <span>+ Post a Listing</span>
+              <span>+ Post</span>
             </a>
             <button
               className="nav-hamburger"
