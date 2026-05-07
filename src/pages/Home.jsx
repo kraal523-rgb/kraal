@@ -298,6 +298,7 @@ useEffect(() => {
             <a href="/marketplace?category=cattle">Cattle</a>
             <a href="/marketplace?category=goats">Goats</a>
             <a href="/about">About</a>
+            <a href="/signin" class="nav-signin">Sign In</a>
           </div>
           <div className="nav-actions">
             <a href="/login" className="nav-signin">
