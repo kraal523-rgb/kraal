@@ -24,18 +24,18 @@
 
 /* ── NAV ── */
 .contact-nav {
-  position: sticky;
+  position: absolute;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 48px;
-  background: rgba(247, 243, 237, 0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(45, 90, 39, 0.1);
+  background: transparent;
+  border-bottom: none;
 }
-
 .contact-logo {
   display: flex;
   align-items: center;
@@ -74,12 +74,13 @@
 
 /* ── HERO ── */
 .contact-hero {
+  position: relative;
   background: linear-gradient(
     135deg,
     var(--kraal-dark) 0%,
     var(--kraal-green) 100%
   );
-  padding: 80px 48px 72px;
+  padding: 160px 48px 72px;
   text-align: center;
 }
 

@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import logo from "../assets/kraal-logo.svg";
+import logo from "../assets/kraal-logo-black.svg";
 import imgCattle from "../assets/pngegg__5.png";
 import imgGoats from "../assets/pngegg__6.png";
 import imgSheep from "../assets/pngegg__7.png";

@@ -2,16 +2,17 @@ import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
 import logo from "../assets/kraal-logo.svg";
+import heroImage from "../assets/hero-image.jpg";
 const TEAM = [
   {
-    name: "Tendai Moyo",
+    name: "Gabriel Mazambani",
     role: "Co-founder & CEO",
     bio: "Third-generation cattle farmer from Masvingo. Built Kraal to give every farmer the reach of a city trader.",
     initials: "TM",
     color: "#2D5A27",
   },
   {
-    name: "Rudo Chikwanda",
+    name: "Terrence Nyakudya",
     role: "Co-founder & CTO",
     bio: "Software engineer who grew up on a goat farm in Matabeleland. Believes technology should serve the land.",
     initials: "RC",
@@ -95,29 +96,27 @@ export default function About() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="about-hero">
-        <div className="about-hero-inner">
-          <div className="about-hero-eyebrow">Our story</div>
-          <h1 className="about-hero-title">
-            Built on the land.
-            <br />
-            <span className="hero-accent">Built for the farmer.</span>
-          </h1>
-          <p className="about-hero-sub">
-            Kraal started with a simple frustration: why should a cattle farmer
-            in Masvingo have to rely on word-of-mouth and middlemen when buyers
-            in Harare are searching online every day? We built the bridge.
-          </p>
-        </div>
-        <div className="about-hero-art" aria-hidden="true">
-          <span className="ha ha-1">🐄</span>
-          <span className="ha ha-2">🐐</span>
-          <span className="ha ha-3">🐑</span>
-          <span className="ha ha-4">🐓</span>
-          <span className="ha ha-5">🐖</span>
-          <span className="ha ha-6">🦆</span>
-        </div>
-      </section>
+  
+     <section className="about-hero">
+  {/* Background image with overlay */}
+  <div className="about-hero-bg">
+    <img src={heroImage} alt="" aria-hidden="true" />
+  </div>
+
+  <div className="about-hero-inner">
+    <div className="about-hero-eyebrow">Our story</div>
+    <h1 className="about-hero-title">
+      Built on the land.
+      <br />
+      <span className="hero-accent">Built for the farmer.</span>
+    </h1>
+    <p className="about-hero-sub">
+      Kraal started with a simple frustration: why should a cattle farmer
+      in Masvingo have to rely on word-of-mouth and middlemen when buyers
+      in Harare are searching online every day? We built the bridge.
+    </p>
+  </div>
+</section>
 
       {/* ── STATS ── */}
       <section className="about-stats" data-reveal>
