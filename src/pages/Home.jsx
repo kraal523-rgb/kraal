@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import InstallButton from '../components/InstallButton'
 import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/kraal-logo.svg";
 import imgCattle from "../assets/pngegg__5.png";   
 import imgGoats from "../assets/pngegg__6.png";    
@@ -290,24 +290,22 @@ useEffect(() => {
       {/* ── NAV ── */}
       <nav className="home-nav">
         <div className="nav-inner">
-          <a href="/" className="nav-logo">
+          <Link to="/" className="nav-logo">
             <img src={logo} style={{ width: "140px" }} alt="Kraal" />
             
-          </a>
+          </Link>
           <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-            <a href="/marketplace">Browse Animals</a>
-            <a href="/marketplace?category=cattle">Cattle</a>
-            <a href="/marketplace?category=goats">Goats</a>
-            <a href="/about">About</a>
-            <a href="/signin" class="nav-signin">Sign In</a>
+           <Link to="/marketplace">Browse Animals</Link>
+<Link to="/marketplace?category=cattle">Cattle</Link>
+<Link to="/marketplace?category=goats">Goats</Link>
+<Link to="/about">About</Link>
+<Link to="/signin" className="nav-signin">Sign In</Link>
           </div>
           <div className="nav-actions">
-            <a href="/login" className="nav-signin">
-              Sign in
-            </a>
-            <a href="/register" className="nav-cta">
+            <Link to="/login" className="nav-signin">Sign in</Link>
+            <Link to="/register" className="nav-cta">
               <span>+ Post</span>
-            </a>
+            </Link>
             <InstallButton />
             <button
               className="nav-hamburger"
@@ -372,12 +370,12 @@ useEffect(() => {
             </form>
 
             <div className="hero-actions">
-              <a href="/register" className="btn-hero-primary">
+           <Link to="/register" className="btn-hero-primary">
                 🐄 Post a Listing — Free
-              </a>
-              <a href="/marketplace" className="btn-hero-ghost">
+              </Link>
+             <Link to="/marketplace" className="btn-hero-ghost">
                 Browse Animals →
-              </a>
+              </Link>
             </div>
 
             <div className="hero-social-proof">
@@ -451,9 +449,9 @@ useEffect(() => {
               <p className="section-eyebrow">What are you looking for?</p>
               <h2 className="section-title">Browse by Animal</h2>
             </div>
-            <a href="/marketplace" className="section-link">
+           <Link to="/marketplace" className="section-link">
               View all listings →
-            </a>
+            </Link>
           </div>
           <div className="categories-grid">
             {CATEGORIES.map((cat, i) => (
@@ -487,7 +485,7 @@ useEffect(() => {
         <p className="section-eyebrow">Fresh on the market</p>
         <h2 className="section-title">Featured Listings</h2>
       </div>
-      <a href="/marketplace" className="section-link">See all →</a>
+     <Link to="/marketplace" className="section-link">See all →</Link>
     </div>
 
     <div className="listings-grid">
@@ -659,9 +657,9 @@ useEffect(() => {
                 Kraal connects sellers to active buyers in all major towns and
                 rural districts — and increasingly from across Southern Africa.
               </p>
-              <a href="/marketplace" className="btn-regions">
+             <Link to="/marketplace" className="btn-regions">
                 Browse Your Region →
-              </a>
+              </Link>
             </div>
             <div className="regions-tags">
               {REGIONS.map((r, i) => (
@@ -772,12 +770,12 @@ useEffect(() => {
             </ul>
           </div>
           <div className="cta-actions">
-            <a href="/register" className="btn-cta-primary">
+          <Link to="/register" className="btn-cta-primary">
               Create Free Account
-            </a>
-            <a href="/marketplace" className="btn-cta-ghost">
+            </Link>
+           <Link to="/marketplace" className="btn-cta-ghost">
               Browse Listings
-            </a>
+            </Link>
           </div>
         </div>
         <div className="cta-emojis" aria-hidden="true">
@@ -811,40 +809,40 @@ useEffect(() => {
               going pan-African.
             </p>
             <div className="footer-socials">
-              <a href="#" aria-label="Facebook">
+             <Link to="#" aria-label="Facebook">
                 f
-              </a>
-              <a href="#" aria-label="Twitter">
+              </Link>
+             <Link to="#" aria-label="Twitter">
                 𝕏
-              </a>
-              <a href="#" aria-label="WhatsApp">
+              </Link>
+             <Link to="#" aria-label="WhatsApp">
                 W
-              </a>
+              </Link>
             </div>
           </div>
           <div className="footer-links">
             <div className="footer-col">
               <strong>Marketplace</strong>
-              <a href="/marketplace">Browse all</a>
-              <a href="/marketplace?category=cattle">Cattle</a>
-              <a href="/marketplace?category=goats">Goats</a>
-              <a href="/marketplace?category=chicken">Road Runners</a>
-              <a href="/marketplace?category=sheep">Sheep</a>
+              <Link to="/marketplace">Browse all</Link>
+              <Link to="/marketplace?category=cattle">Cattle</Link>
+              <Link to="/marketplace?category=goats">Goats</Link>
+              <Link to="/marketplace?category=chicken">Road Runners</Link>
+              <Link to="/marketplace?category=sheep">Sheep</Link>
             </div>
             <div className="footer-col">
               <strong>Sellers</strong>
-              <a href="/register">Start selling</a>
-              <a href="/seller/dashboard">Dashboard</a>
-              <a href="/sell">Post listing</a>
-              <a href="/pricing">Pricing</a>
+             <Link to="/register">Start selling</Link>
+              <Link to="/seller/dashboard">Dashboard</Link>
+             <Link to="/sell">Post listing</Link>
+             <Link to="/pricing">Pricing</Link>
             </div>
             <div className="footer-col">
               <strong>Company</strong>
-              <a href="/about">About Kraal</a>
-              <a href="/contact">Contact</a>
-              <a href="/blog">Farming Tips</a>
-              <a href="/terms">Terms</a>
-              <a href="/privacy">Privacy</a>
+             <Link to="/about">About Kraal</Link>
+              <Link to="/contact">Contact</Link>
+              <Link to="/blog">Farming Tips</Link>
+             <Link to="/terms">Terms</Link>
+              <Link to="/privacy">Privacy</Link>
             </div>
           </div>
         </div>

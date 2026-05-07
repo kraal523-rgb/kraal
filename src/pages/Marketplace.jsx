@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import logo from "../assets/kraal-logo.svg";
 import imgCattle from "../assets/pngegg__5.png";
 import imgGoats from "../assets/pngegg__6.png";
@@ -861,25 +861,25 @@ export default function Marketplace() {
       {/* ── NAV ── */}
       <nav className="mp-nav">
         <div className="mp-nav-inner">
-          <a href="/" className="mp-nav-logo">
+         <Link to="/" className="mp-nav-logo">
             <img src={logo} style={{ width: "120px" }} alt="Kraal" />
             <span>Market</span>
-          </a>
+          </Link>
           <div className={`mp-nav-links ${menuOpen ? "open" : ""}`}>
-            <a href="/marketplace" className="active">
+           <Link to="/marketplace" className="active">
               Browse Animals
-            </a>
-            <a href="/marketplace?category=cattle">Cattle</a>
-            <a href="/marketplace?category=goats">Goats</a>
-            <a href="/about">About</a>
+            </Link>
+            <Link to="/marketplace?category=cattle">Cattle</Link>
+            <Link to="/marketplace?category=goats">Goats</Link>
+            <Link to="/about">About</Link>
           </div>
           <div className="mp-nav-actions">
-            <a href="/login" className="mp-nav-signin">
+           <Link to="/login" className="mp-nav-signin">
               Sign in
-            </a>
-            <a href="/register" className="mp-nav-cta">
+            </Link>
+            <Link to="/register" className="mp-nav-cta">
               + Post a Listing
-            </a>
+            </Link>
             <button
               className="mp-hamburger"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -1458,21 +1458,21 @@ export default function Marketplace() {
           <div className="mp-footer-links">
             <div className="mp-footer-col">
               <strong>Marketplace</strong>
-              <a href="/marketplace">Browse all</a>
-              <a href="/marketplace?category=cattle">Cattle</a>
-              <a href="/marketplace?category=goats">Goats</a>
+              <Link to="/marketplace">Browse all</Link>
+             <Link to="/marketplace?category=cattle">Cattle</Link>
+              <Link to="/marketplace?category=goats">Goats</Link>
             </div>
             <div className="mp-footer-col">
               <strong>Sellers</strong>
-              <a href="/register">Start selling</a>
-              <a href="/sell">Post listing</a>
-              <a href="/pricing">Pricing</a>
+             <Link to="/register">Start selling</Link>
+             <Link to="/sell">Post listing</Link>
+             <Link to="/pricing">Pricing</Link>
             </div>
             <div className="mp-footer-col">
               <strong>Company</strong>
-              <a href="/about">About Kraal</a>
-              <a href="/contact">Contact</a>
-              <a href="/terms">Terms</a>
+              <Link to="/about">About Kraal</Link>
+             <Link to="/contact">Contact</Link>
+             <Link to="/terms">Terms</Link>
             </div>
           </div>
         </div>
