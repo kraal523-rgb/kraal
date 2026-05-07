@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef } from "react";
+import InstallButton from '../components/InstallButton'
 import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useNavigate } from "react-router-dom";
@@ -307,6 +308,7 @@ useEffect(() => {
             <a href="/register" className="nav-cta">
               <span>+ Post</span>
             </a>
+            <InstallButton />
             <button
               className="nav-hamburger"
               onClick={() => setMenuOpen(!menuOpen)}
