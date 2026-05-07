@@ -717,7 +717,43 @@ const PRICE_TICKER = [
   { label: "Bronze Turkey", price: "USD 45", trend: "up" },
   { label: "Ankole Bull", price: "USD 1,500", trend: "up" },
 ];
+const BANNER_ADS = [
+  {
+    id: 1,
+    company: "AgriFeeds Zimbabwe",
+    tagline: "Premium livestock feed — nationwide delivery",
+    cta: "Shop now",
+    url: "https://agrifeeds.co.zw",
+    bg: "#1a3a1a",
+    accent: "#a8d5a2",
+  },
+  {
+    id: 2,
+    company: "Vetsure Africa",
+    tagline: "Vaccines & dewormers in stock",
+    cta: "Order today",
+    url: "https://vetsure.africa",
+    bg: "#2d4a6a",
+    accent: "#a2c4d5",
+  },
+];
 
+const VIDEO_ADS = [
+  {
+    id: 1,
+    company: "ProNutro Feeds",
+    thumbnail: null, // replace with image URL
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    label: "Sponsored",
+  },
+  {
+    id: 2,
+    company: "Zimbabwe Farmers Union",
+    thumbnail: null,
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    label: "Sponsored",
+  },
+];
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function Marketplace() {
@@ -741,7 +777,7 @@ export default function Marketplace() {
   const [visibleCards, setVisibleCards] = useState(new Set());
   const [page, setPage] = useState(1);
   const PER_PAGE = 12;
-
+const [activeBanner, setActiveBanner] = useState(0);
   const cardRefs = useRef({});
 
   // Sync URL params
@@ -769,7 +805,12 @@ export default function Marketplace() {
     Object.values(cardRefs.current).forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
   });
-
+useEffect(() => {
+  const t = setInterval(() => {
+    setActiveBanner((i) => (i + 1) % BANNER_ADS.length);
+  }, 5000);
+  return () => clearInterval(t);
+}, []);
   // Filtered + sorted listings
   const filtered = useMemo(() => {
     let list = [...LISTINGS];
@@ -971,139 +1012,146 @@ export default function Marketplace() {
       {/* ── MAIN LAYOUT ── */}
       <div className="mp-layout">
         {/* ── SIDEBAR ── */}
-        <aside className={`mp-sidebar ${sidebarOpen ? "open" : ""}`}>
-          <div className="mp-sidebar-header">
-            <h3>Filters</h3>
-            {hasFilters && (
-              <button className="mp-clear-btn" onClick={clearFilters}>
-                Clear all
-              </button>
-            )}
-            <button
-              className="mp-sidebar-close"
-              onClick={() => setSidebarOpen(false)}
-            >
-              ✕
-            </button>
-          </div>
+      <aside className={`mp-sidebar ${sidebarOpen ? "open" : ""}`}>
+  {/* ── BANNER AD ── */}
+  <div className="mp-ad-banner" style={{
+    background: BANNER_ADS[activeBanner].bg,
+  }}>
+    <span className="mp-ad-label">Ad</span>
+    <p className="mp-ad-company">{BANNER_ADS[activeBanner].company}</p>
+    <p className="mp-ad-tagline">{BANNER_ADS[activeBanner].tagline}</p>
+    
+    <a  href={BANNER_ADS[activeBanner].url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mp-ad-cta"
+      style={{ color: BANNER_ADS[activeBanner].accent, borderColor: BANNER_ADS[activeBanner].accent }}
+    >
+      {BANNER_ADS[activeBanner].cta} →
+    </a>
+    <div className="mp-ad-dots">
+      {BANNER_ADS.map((_, i) => (
+        <button
+          key={i}
+          className={`mp-ad-dot ${i === activeBanner ? "active" : ""}`}
+          onClick={() => setActiveBanner(i)}
+        />
+      ))}
+    </div>
+  </div>
 
-          {/* Location */}
-          <div className="mp-filter-group">
-            <label className="mp-filter-label">📍 Location</label>
-            <select
-              className="mp-filter-select"
-              value={location}
-              onChange={(e) => {
-                setLocation(e.target.value);
-                setPage(1);
-              }}
-            >
-              {LOCATIONS.map((l) => (
-                <option key={l}>{l}</option>
-              ))}
-            </select>
-          </div>
+  {/* ── EXISTING FILTERS ── */}
+  <div className="mp-sidebar-header">
+    <h3>Filters</h3>
+    {hasFilters && (
+      <button className="mp-clear-btn" onClick={clearFilters}>
+        Clear all
+      </button>
+    )}
+    <button className="mp-sidebar-close" onClick={() => setSidebarOpen(false)}>
+      ✕
+    </button>
+  </div>
 
-          {/* Price range */}
-          <div className="mp-filter-group">
-            <label className="mp-filter-label">💵 Price Range (USD)</label>
-            <div className="mp-price-inputs">
-              <input
-                type="number"
-                placeholder="Min"
-                value={priceMin}
-                onChange={(e) => {
-                  setPriceMin(e.target.value);
-                  setPage(1);
-                }}
-                className="mp-price-input"
-              />
-              <span className="mp-price-dash">–</span>
-              <input
-                type="number"
-                placeholder="Max"
-                value={priceMax}
-                onChange={(e) => {
-                  setPriceMax(e.target.value);
-                  setPage(1);
-                }}
-                className="mp-price-input"
-              />
-            </div>
-          </div>
+  {/* Location */}
+  <div className="mp-filter-group">
+    <label className="mp-filter-label">📍 Location</label>
+    <select
+      className="mp-filter-select"
+      value={location}
+      onChange={(e) => { setLocation(e.target.value); setPage(1); }}
+    >
+      {LOCATIONS.map((l) => <option key={l}>{l}</option>)}
+    </select>
+  </div>
 
-          {/* Quick price filters */}
-          <div className="mp-filter-group">
-            <label className="mp-filter-label">Quick Price</label>
-            <div className="mp-quick-prices">
-              {[
-                { label: "Under $50", min: "", max: "50" },
-                { label: "$50–$200", min: "50", max: "200" },
-                { label: "$200–$500", min: "200", max: "500" },
-                { label: "$500–$1,000", min: "500", max: "1000" },
-                { label: "Over $1,000", min: "1000", max: "" },
-              ].map((q) => (
-                <button
-                  key={q.label}
-                  className={`mp-quick-price ${priceMin === q.min && priceMax === q.max ? "active" : ""}`}
-                  onClick={() => {
-                    setPriceMin(q.min);
-                    setPriceMax(q.max);
-                    setPage(1);
-                  }}
-                >
-                  {q.label}
-                </button>
-              ))}
-            </div>
-          </div>
+  {/* Price range */}
+  <div className="mp-filter-group">
+    <label className="mp-filter-label">💵 Price Range (USD)</label>
+    <div className="mp-price-inputs">
+      <input type="number" placeholder="Min" value={priceMin}
+        onChange={(e) => { setPriceMin(e.target.value); setPage(1); }}
+        className="mp-price-input" />
+      <span className="mp-price-dash">–</span>
+      <input type="number" placeholder="Max" value={priceMax}
+        onChange={(e) => { setPriceMax(e.target.value); setPage(1); }}
+        className="mp-price-input" />
+    </div>
+  </div>
 
-          {/* Animal category */}
-          <div className="mp-filter-group">
-            <label className="mp-filter-label">🐾 Animal Type</label>
-            <div className="mp-cat-filter-list">
-              {CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
-                <button
-                  key={cat.id}
-                  className={`mp-cat-filter-item ${category === cat.id ? "active" : ""}`}
-                  onClick={() => {
-                    setCategory(cat.id);
-                    setPage(1);
-                    setSidebarOpen(false);
-                  }}
-                >
-                  {cat.img ? (
-                    <img src={cat.img} alt={cat.label} className="mp-cfi-img" />
-                  ) : (
-                    <span>🐾</span>
-                  )}
-                  <span>{cat.label}</span>
-                  <span className="mp-cfi-count">
-                    {LISTINGS.filter((l) => l.category === cat.id).length}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+  {/* Quick price filters */}
+  <div className="mp-filter-group">
+    <label className="mp-filter-label">Quick Price</label>
+    <div className="mp-quick-prices">
+      {[
+        { label: "Under $50", min: "", max: "50" },
+        { label: "$50–$200", min: "50", max: "200" },
+        { label: "$200–$500", min: "200", max: "500" },
+        { label: "$500–$1,000", min: "500", max: "1000" },
+        { label: "Over $1,000", min: "1000", max: "" },
+      ].map((q) => (
+        <button key={q.label}
+          className={`mp-quick-price ${priceMin === q.min && priceMax === q.max ? "active" : ""}`}
+          onClick={() => { setPriceMin(q.min); setPriceMax(q.max); setPage(1); }}
+        >
+          {q.label}
+        </button>
+      ))}
+    </div>
+  </div>
 
-          {/* Saved */}
-          {savedItems.size > 0 && (
-            <div className="mp-filter-group">
-              <label className="mp-filter-label">
-                ❤️ Saved ({savedItems.size})
-              </label>
-              <button
-                className="mp-saved-btn"
-                onClick={() => {
-                  setCategory("all");
-                  setSearch("");
-                }}
-              >
-                View saved listings
-              </button>
-            </div>
-          )}
-        </aside>
+  {/* Animal category */}
+  <div className="mp-filter-group">
+    <label className="mp-filter-label">🐾 Animal Type</label>
+    <div className="mp-cat-filter-list">
+      {CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
+        <button key={cat.id}
+          className={`mp-cat-filter-item ${category === cat.id ? "active" : ""}`}
+          onClick={() => { setCategory(cat.id); setPage(1); setSidebarOpen(false); }}
+        >
+          {cat.img
+            ? <img src={cat.img} alt={cat.label} className="mp-cfi-img" />
+            : <span>🐾</span>}
+          <span>{cat.label}</span>
+          <span className="mp-cfi-count">
+            {LISTINGS.filter((l) => l.category === cat.id).length}
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  {savedItems.size > 0 && (
+    <div className="mp-filter-group">
+      <label className="mp-filter-label">❤️ Saved ({savedItems.size})</label>
+      <button className="mp-saved-btn" onClick={() => { setCategory("all"); setSearch(""); }}>
+        View saved listings
+      </button>
+    </div>
+  )}
+
+  {/* ── VIDEO ADS ── */}
+  <div className="mp-video-ads">
+    <p className="mp-video-ads-label">Sponsored</p>
+    {VIDEO_ADS.map((ad) => (
+      <a key={ad.id} href={ad.videoUrl} target="_blank" rel="noopener noreferrer"
+        className="mp-video-ad">
+        <div className="mp-video-thumb">
+          {ad.thumbnail
+            ? <img src={ad.thumbnail} alt={ad.company} />
+            : <div className="mp-video-placeholder">
+                <span className="mp-play-icon">▶</span>
+              </div>
+          }
+        </div>
+        <div className="mp-video-info">
+          <p className="mp-video-company">{ad.company}</p>
+          <span className="mp-video-tag">{ad.label}</span>
+        </div>
+      </a>
+    ))}
+  </div>
+</aside>
 
         {/* ── SIDEBAR OVERLAY ── */}
         {sidebarOpen && (

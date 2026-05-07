@@ -1356,3 +1356,202 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   .mp-footer-links { gap: 28px; }
   .mp-footer-inner { gap: 28px; }
 }
+/* ── BANNER AD ── */
+.mp-ad-banner {
+  border-radius: 12px;
+  padding: 20px 16px 16px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mp-ad-label {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+}
+
+.mp-ad-company {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.mp-ad-tagline {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.mp-ad-cta {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1.5px solid;
+  transition: opacity 0.2s;
+  align-self: flex-start;
+}
+
+.mp-ad-cta:hover {
+  opacity: 0.8;
+}
+
+.mp-ad-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.mp-ad-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.mp-ad-dot.active {
+  background: rgba(255,255,255,0.8);
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* ── VIDEO ADS ── */
+.mp-video-ads {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e2da;
+}
+
+.mp-video-ads-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+.mp-video-ad {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e8e2da;
+  margin-bottom: 10px;
+  background: white;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.mp-video-ad:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+.mp-video-thumb {
+  width: 72px;
+  height: 54px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #1a2a18;
+}
+
+.mp-video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mp-video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a3a1a, #2d5a27);
+}
+
+.mp-play-icon {
+  color: white;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.mp-video-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-video-company {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a2a18;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-video-tag {
+  font-size: 0.7rem;
+  color: #aaa;
+  font-weight: 500;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .mp-ad-banner {
+    border-radius: 10px;
+    min-height: 120px;
+    padding: 16px 14px 14px;
+  }
+
+  .mp-video-ads {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mp-video-ads-label {
+    grid-column: 1 / -1;
+  }
+
+  .mp-video-ad {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .mp-video-thumb {
+    width: 100%;
+    height: 80px;
+  }
+}
+
+@media (max-width: 600px) {
+  .mp-video-ads {
+    grid-template-columns: 1fr;
+  }
+}
