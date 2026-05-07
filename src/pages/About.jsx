@@ -83,8 +83,7 @@ export default function About() {
       {/* ── NAV ── */}
       <nav className="about-nav">
         <Link to="/" className="about-logo">
-          <KraalMark />
-          <span>Kraal</span>
+          <img src={logo} style={{ width: "140px" }} alt="Kraal" />
         </Link>
         <div className="about-nav-links">
           <Link to="/marketplace">Marketplace</Link>

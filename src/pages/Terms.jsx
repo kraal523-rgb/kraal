@@ -109,8 +109,7 @@ export default function Terms() {
       {/* ── NAV ── */}
       <nav className="terms-nav">
         <Link to="/" className="terms-logo">
-          <KraalMark />
-          <span>Kraal</span>
+          <img src={logo} style={{ width: "140px" }} alt="Kraal" />
         </Link>
         <div className="terms-nav-links">
           <Link to="/marketplace">Marketplace</Link>

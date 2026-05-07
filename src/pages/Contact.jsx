@@ -70,8 +70,7 @@ export default function Contact() {
       {/* ── NAV ── */}
       <nav className="contact-nav">
         <Link to="/" className="contact-logo">
-          <KraalMark />
-          <span>Kraal</span>
+           <img src={logo} style={{ width: "140px" }} alt="Kraal" />
         </Link>
         <div className="contact-nav-links">
           <Link to="/marketplace">Marketplace</Link>

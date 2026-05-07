@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../store/useAuthStore";
 import "./Login.css";
-
+import logo from "../assets/kraal-logo.svg";
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,8 +53,7 @@ export default function Login() {
       <div className="login-panel-left">
         <div className="lpl-inner">
           <Link to="/" className="login-logo">
-            <KraalMark />
-            <span>Kraal</span>
+            <img src={logo} style={{ width: "140px" }} alt="Kraal" />
           </Link>
 
           <div className="lpl-art" aria-hidden="true">

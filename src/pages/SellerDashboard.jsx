@@ -2,6 +2,7 @@ import { useEffect,useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./SellerDashboard.css";
 
@@ -219,7 +220,7 @@ const toggleListingStatus = async (id) => {
           ← Back to Market
         </button>
         <div className="sd-nav-brand">
-          <span className="sd-nav-logo">🐾 Kraal</span>
+           <img src={logo} style={{ width: "140px" }} alt="Kraal" />
           <span className="sd-nav-sub">Seller Dashboard</span>
         </div>
         <div className="sd-nav-seller">
