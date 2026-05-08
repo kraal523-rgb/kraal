@@ -490,99 +490,90 @@ useEffect(() => {
     </div>
 
     <div className="mp-grid">
-     {featuredListings.length === 0 ? (
-  Array.from({ length: 3 }).map((_, i) => (
-    <div key={i} className="mp-card skeleton">
-      <div className="mp-card-media" style={{ background: "#eee" }} />
-      <div className="mp-card-body">
-        <div className="skeleton-line" />
-        <div className="skeleton-line short" />
-      </div>
-    </div>
-  ))
-) : (
-  featuredListings.map((listing, i) => {
-    const firstPhoto = listing.photos?.[0]?.url;
-    const daysAgo = listing.createdAt?.seconds
-      ? Math.floor((Date.now() / 1000 - listing.createdAt.seconds) / 86400)
-      : 0;
+      {featuredListings.length === 0 ? (
+        // Skeleton loading cards
+        Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="listing-card skeleton">
+            <div className="lc-media lc-media-skeleton" />
+            <div className="lc-body">
+              <div className="skeleton-line" />
+              <div className="skeleton-line short" />
+            </div>
+          </div>
+        ))
+      ) : (
+        featuredListings.map((listing, i) => {
+          const firstPhoto = listing.photos?.[0]?.url;
+          const daysAgo = listing.createdAt?.seconds
+            ? Math.floor((Date.now() / 1000 - listing.createdAt.seconds) / 86400)
+            : 0;
 
-    return (
-      <div
-        key={listing.id}
-        className="mp-card"
-        style={{ animationDelay: `${i * 0.08}s` }}
-        onClick={() => navigate(`/listings/${listing.id}`)}
-      >
-        {/* Media */}
-        <div className="mp-card-media">
-          {firstPhoto ? (
-            <img
-              src={firstPhoto}
-              alt={listing.title}
-              className="mp-card-image"
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextSibling.style.display = "flex";
-              }}
-            />
-          ) : null}
-          <div
-            className="mp-card-emoji-wrap"
-            style={{ display: firstPhoto ? "none" : "flex" }}
-          >
-            <span className="mp-card-emoji">
-              {getCategoryEmoji(listing.categoryId)}
-            </span>
-          </div>
-          <div className="mp-card-badges">
-            <span className="mp-card-badge">
-              {listing.vaccinated ? "Vaccinated" : listing.condition || "Good"}
-            </span>
-            <span className="mp-card-days">
-              {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
-            </span>
-          </div>
-        </div>
+          return (
+            <div
+              key={listing.id}
+              className="mp-card visible"
+              style={{ animationDelay: `${i * 0.08}s` }}
+              onClick={() => navigate(`/listings/${listing.id}`)}
+            >
+              <div className="lc-media">
+                {firstPhoto ? (
+                  <img
+                    src={firstPhoto}
+                    alt={listing.title}
+                    className="lc-image"
+                    onError={(e) => {
+                      // Fallback to emoji if image fails
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                {/* Emoji fallback */}
+                <span
+                  className="lc-emoji"
+                  style={{ display: firstPhoto ? "none" : "flex" }}
+                >
+                  {getCategoryEmoji(listing.categoryId)}
+                </span>
+                <span className="lc-badge">
+                  {listing.vaccinated ? "Vaccinated" : listing.condition || "Good"}
+                </span>
+                <span className="lc-days">
+                  {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
+                </span>
+              </div>
 
-        {/* Body */}
-        <div className="mp-card-body">
-          <h3 className="mp-card-title">{listing.title}</h3>
-          <p className="mp-card-location">
-            📍 {listing.city || listing.province || "Zimbabwe"}
-          </p>
-          <div className="mp-card-meta">
-            {listing.age && (
-              <span className="mp-meta-tag">📅 {listing.age}</span>
-            )}
-            {listing.breed && (
-              <span className="mp-meta-tag">🏷 {listing.breed}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mp-card-footer">
-          <div className="mp-card-price">
-            <strong>
-              {listing.currency || "USD"} {listing.price?.toLocaleString()}
-            </strong>
-            <span>{listing.pricePerHead ? "per head" : "per lot"}</span>
-          </div>
-          <button
-            className="mp-enquire-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/listings/${listing.id}`);
-            }}
-          >
-            Enquire
-          </button>
-        </div>
-      </div>
-    );
-  })
-)}
+              <div className="lc-body">
+                <h3 className="lc-title">{listing.title}</h3>
+                <p className="lc-location">
+                  📍 {listing.city || listing.province || "Zimbabwe"}
+                </p>
+                <div className="lc-meta">
+                  {listing.age && <span className="lc-age">Age: {listing.age}</span>}
+                  {listing.breed && <span className="lc-breed">{listing.breed}</span>}
+                </div>
+                <div className="lc-footer">
+                  <div className="lc-price">
+                    <strong>
+                      {listing.currency || "USD"} {listing.price?.toLocaleString()}
+                    </strong>
+                    <span>{listing.pricePerHead ? "per head" : "per lot"}</span>
+                  </div>
+                  <button
+                    className="lc-enquire"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/listings/${listing.id}`);
+                    }}
+                  >
+                    Enquire
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      )}
     </div>
   </div>
 </section>
