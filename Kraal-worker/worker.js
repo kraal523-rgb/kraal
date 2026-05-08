@@ -1,11 +1,16 @@
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
-    const allowedOrigins = (env.ALLOWED_ORIGINS || "").split(",").map(o => o.trim());
-    const isAllowed = allowedOrigins.includes(origin) || allowedOrigins.includes("*");
+    const allowedOrigins = (env.ALLOWED_ORIGINS || "")
+      .split(",")
+      .map((o) => o.trim());
 
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": allowedOrigins.includes(origin)
+        ? origin
+        : allowedOrigins.includes("*")
+          ? "*"
+          : "",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
@@ -16,149 +21,398 @@ export default {
 
     const url = new URL(request.url);
 
-    // POST /upload
-    if (url.pathname === "/upload" && request.method === "POST") {
-
-      const authHeader = request.headers.get("Authorization") || "";
-      const token = authHeader.replace("Bearer ", "").trim();
-
-      if (!token) {
-        return jsonResponse({ error: "Missing auth token" }, 401, corsHeaders);
+    try {
+      // ── POST /upload ─────────────────────────────────────────────────────────
+      if (url.pathname === "/upload" && request.method === "POST") {
+        return await handleUpload(request, env, url, corsHeaders);
       }
 
-      const uid = await verifyFirebaseToken(token, env.FIREBASE_PROJECT_ID);
-      if (!uid) {
-        return jsonResponse({ error: "Invalid or expired token" }, 403, corsHeaders);
+      // ── DELETE /media/:key ───────────────────────────────────────────────────
+      if (url.pathname.startsWith("/media/") && request.method === "DELETE") {
+        return await handleDelete(request, env, url, corsHeaders);
       }
 
-      let file, folder;
-      try {
-        const formData = await request.formData();
-        file = formData.get("file");
-        folder = formData.get("folder") || "uploads";
-      } catch (err) {
-        return jsonResponse({ error: "Invalid form data" }, 400, corsHeaders);
+      // ── POST /api/verify/submit ──────────────────────────────────────────────
+      if (url.pathname === "/api/verify/submit" && request.method === "POST") {
+        return await handleVerifySubmit(request, env, corsHeaders);
       }
 
-      if (!file || typeof file === "string") {
-        return jsonResponse({ error: "No file provided" }, 400, corsHeaders);
+      // ── GET /api/verify/status ───────────────────────────────────────────────
+      if (url.pathname === "/api/verify/status" && request.method === "GET") {
+        return await handleVerifyStatus(request, env, corsHeaders);
       }
 
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-      if (!allowedTypes.includes(file.type)) {
-        return jsonResponse({ error: "Invalid file type. Only JPEG, PNG, WebP, GIF allowed." }, 400, corsHeaders);
-      }
+      // ── GET /:key  (R2 file serving) ─────────────────────────────────────────
+      if (request.method === "GET") {
+        const key = url.pathname.slice(1);
+        if (!key)
+          return new Response("Not found", {
+            status: 404,
+            headers: corsHeaders,
+          });
 
-      const arrayBuffer = await file.arrayBuffer();
-      if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
-        return jsonResponse({ error: "File too large. Maximum 5 MB." }, 400, corsHeaders);
-      }
+        const object = await env.BUCKET.get(key);
+        if (!object)
+          return new Response("Not found", {
+            status: 404,
+            headers: corsHeaders,
+          });
 
-      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-      const key = `${folder}/${uid}/${Date.now()}-${safeName}`;
-
-      try {
-        await env.BUCKET.put(key, arrayBuffer, {
-          httpMetadata: { contentType: file.type },
-          customMetadata: { uploadedBy: uid, originalName: file.name },
+        return new Response(object.body, {
+          headers: {
+            ...corsHeaders,
+            "Content-Type":
+              object.httpMetadata?.contentType || "application/octet-stream",
+            "Cache-Control": "public, max-age=31536000",
+          },
         });
-      } catch (err) {
-        return jsonResponse({ error: "Upload to R2 failed", detail: err.message }, 500, corsHeaders);
       }
 
-      const publicBase = env.R2_PUBLIC_URL || url.origin;
-      const publicUrl = `${publicBase}/${key}`;
-
-      return jsonResponse({ url: publicUrl, key }, 200, corsHeaders);
+      return new Response("Not found", { status: 404, headers: corsHeaders });
+    } catch (err) {
+      console.error("Worker error:", err);
+      return jsonResponse({ error: "Internal server error" }, 500, corsHeaders);
     }
-
-    // DELETE /media/:key
-    if (url.pathname.startsWith("/media/") && request.method === "DELETE") {
-      const authHeader = request.headers.get("Authorization") || "";
-      const token = authHeader.replace("Bearer ", "").trim();
-
-      if (!token) return jsonResponse({ error: "Missing auth token" }, 401, corsHeaders);
-
-      const uid = await verifyFirebaseToken(token, env.FIREBASE_PROJECT_ID);
-      if (!uid) return jsonResponse({ error: "Invalid or expired token" }, 403, corsHeaders);
-
-      const key = decodeURIComponent(url.pathname.replace("/media/", ""));
-
-      if (!key.includes(`/${uid}/`)) {
-        return jsonResponse({ error: "Forbidden" }, 403, corsHeaders);
-      }
-
-      await env.BUCKET.delete(key);
-      return jsonResponse({ deleted: true, key }, 200, corsHeaders);
-    }
-
-    // GET /:key
-    if (request.method === "GET") {
-      const key = url.pathname.slice(1);
-      if (!key) return new Response("Not found", { status: 404, headers: corsHeaders });
-
-      const object = await env.BUCKET.get(key);
-      if (!object) return new Response("Not found", { status: 404, headers: corsHeaders });
-
-      return new Response(object.body, {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": object.httpMetadata?.contentType || "application/octet-stream",
-          "Cache-Control": "public, max-age=31536000",
-        },
-      });
-    }
-
-    return new Response("Not found", { status: 404, headers: corsHeaders });
   },
 };
 
-function jsonResponse(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...headers },
-  });
+// ─── Existing: POST /upload ───────────────────────────────────────────────────
+
+async function handleUpload(request, env, url, corsHeaders) {
+  const uid = await requireAuth(request, env);
+  if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
+
+  let file, folder;
+  try {
+    const formData = await request.formData();
+    file = formData.get("file");
+    folder = formData.get("folder") || "uploads";
+  } catch {
+    return jsonResponse({ error: "Invalid form data" }, 400, corsHeaders);
+  }
+
+  if (!file || typeof file === "string") {
+    return jsonResponse({ error: "No file provided" }, 400, corsHeaders);
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (!allowedTypes.includes(file.type)) {
+    return jsonResponse(
+      { error: "Invalid file type. Only JPEG, PNG, WebP, GIF allowed." },
+      400,
+      corsHeaders,
+    );
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
+    return jsonResponse(
+      { error: "File too large. Maximum 5 MB." },
+      400,
+      corsHeaders,
+    );
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+  const key = `${folder}/${uid}/${Date.now()}-${safeName}`;
+
+  try {
+    await env.BUCKET.put(key, arrayBuffer, {
+      httpMetadata: { contentType: file.type },
+      customMetadata: { uploadedBy: uid, originalName: file.name },
+    });
+  } catch (err) {
+    return jsonResponse(
+      { error: "Upload to R2 failed", detail: err.message },
+      500,
+      corsHeaders,
+    );
+  }
+
+  const publicBase = env.R2_PUBLIC_URL || url.origin;
+  return jsonResponse({ url: `${publicBase}/${key}`, key }, 200, corsHeaders);
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ─── Existing: DELETE /media/:key ────────────────────────────────────────────
+
+async function handleDelete(request, env, url, corsHeaders) {
+  const uid = await requireAuth(request, env);
+  if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
+
+  const key = decodeURIComponent(url.pathname.replace("/media/", ""));
+  if (!key.includes(`/${uid}/`)) {
+    return jsonResponse({ error: "Forbidden" }, 403, corsHeaders);
+  }
+
+  await env.BUCKET.delete(key);
+  return jsonResponse({ deleted: true, key }, 200, corsHeaders);
+}
+
+// ─── New: POST /api/verify/submit ─────────────────────────────────────────────
+
+async function handleVerifySubmit(request, env, corsHeaders) {
+  const uid = await requireAuth(request, env);
+  if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
+
+  let idDoc, selfie;
+  try {
+    const formData = await request.formData();
+    idDoc = formData.get("idDocument");
+    selfie = formData.get("selfie");
+  } catch {
+    return jsonResponse({ error: "Invalid form data" }, 400, corsHeaders);
+  }
+
+  if (!idDoc || !selfie) {
+    return jsonResponse(
+      { error: "Both idDocument and selfie are required" },
+      400,
+      corsHeaders,
+    );
+  }
+
+  const ALLOWED_ID_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+  ];
+  const ALLOWED_SELFIE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+  const MAX_SIZE = 10 * 1024 * 1024;
+
+  if (!ALLOWED_ID_TYPES.includes(idDoc.type)) {
+    return jsonResponse(
+      { error: "ID document must be JPG, PNG, WebP, or PDF" },
+      400,
+      corsHeaders,
+    );
+  }
+  if (!ALLOWED_SELFIE_TYPES.includes(selfie.type)) {
+    return jsonResponse(
+      { error: "Selfie must be JPG, PNG, or WebP" },
+      400,
+      corsHeaders,
+    );
+  }
+
+  const idBuffer = await idDoc.arrayBuffer();
+  const selfieBuffer = await selfie.arrayBuffer();
+
+  if (idBuffer.byteLength > MAX_SIZE || selfieBuffer.byteLength > MAX_SIZE) {
+    return jsonResponse(
+      { error: "File size must be under 10 MB" },
+      400,
+      corsHeaders,
+    );
+  }
+
+  const ts = Date.now();
+  const ext = (type) =>
+    type === "application/pdf" ? "pdf" : type.split("/")[1];
+  const idKey = `verifications/${uid}/id_${ts}.${ext(idDoc.type)}`;
+  const selfieKey = `verifications/${uid}/selfie_${ts}.${ext(selfie.type)}`;
+
+  // Store in the same BUCKET binding — under verifications/ prefix
+  await env.BUCKET.put(idKey, idBuffer, {
+    httpMetadata: { contentType: idDoc.type },
+    customMetadata: { uid, uploadedAt: new Date().toISOString() },
+  });
+  await env.BUCKET.put(selfieKey, selfieBuffer, {
+    httpMetadata: { contentType: selfie.type },
+    customMetadata: { uid, uploadedAt: new Date().toISOString() },
+  });
+
+  // Write pending status to Firestore
+  await firestoreSet(env, `users/${uid}/verification/status`, {
+    state: "pending",
+    submittedAt: new Date().toISOString(),
+    idDocKey: idKey,
+    selfieKey: selfieKey,
+    uid,
+  });
+
+  return jsonResponse({ success: true, state: "pending" }, 200, corsHeaders);
+}
+
+// ─── New: GET /api/verify/status ─────────────────────────────────────────────
+
+async function handleVerifyStatus(request, env, corsHeaders) {
+  const uid = await requireAuth(request, env);
+  if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
+
+  const doc = await firestoreGet(env, `users/${uid}/verification/status`);
+  if (!doc) return jsonResponse({ state: "unverified" }, 200, corsHeaders);
+
+  return jsonResponse(
+    { state: doc.state, submittedAt: doc.submittedAt },
+    200,
+    corsHeaders,
+  );
+}
+
+// ─── Shared auth helper ───────────────────────────────────────────────────────
+
+async function requireAuth(request, env) {
+  const authHeader = request.headers.get("Authorization") || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) return null;
+  return verifyFirebaseToken(token, env.FIREBASE_PROJECT_ID);
+}
+
+// ─── Firestore REST helpers ───────────────────────────────────────────────────
+
+async function getAdminToken(env) {
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: env.FIREBASE_CLIENT_EMAIL,
+    sub: env.FIREBASE_CLIENT_EMAIL,
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+    scope: "https://www.googleapis.com/auth/datastore",
+  };
+
+  const headerB64 = toB64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payloadB64 = toB64url(JSON.stringify(payload));
+  const sigInput = `${headerB64}.${payloadB64}`;
+
+  const pemKey = env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+  const cryptoKey = await importPrivatePemKey(pemKey);
+
+  const signature = await crypto.subtle.sign(
+    { name: "RSASSA-PKCS1-v1_5" },
+    cryptoKey,
+    new TextEncoder().encode(sigInput),
+  );
+
+  const sigB64 = toB64url(String.fromCharCode(...new Uint8Array(signature)));
+  const jwt = `${sigInput}.${sigB64}`;
+
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+  });
+
+  const data = await tokenRes.json();
+  return data.access_token;
+}
+
+async function firestoreSet(env, docPath, data) {
+  const token = await getAdminToken(env);
+  const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${docPath}`;
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields: toFirestoreFields(data) }),
+  });
+
+  if (!res.ok) throw new Error(`Firestore write failed: ${await res.text()}`);
+  return res.json();
+}
+
+async function firestoreGet(env, docPath) {
+  const token = await getAdminToken(env);
+  const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${docPath}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) return null;
+
+  const doc = await res.json();
+  return doc.fields ? fromFirestoreFields(doc.fields) : null;
+}
+
+// ─── Firestore field converters ───────────────────────────────────────────────
+
+function toFirestoreFields(obj) {
+  const fields = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === "string") fields[k] = { stringValue: v };
+    else if (typeof v === "number") fields[k] = { integerValue: String(v) };
+    else if (typeof v === "boolean") fields[k] = { booleanValue: v };
+    else if (v === null) fields[k] = { nullValue: null };
+    else if (typeof v === "object")
+      fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
+  }
+  return fields;
+}
+
+function fromFirestoreFields(fields) {
+  const obj = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if ("stringValue" in v) obj[k] = v.stringValue;
+    else if ("integerValue" in v) obj[k] = Number(v.integerValue);
+    else if ("booleanValue" in v) obj[k] = v.booleanValue;
+    else if ("nullValue" in v) obj[k] = null;
+    else if ("mapValue" in v)
+      obj[k] = fromFirestoreFields(v.mapValue.fields || {});
+  }
+  return obj;
+}
+
+// ─── Crypto helpers ───────────────────────────────────────────────────────────
+
+function toB64url(str) {
+  return btoa(str).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
 
 function b64Decode(str) {
   const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
-  const padded  = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
-  return atob(padded);
+  return atob(
+    base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "="),
+  );
 }
 
 function b64DecodeBytes(str) {
-  const binary = b64Decode(str);
-  return Uint8Array.from(binary, c => c.charCodeAt(0));
+  return Uint8Array.from(b64Decode(str), (c) => c.charCodeAt(0));
 }
 
-// ── Token verification using JWK endpoint (fixes X.509 spki import bug) ───────
+function pemToBuffer(pem) {
+  return b64DecodeBytes(pem.replace(/-----[^-]+-----/g, "").replace(/\s/g, ""));
+}
+
+async function importPrivatePemKey(pem) {
+  return crypto.subtle.importKey(
+    "pkcs8",
+    pemToBuffer(pem),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+}
+
+// ─── Firebase token verification (your existing JWK approach — kept as-is) ───
+
 async function verifyFirebaseToken(idToken, projectId) {
   try {
     const parts = idToken.split(".");
     if (parts.length !== 3) return null;
 
     const [headerB64, payloadB64, sigB64] = parts;
-    const header  = JSON.parse(b64Decode(headerB64));
+    const header = JSON.parse(b64Decode(headerB64));
     const payload = JSON.parse(b64Decode(payloadB64));
 
     const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now)         return null;  // expired
-    if (payload.iat > now + 300)   return null;  // issued in the future
-    if (payload.aud !== projectId) return null;  // wrong project
-    if (payload.iss !== `https://securetoken.google.com/${projectId}`) return null;
+    if (payload.exp < now) return null;
+    if (payload.iat > now + 300) return null;
+    if (payload.aud !== projectId) return null;
+    if (payload.iss !== `https://securetoken.google.com/${projectId}`)
+      return null;
 
-    // ✅ Use JWK endpoint — Web Crypto can import these directly.
-    // The old x509 endpoint returned PEM certs which require parsing the
-    // SubjectPublicKeyInfo out of the full certificate, which Cloudflare
-    // Workers' Web Crypto doesn't support via "spki" directly.
+    // ✅ JWK endpoint — works correctly in Cloudflare Workers
     const keysRes = await fetch(
       "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
-      { cf: { cacheTtl: 3600 } }
+      { cf: { cacheTtl: 3600 } },
     );
     const { keys } = await keysRes.json();
-    const jwk = keys.find(k => k.kid === header.kid);
+    const jwk = keys.find((k) => k.kid === header.kid);
     if (!jwk) return null;
 
     const publicKey = await crypto.subtle.importKey(
@@ -166,22 +420,28 @@ async function verifyFirebaseToken(idToken, projectId) {
       jwk,
       { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
       false,
-      ["verify"]
+      ["verify"],
     );
-
-    const signed    = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const signature = b64DecodeBytes(sigB64);
 
     const valid = await crypto.subtle.verify(
       { name: "RSASSA-PKCS1-v1_5" },
       publicKey,
-      signature,
-      signed
+      b64DecodeBytes(sigB64),
+      new TextEncoder().encode(`${headerB64}.${payloadB64}`),
     );
 
-    return valid ? (payload.user_id || payload.sub) : null;
+    return valid ? payload.user_id || payload.sub : null;
   } catch (e) {
     console.error("Token verify error:", e);
     return null;
   }
+}
+
+// ─── JSON response helper ─────────────────────────────────────────────────────
+
+function jsonResponse(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...headers },
+  });
 }
