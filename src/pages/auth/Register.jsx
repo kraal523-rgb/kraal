@@ -6,6 +6,7 @@ import StepLocation from '../../components/auth/StepLocation';
 import StepPhoto from '../../components/auth/StepPhoto';
 import StepDone from '../../components/auth/StepDone';
 import { useNavigate } from 'react-router-dom';
+import logo from "../../assets/kraal-logo.svg";
 import './Register.css';
 
 export default function Register() {
@@ -32,7 +33,7 @@ export default function Register() {
       <div className="register-brand">
         <div className="brand-content">
           <div className="brand-logo">
-            <KraalLogo />
+             <img src={logo} style={{ width: "140px" }} alt="Kraal" />
           </div>
           <h1>Sell your livestock to the world</h1>
           <p>
