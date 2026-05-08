@@ -1,8 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../store/useAuthStore";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import "./Login.css";
 import logo from "../assets/kraal-logo.svg";
+
+async function getRoleRedirect(uid, from) {
+  try {
+    const snap = await getDoc(doc(db, "users", uid));
+    const role = snap.data()?.role;
+    if (role === "transporter") return "/driver";
+    if (role === "seller" || role === "admin") return from || "/seller/dashboard";
+    return from || "/";
+  } catch {
+    return from || "/";
+  }
+}
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,37 +30,38 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleEmail = async (e) => {
-    e.preventDefault();
-    setError(null);
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      return;
-    }
-    setLoading(true);
-    try {
-      await signIn(email, password);
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(friendlyError(err.code));
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleEmail = async (e) => {
+  e.preventDefault();
+  setError(null);
+  if (!email || !password) {
+    setError("Please fill in all fields");
+    return;
+  }
+  setLoading(true);
+  try {
+    const user = await signIn(email, password);             // ← no destructuring
+    const redirect = await getRoleRedirect(user.uid, from);
+    navigate(redirect, { replace: true });
+  } catch (err) {
+    setError(friendlyError(err.code));
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleGoogle = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await signInWithGoogle();
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(friendlyError(err.code));
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const handleGoogle = async () => {
+  setError(null);
+  setLoading(true);
+  try {
+    const user = await signInWithGoogle();                  // ← no destructuring
+    const redirect = await getRoleRedirect(user.uid, from);
+    navigate(redirect, { replace: true });
+  } catch (err) {
+    setError(friendlyError(err.code));
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="login-page">
       {/* ── LEFT PANEL ── */}
