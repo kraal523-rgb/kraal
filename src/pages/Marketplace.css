@@ -721,7 +721,19 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   justify-content: center;
   overflow: hidden;
 }
-
+.mp-card-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.mp-card:hover .mp-card-image {
+  transform: scale(1.04);
+}
 .mp-card-emoji-wrap {
   display: flex;
   align-items: center;

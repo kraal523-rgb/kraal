@@ -1,10 +1,14 @@
 {
   "name": "kraal-upload",
   "main": "worker.js",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2024-09-23",
 
-  // R2 bucket binding — Worker accesses it as env.BUCKET
-  // The bucket name here must match what you created in the dashboard
+  "vars": {
+    "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com,http://localhost:5173",
+    "FIREBASE_PROJECT_ID": "kraal-ea0b0",
+    "R2_PUBLIC_URL": "https://media.kraalmarket.com"
+  },
+
   "r2_buckets": [
     {
       "binding": "BUCKET",
@@ -12,13 +16,16 @@
     }
   ],
 
-  // Secrets (set via wrangler secret put, never hardcode here):
-  //   wrangler secret put FIREBASE_PROJECT_ID
-  //   wrangler secret put ALLOWED_ORIGINS      e.g. https://kraalmarket.com,http://localhost:5173
-
   "env": {
     "production": {
       "name": "kraal-upload-prod",
+
+      "vars": {
+        "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com",
+        "FIREBASE_PROJECT_ID": "kraal-ea0b0",
+        "R2_PUBLIC_URL": "https://media.kraalmarket.com"
+      },
+
       "r2_buckets": [
         {
           "binding": "BUCKET",

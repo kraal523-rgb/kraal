@@ -5,7 +5,7 @@ export default {
     const isAllowed = allowedOrigins.includes(origin) || allowedOrigins.includes("*");
 
     const corsHeaders = {
-      "Access-Control-Allow-Origin": isAllowed ? origin : "",
+      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
@@ -120,45 +120,7 @@ function jsonResponse(data, status = 200, headers = {}) {
   });
 }
 
-async function verifyFirebaseToken(idToken, projectId) {
-  try {
-    const parts = idToken.split(".");
-    if (parts.length !== 3) return null;
-
-    const [headerB64, payloadB64, sigB64] = parts;
-    const header  = JSON.parse(b64Decode(headerB64));
-    const payload = JSON.parse(b64Decode(payloadB64));
-
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now)         return null;
-    if (payload.iat > now + 300)   return null;
-    if (payload.aud !== projectId) return null;
-    if (payload.iss !== `https://securetoken.google.com/${projectId}`) return null;
-
-    const keysRes = await fetch(
-      "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com",
-      { cf: { cacheTtl: 3600 } }
-    );
-    const keys = await keysRes.json();
-    const certPem = keys[header.kid];
-    if (!certPem) return null;
-
-    const publicKey = await importX509Key(certPem);
-    const signed    = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const signature = b64DecodeBytes(sigB64);
-
-    const valid = await crypto.subtle.verify(
-      { name: "RSASSA-PKCS1-v1_5" },
-      publicKey,
-      signature,
-      signed
-    );
-
-    return valid ? (payload.user_id || payload.sub) : null;
-  } catch {
-    return null;
-  }
-}
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
 function b64Decode(str) {
   const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
@@ -171,17 +133,55 @@ function b64DecodeBytes(str) {
   return Uint8Array.from(binary, c => c.charCodeAt(0));
 }
 
-async function importX509Key(pem) {
-  const pemContents = pem
-    .replace(/-----BEGIN CERTIFICATE-----/, "")
-    .replace(/-----END CERTIFICATE-----/, "")
-    .replace(/\s/g, "");
-  const der = b64DecodeBytes(pemContents);
-  return crypto.subtle.importKey(
-    "spki",
-    der,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["verify"]
-  );
+// ── Token verification using JWK endpoint (fixes X.509 spki import bug) ───────
+async function verifyFirebaseToken(idToken, projectId) {
+  try {
+    const parts = idToken.split(".");
+    if (parts.length !== 3) return null;
+
+    const [headerB64, payloadB64, sigB64] = parts;
+    const header  = JSON.parse(b64Decode(headerB64));
+    const payload = JSON.parse(b64Decode(payloadB64));
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp < now)         return null;  // expired
+    if (payload.iat > now + 300)   return null;  // issued in the future
+    if (payload.aud !== projectId) return null;  // wrong project
+    if (payload.iss !== `https://securetoken.google.com/${projectId}`) return null;
+
+    // ✅ Use JWK endpoint — Web Crypto can import these directly.
+    // The old x509 endpoint returned PEM certs which require parsing the
+    // SubjectPublicKeyInfo out of the full certificate, which Cloudflare
+    // Workers' Web Crypto doesn't support via "spki" directly.
+    const keysRes = await fetch(
+      "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+      { cf: { cacheTtl: 3600 } }
+    );
+    const { keys } = await keysRes.json();
+    const jwk = keys.find(k => k.kid === header.kid);
+    if (!jwk) return null;
+
+    const publicKey = await crypto.subtle.importKey(
+      "jwk",
+      jwk,
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const signed    = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
+    const signature = b64DecodeBytes(sigB64);
+
+    const valid = await crypto.subtle.verify(
+      { name: "RSASSA-PKCS1-v1_5" },
+      publicKey,
+      signature,
+      signed
+    );
+
+    return valid ? (payload.user_id || payload.sub) : null;
+  } catch (e) {
+    console.error("Token verify error:", e);
+    return null;
+  }
 }
