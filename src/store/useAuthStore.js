@@ -18,24 +18,31 @@ const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
-      sellerProfile: null,
+      userProfile: null,   // unified profile for all roles (replaces sellerProfile)
+      sellerProfile: null, // kept for backward compatibility with existing components
       loading: true,
       error: null,
 
-      // Called once in App.jsx to listen for auth changes
+      // ── Auth listener ────────────────────────────────────────────────────────
       init: () => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
           if (firebaseUser) {
-            const profile = await get().fetchSellerProfile(firebaseUser.uid);
-            set({ user: firebaseUser, sellerProfile: profile, loading: false });
+            const profile = await get().fetchUserProfile(firebaseUser.uid);
+            set({
+              user: firebaseUser,
+              userProfile: profile,
+              // Mirror into sellerProfile so existing seller components don't break
+              sellerProfile: profile?.role === 'seller' ? profile : null,
+              loading: false,
+            });
           } else {
-            set({ user: null, sellerProfile: null, loading: false });
+            set({ user: null, userProfile: null, sellerProfile: null, loading: false });
           }
         });
         return unsubscribe;
       },
 
-      // Step 1: Create Firebase Auth account
+      // ── Registration ─────────────────────────────────────────────────────────
       registerWithEmail: async (email, password) => {
         set({ error: null });
         const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -43,57 +50,124 @@ const useAuthStore = create(
         return cred.user;
       },
 
-      // Google sign-in (also used for registration)
       signInWithGoogle: async () => {
         set({ error: null });
         const cred = await signInWithPopup(auth, googleProvider);
         return cred.user;
       },
 
-      // Step 2: Save seller profile to Firestore after registration
+      // ── Create profile (called at end of registration for ALL roles) ─────────
       createSellerProfile: async (uid, profileData) => {
-        const ref = doc(db, 'sellers', uid);
-        const data = {
+        const now = serverTimestamp();
+        const role = profileData.role || 'buyer';
+
+        // ── users/{uid} — role lookup used by guards (DriverGuard etc.) ────────
+        const userDoc = {
+          uid,
+          email:       profileData.email,
+          displayName: profileData.businessName || profileData.email,
+          role,
+          available:   role === 'transporter' ? true : false,
+          verified:    false,
+          createdAt:   now,
+          updatedAt:   now,
+        };
+        await setDoc(doc(db, 'users', uid), userDoc, { merge: true });
+
+        // ── Role-specific collection ─────────────────────────────────────────
+        // sellers/{uid} — for sellers (existing behaviour, unchanged)
+        // transporters/{uid} — for transport providers
+        // buyers/{uid} — for buyers (lightweight, just essentials)
+        const roleCollection = role === 'seller'
+          ? 'sellers'
+          : role === 'transporter'
+            ? 'transporters'
+            : 'buyers';
+
+        const profileDoc = {
           ...profileData,
           uid,
-          verified: false,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
+          role,
+          verified:  false,
+          createdAt: now,
+          updatedAt: now,
         };
-        await setDoc(ref, data);
-        set({ sellerProfile: data });
-        return data;
+        await setDoc(doc(db, roleCollection, uid), profileDoc);
+
+        set({
+          userProfile: profileDoc,
+          sellerProfile: role === 'seller' ? profileDoc : null,
+        });
+
+        return profileDoc;
       },
 
-      // Fetch existing seller profile
+      // ── Fetch profile on login (checks role-specific collection) ────────────
+      fetchUserProfile: async (uid) => {
+        // First read users/{uid} to get the role
+        const userSnap = await getDoc(doc(db, 'users', uid));
+        if (!userSnap.exists()) {
+          // Fall back to legacy sellers/{uid} lookup for existing accounts
+          return get().fetchSellerProfile(uid);
+        }
+
+        const { role } = userSnap.data();
+        const roleCollection = role === 'seller'
+          ? 'sellers'
+          : role === 'transporter'
+            ? 'transporters'
+            : 'buyers';
+
+        const profileSnap = await getDoc(doc(db, roleCollection, uid));
+        const profile = profileSnap.exists()
+          ? profileSnap.data()
+          : userSnap.data(); // fall back to users doc if role doc missing
+
+        set({
+          userProfile: profile,
+          sellerProfile: role === 'seller' ? profile : null,
+        });
+
+        return profile;
+      },
+
+      // ── Legacy fallback — keeps existing seller components working ───────────
       fetchSellerProfile: async (uid) => {
-        const ref = doc(db, 'sellers', uid);
-        const snap = await getDoc(ref);
+        const snap = await getDoc(doc(db, 'sellers', uid));
         if (snap.exists()) {
           const data = snap.data();
-          set({ sellerProfile: data });
+          set({ sellerProfile: data, userProfile: data });
           return data;
         }
         return null;
       },
 
+      // ── Sign in ──────────────────────────────────────────────────────────────
       signIn: async (email, password) => {
         set({ error: null });
         const cred = await signInWithEmailAndPassword(auth, email, password);
         return cred.user;
       },
 
+      // ── Logout ───────────────────────────────────────────────────────────────
       logout: async () => {
         await signOut(auth);
-        set({ user: null, sellerProfile: null });
+        set({ user: null, userProfile: null, sellerProfile: null });
       },
 
-      setError: (error) => set({ error }),
+      // ── Helpers ──────────────────────────────────────────────────────────────
+      // Convenience getter — use anywhere you need the current role
+      getRole: () => get().userProfile?.role ?? null,
+
+      setError:   (error) => set({ error }),
       clearError: () => set({ error: null }),
     }),
     {
       name: 'kraal-auth',
-      partialize: (state) => ({ sellerProfile: state.sellerProfile }),
+      partialize: (state) => ({
+        sellerProfile: state.sellerProfile,
+        userProfile:   state.userProfile,
+      }),
     }
   )
 );

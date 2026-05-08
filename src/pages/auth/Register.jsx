@@ -1,13 +1,15 @@
 import React from 'react';
-import { useRegister, STEPS, STEP_LABELS } from '../../hooks/useRegister';
+import { useRegister, STEPS, STEP_LABELS, ROLES } from '../../hooks/useRegister';
 import StepAccount from '../../components/auth/StepAccount';
 import StepBusiness from '../../components/auth/StepBusiness';
 import StepLocation from '../../components/auth/StepLocation';
 import StepPhoto from '../../components/auth/StepPhoto';
 import StepDone from '../../components/auth/StepDone';
+import { useNavigate } from 'react-router-dom';
 import './Register.css';
 
 export default function Register() {
+  const navigate = useNavigate();
   const {
     step, form, loading, error,
     update, toggleLivestock,
@@ -17,9 +19,16 @@ export default function Register() {
 
   const isDone = step === STEPS.DONE;
 
+  // Redirect to the right dashboard after registration completes
+  const handleDone = () => {
+    if (form.role === 'transporter') navigate('/driver', { replace: true });
+    else if (form.role === 'seller')  navigate('/seller/dashboard', { replace: true });
+    else                              navigate('/marketplace', { replace: true });
+  };
+
   return (
     <div className="register-page">
-      {/* Left panel - branding */}
+      {/* ── Left panel ── */}
       <div className="register-brand">
         <div className="brand-content">
           <div className="brand-logo">
@@ -44,7 +53,7 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Right panel - form */}
+      {/* ── Right panel ── */}
       <div className="register-form-panel">
         {!isDone && (
           <div className="progress-bar">
@@ -64,14 +73,23 @@ export default function Register() {
 
         <div className="form-card">
           {step === STEPS.ACCOUNT && (
-            <StepAccount
-              form={form}
-              update={update}
-              onSubmit={submitAccount}
-              loading={loading}
-              error={error}
-            />
+            <>
+              {/* ── Role selector — shown above the account fields ── */}
+              <RoleSelector
+                selected={form.role}
+                onSelect={(role) => { update({ role }); setError(null); }}
+              />
+
+              <StepAccount
+                form={form}
+                update={update}
+                onSubmit={submitAccount}
+                loading={loading}
+                error={error}
+              />
+            </>
           )}
+
           {step === STEPS.BUSINESS && (
             <StepBusiness
               form={form}
@@ -82,6 +100,7 @@ export default function Register() {
               error={error}
             />
           )}
+
           {step === STEPS.LOCATION && (
             <StepLocation
               form={form}
@@ -91,6 +110,7 @@ export default function Register() {
               error={error}
             />
           )}
+
           {step === STEPS.PHOTO && (
             <StepPhoto
               form={form}
@@ -102,8 +122,9 @@ export default function Register() {
               setError={setError}
             />
           )}
+
           {step === STEPS.DONE && (
-            <StepDone />
+            <StepDone role={form.role} onContinue={handleDone} />
           )}
         </div>
       </div>
@@ -111,6 +132,33 @@ export default function Register() {
   );
 }
 
+// ─── Role Selector ────────────────────────────────────────────────────────────
+function RoleSelector({ selected, onSelect }) {
+  return (
+    <div className="role-selector">
+      <p className="role-selector-label">I want to join Kraal as a</p>
+      <div className="role-cards">
+        {ROLES.map(({ value, label, emoji, desc }) => (
+          <button
+            key={value}
+            type="button"
+            className={`role-card ${selected === value ? 'role-card--active' : ''}`}
+            onClick={() => onSelect(value)}
+          >
+            <span className="role-card-emoji">{emoji}</span>
+            <span className="role-card-label">{label}</span>
+            <span className="role-card-desc">{desc}</span>
+            {selected === value && (
+              <span className="role-card-check">✓</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Logo ─────────────────────────────────────────────────────────────────────
 function KraalLogo() {
   return (
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none">

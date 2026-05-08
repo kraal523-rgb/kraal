@@ -5,7 +5,7 @@ import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./SellerDashboard.css";
-
+import RequestTransportButton from "../components/RequestTransportButton";
 
 const SELLER = {
   name: "Takudzwa M.",
@@ -572,6 +572,9 @@ const toggleListingStatus = async (id) => {
                             Awaiting delivery
                           </span>
                         )}
+                        {order.status === "confirmed" && (
+  <RequestTransportButton order={order} />
+)}
                         {(order.status === "completed" ||
                           order.status === "cancelled") && (
                           <span className="sd-order-action-text">—</span>
