@@ -21,7 +21,7 @@ import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import VerifyIdentity, { VerificationGuard } from "./pages/VerifyIdentity";
 import DriverDashboard from "./pages/DriverDashboard";
-
+import BuyerDashboard from "./pages/Buyerdashboard";
 // ─── ProtectedRoute ───────────────────────────────────────────────────────────
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuthStore();
@@ -221,7 +221,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+<Route path="/buyer" element={<ProtectedRoute><BuyerDashboard /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

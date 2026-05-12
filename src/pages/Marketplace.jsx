@@ -326,32 +326,40 @@ export default function Marketplace() {
         <div className="mp-nav-inner">
           <Link to="/" className="mp-nav-logo">
             <img src={logo} style={{ width: "120px" }} alt="Kraal" />
-            <span>Market</span>
+            <span className="mp-nav-logo-text">Market</span>
           </Link>
+          <button
+            className={`mp-hamburger ${menuOpen ? "open" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
           <div className={`mp-nav-links ${menuOpen ? "open" : ""}`}>
-            <Link to="/marketplace" className="active">
+            <Link to="/marketplace" className="active" onClick={() => setMenuOpen(false)}>
               Browse Animals
             </Link>
-            <Link to="/marketplace?category=cattle">Cattle</Link>
-            <Link to="/marketplace?category=goats">Goats</Link>
-            <Link to="/about">About</Link>
+            <Link to="/marketplace?category=cattle" onClick={() => setMenuOpen(false)}>Cattle</Link>
+            <Link to="/marketplace?category=goats" onClick={() => setMenuOpen(false)}>Goats</Link>
+            <Link to="/about" onClick={() => setMenuOpen(false)}>About</Link>
+            <div className="mp-nav-actions-mobile">
+              <Link to="/login" className="mp-nav-signin" onClick={() => setMenuOpen(false)}>
+                Sign in
+              </Link>
+              <Link to="/register" className="mp-nav-cta" onClick={() => setMenuOpen(false)}>
+                + Post
+              </Link>
+            </div>
           </div>
           <div className="mp-nav-actions">
             <Link to="/login" className="mp-nav-signin">
               Sign in
             </Link>
             <Link to="/register" className="mp-nav-cta">
-              + Post a Listing
+              + Post
             </Link>
-            <button
-              className="mp-hamburger"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
           </div>
         </div>
       </nav>

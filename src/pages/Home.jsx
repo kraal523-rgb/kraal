@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import InstallButton from '../components/InstallButton'
-import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp  } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/kraal-logo.svg";
@@ -201,9 +201,9 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertEmail, setAlertEmail] = useState("");
   const [alertSubmitted, setAlertSubmitted] = useState(false);
-  const [visibleSections, setVisibleSections] = useState({});
+  const [ setVisibleSections] = useState({});
   const observerRef = useRef(null);
-
+  const [fetchError, setFetchError] = useState(false);
   // Rotate testimonials
   useEffect(() => {
     const t = setInterval(
@@ -212,7 +212,25 @@ export default function Home() {
     );
     return () => clearInterval(t);
   }, []);
-
+const fetchFeatured = useCallback(async () => {
+    try {
+      const q = query(
+        collection(db, "listings"),
+        where("status", "==", "active"),
+        orderBy("createdAt", "desc"),
+        limit(6)
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setFeaturedListings(data);
+    } catch (err) {
+      console.error("Failed to fetch listings:", err);
+      setFetchError(true); 
+    }
+  },[]);
   // Intersection observer for scroll reveals
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -234,36 +252,26 @@ export default function Home() {
     return () => observerRef.current?.disconnect();
   }, []);
 useEffect(() => {
-  const fetchFeatured = async () => {
-    try {
-      const q = query(
-        collection(db, "listings"),
-        where("status", "==", "active"),
-        orderBy("createdAt", "desc"),
-        limit(6)
-      );
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setFeaturedListings(data);
-    } catch (err) {
-      console.error("Failed to fetch listings:", err);
-    }
-  };
-
   fetchFeatured();
-}, []);
+}, [fetchFeatured]);
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/marketplace${search ? `?q=${encodeURIComponent(search)}` : ""}`);
   };
 
-  const handleAlertSubmit = (e) => {
-    e.preventDefault();
-    if (alertEmail) setAlertSubmitted(true);
-  };
+ const handleAlertSubmit = async (e) => {
+  e.preventDefault();
+  if (!alertEmail) return;
+  try {
+    await addDoc(collection(db, "alert_signups"), {
+      email: alertEmail,
+      createdAt: serverTimestamp(),
+    });
+    setAlertSubmitted(true);
+  } catch (err) {
+    console.error("Alert signup failed:", err);
+  }
+};
 
   return (
     <div className="home">
@@ -464,7 +472,7 @@ useEffect(() => {
 >
   <div className="cat-img-wrap">
     {cat.img ? (
-      <img src={cat.img} alt={cat.label} className="cat-animal-img" />
+      <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
     ) : (
       <span className="cat-emoji">{cat.emoji}</span>
     )}
@@ -490,7 +498,11 @@ useEffect(() => {
     </div>
 
     <div className="mp-grid">
-      {featuredListings.length === 0 ? (
+      {fetchError ? (
+  <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "40px 0" }}>
+    Could not load listings right now. <button onClick={fetchFeatured}>Retry</button>
+  </p>
+) : featuredListings.length === 0 ?  (
         // Skeleton loading cards
         Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="listing-card skeleton">
@@ -505,6 +517,7 @@ useEffect(() => {
         featuredListings.map((listing, i) => {
           const firstPhoto = listing.photos?.[0]?.url;
           const daysAgo = listing.createdAt?.seconds
+            // eslint-disable-next-line react-hooks/purity
             ? Math.floor((Date.now() / 1000 - listing.createdAt.seconds) / 86400)
             : 0;
 

@@ -1130,7 +1130,21 @@ body,
   border-radius: 100px;
   font-weight: 500;
 }
-
+.mp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1100px) { .mp-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .mp-grid { grid-template-columns: 1fr; } }
+.lc-breed {
+  font-size: 0.74rem;
+  background: rgba(38, 97, 32, 0.08);
+  color: var(--green-rich);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-weight: 500;
+}
 .lc-footer {
   display: flex;
   align-items: center;

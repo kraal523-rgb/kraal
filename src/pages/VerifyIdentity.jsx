@@ -6,15 +6,17 @@ import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
 
 // ── Worker base URL — change to your deployed worker URL ─────────────────────
-const WORKER_URL = import.meta.env.VITE_WORKER_URL || "http://localhost:8787";
+const WORKER_URL = import.meta.env.VITE_WORKER_URL;
 
 // ─── Hook: real-time verification status from Firestore ───────────────────────
+// eslint-disable-next-line react-refresh/only-export-components
 export function useVerificationStatus() {
   const { user } = useAuthStore();
   const [status, setStatus] = useState(undefined); // undefined = loading
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus(null);
       return;
     }
@@ -327,7 +329,7 @@ function IntroStep({ onNext, status }) {
         {[
           [
             "🪪",
-            "A photo of your ID document (SA ID, passport, or driver's licence)",
+            "A photo of your ID document (ZIM ID, passport, or driver's licence)",
           ],
           ["🤳", "A quick selfie to match your face"],
           ["⏱", "Usually approved within 1–2 business days"],
@@ -351,7 +353,7 @@ function IdUploadStep({ idFile, fileInputRef, onChange, onNext, onBack }) {
       <StepLabel label="Step 1 of 2" />
       <h2 style={styles.h2}>Upload your ID document</h2>
       <p style={styles.body}>
-        Take a clear photo of your <strong>SA ID</strong>,{" "}
+        Take a clear photo of your <strong>ZIM ID</strong>,{" "}
         <strong>passport</strong>, or <strong>driver's licence</strong>. All
         four corners must be visible and text legible.
       </p>
