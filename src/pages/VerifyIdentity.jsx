@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth";
 import { db } from "../lib/firebase"; 
 import useAuthStore from "../store/useAuthStore";
 
-// ── Worker base URL — change to your deployed worker URL ─────────────────────
+
 const WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL;
 
 // ─── Hook: real-time verification status from Firestore ───────────────────────

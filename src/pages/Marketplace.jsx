@@ -109,7 +109,7 @@ const BANNER_ADS = [
 const BANNER_SLIDES = [
   {
     categoryId: "cattle",
-    img: "/src/assets/brahman-1.jpg",
+    img: "/brahman-1.jpg",
     overlay: "linear-gradient(90deg, rgba(20,10,5,0.82) 0%, rgba(20,10,5,0.35) 60%, transparent 100%)",
     tag: "🐄 Cattle · Premium Listings",
     headline: "Brahman Bulls.\nTop bloodlines,\nbest prices.",
@@ -118,7 +118,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "goats",
-    img: "/src/assets/goats-2.jpg",
+    img: "/goats-2.jpg",
     overlay: "linear-gradient(90deg, rgba(10,25,10,0.80) 0%, rgba(10,25,10,0.30) 60%, transparent 100%)",
     tag: "🐐 Goats · New Listings Daily",
     headline: "Boer Goats.\nFarm-fresh,\nready to go.",
@@ -127,7 +127,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "chicken",
-    img: "/src/assets/pngegg__9.png",
+    img: "/chicken-3.jpg",
     overlay: "linear-gradient(90deg, rgba(60,30,5,0.82) 0%, rgba(60,30,5,0.35) 60%, transparent 100%)",
     tag: "🐓 Road Runners · Best Sellers",
     headline: "Indigenous\nchickens.\nZimbabwe's favourite.",
@@ -136,7 +136,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "pigs",
-    img: "/src/assets/pngegg__18.png",
+    img: "/pigs-4.jpg",
     overlay: "linear-gradient(90deg, rgba(15,15,40,0.82) 0%, rgba(15,15,40,0.35) 60%, transparent 100%)",
     tag: "🤝 Sell on Kraal · It's Free",
     headline: "Reach buyers\nacross Africa.\nNo middlemen.",
@@ -145,7 +145,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "all",
-    img: "/src/assets/pngegg__5.png",
+    img: "/all-5.jpg",
     overlay: "linear-gradient(90deg, rgba(30,15,5,0.80) 0%, rgba(30,15,5,0.30) 60%, transparent 100%)",
     tag: "🌍 All Animals · Southern Africa",
     headline: "Zimbabwe's #1\nlivestock\nmarketplace.",
