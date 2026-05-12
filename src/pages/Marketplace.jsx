@@ -344,21 +344,15 @@ export default function Marketplace() {
             <Link to="/marketplace?category=cattle" onClick={() => setMenuOpen(false)}>Cattle</Link>
             <Link to="/marketplace?category=goats" onClick={() => setMenuOpen(false)}>Goats</Link>
             <Link to="/about" onClick={() => setMenuOpen(false)}>About</Link>
-            <div className="mp-nav-actions-mobile">
-              <Link to="/login" className="mp-nav-signin" onClick={() => setMenuOpen(false)}>
-                Sign in
-              </Link>
-              <Link to="/register" className="mp-nav-cta" onClick={() => setMenuOpen(false)}>
-                + Post
-              </Link>
-            </div>
+          
           </div>
           <div className="mp-nav-actions">
-            <Link to="/login" className="mp-nav-signin">
-              Sign in
-            </Link>
+            
             <Link to="/register" className="mp-nav-cta">
               + Post
+            </Link>
+            <Link to="/login" className="mp-nav-signin">
+              Sign in
             </Link>
           </div>
         </div>

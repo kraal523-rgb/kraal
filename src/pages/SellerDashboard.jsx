@@ -247,32 +247,6 @@ const toggleListingStatus = async (id) => {
         </div>
       </nav>
 
-      {/* ── PAGE HEADER ── */}
-      <div className="sd-page-header">
-        <div className="sd-page-header-inner">
-          <div>
-            <h1>Welcome back, {user?.displayName?.split(" ")[0] || "Seller"} 👋</h1>
-            <p>📍 {user?.email}</p>
-          </div>
-          <button className="sd-post-btn" onClick={() => navigate('/sell')}>
-  + Post New Listing
-</button>
-        </div>
-
-        {/* Tabs */}
-        <div className="sd-tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              className={`sd-tab ${activeTab === tab ? "active" : ""}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* ── CONTENT ── */}
       <div className="sd-body">
         {/* ══ OVERVIEW ══ */}

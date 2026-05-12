@@ -7,6 +7,10 @@
     "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com,http://localhost:5173",
     "FIREBASE_PROJECT_ID": "kraal-ea0b0",
     "R2_PUBLIC_URL": "https://media.kraalmarket.com"
+    // FACEPP_API_KEY    → set via: wrangler secret put FACEPP_API_KEY
+    // FACEPP_API_SECRET → set via: wrangler secret put FACEPP_API_SECRET
+    // FIREBASE_CLIENT_EMAIL  → set via: wrangler secret put FIREBASE_CLIENT_EMAIL
+    // FIREBASE_PRIVATE_KEY   → set via: wrangler secret put FIREBASE_PRIVATE_KEY
   },
 
   "r2_buckets": [
@@ -24,6 +28,10 @@
         "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com",
         "FIREBASE_PROJECT_ID": "kraal-ea0b0",
         "R2_PUBLIC_URL": "https://media.kraalmarket.com"
+        // FACEPP_API_KEY    → set via: wrangler secret put FACEPP_API_KEY --env production
+        // FACEPP_API_SECRET → set via: wrangler secret put FACEPP_API_SECRET --env production
+        // FIREBASE_CLIENT_EMAIL  → set via: wrangler secret put FIREBASE_CLIENT_EMAIL --env production
+        // FIREBASE_PRIVATE_KEY   → set via: wrangler secret put FIREBASE_PRIVATE_KEY --env production
       },
 
       "r2_buckets": [

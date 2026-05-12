@@ -1945,6 +1945,10 @@ body,
     padding: 0 16px;
     height: 58px;
     gap: 16px;
+    justify-content: space-between;
+  }
+   .nav-actions {
+    margin-left: auto; 
   }
   .nav-links {
     display: none;

@@ -6,7 +6,7 @@ import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
 
 // ── Worker base URL — change to your deployed worker URL ─────────────────────
-const WORKER_URL = import.meta.env.VITE_WORKER_URL;
+const WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL;
 
 // ─── Hook: real-time verification status from Firestore ───────────────────────
 // eslint-disable-next-line react-refresh/only-export-components

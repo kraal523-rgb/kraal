@@ -148,8 +148,6 @@ async function handleDelete(request, env, url, corsHeaders) {
   return jsonResponse({ deleted: true, key }, 200, corsHeaders);
 }
 
-// ─── New: POST /api/verify/submit ─────────────────────────────────────────────
-
 async function handleVerifySubmit(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
@@ -171,48 +169,30 @@ async function handleVerifySubmit(request, env, corsHeaders) {
     );
   }
 
-  const ALLOWED_ID_TYPES = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "application/pdf",
-  ];
+  const ALLOWED_ID_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
   const ALLOWED_SELFIE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_SIZE = 10 * 1024 * 1024;
 
   if (!ALLOWED_ID_TYPES.includes(idDoc.type)) {
-    return jsonResponse(
-      { error: "ID document must be JPG, PNG, WebP, or PDF" },
-      400,
-      corsHeaders,
-    );
+    return jsonResponse({ error: "ID document must be JPG, PNG, WebP, or PDF" }, 400, corsHeaders);
   }
   if (!ALLOWED_SELFIE_TYPES.includes(selfie.type)) {
-    return jsonResponse(
-      { error: "Selfie must be JPG, PNG, or WebP" },
-      400,
-      corsHeaders,
-    );
+    return jsonResponse({ error: "Selfie must be JPG, PNG, or WebP" }, 400, corsHeaders);
   }
 
   const idBuffer = await idDoc.arrayBuffer();
   const selfieBuffer = await selfie.arrayBuffer();
 
   if (idBuffer.byteLength > MAX_SIZE || selfieBuffer.byteLength > MAX_SIZE) {
-    return jsonResponse(
-      { error: "File size must be under 10 MB" },
-      400,
-      corsHeaders,
-    );
+    return jsonResponse({ error: "File size must be under 10 MB" }, 400, corsHeaders);
   }
 
+  // ── Store in R2 ────────────────────────────────────────────────────────────
   const ts = Date.now();
-  const ext = (type) =>
-    type === "application/pdf" ? "pdf" : type.split("/")[1];
+  const ext = (type) => type === "application/pdf" ? "pdf" : type.split("/")[1];
   const idKey = `verifications/${uid}/id_${ts}.${ext(idDoc.type)}`;
   const selfieKey = `verifications/${uid}/selfie_${ts}.${ext(selfie.type)}`;
 
-  // Store in the same BUCKET binding — under verifications/ prefix
   await env.BUCKET.put(idKey, idBuffer, {
     httpMetadata: { contentType: idDoc.type },
     customMetadata: { uid, uploadedAt: new Date().toISOString() },
@@ -222,18 +202,104 @@ async function handleVerifySubmit(request, env, corsHeaders) {
     customMetadata: { uid, uploadedAt: new Date().toISOString() },
   });
 
-  // Write pending status to Firestore
+  // ── Face++ comparison ──────────────────────────────────────────────────────
+  // PDFs can't be compared — skip face check if ID is a PDF
+  let faceResult = null;
+  let faceState = "pending"; // default: goes to manual review
+
+  if (idDoc.type !== "application/pdf") {
+    try {
+      faceResult = await compareFaces(env, idBuffer, selfieBuffer);
+
+      // Face++ threshold guide:
+      // confidence > 80  → very likely same person (1 in 100,000 false positive)
+      // confidence > 74  → likely same person     (1 in 10,000 false positive)
+      // confidence > 65  → possible match         (1 in 1,000 false positive)
+      // We use 74 as our auto-approve threshold
+      if (faceResult.confidence >= 74) {
+        faceState = "approved";
+      } else if (faceResult.confidence < 65) {
+        faceState = "rejected";
+      } else {
+        faceState = "pending"; // 65–74 range → manual review
+      }
+    } catch (err) {
+      console.error("Face++ error:", err.message);
+      // If Face++ fails (network, quota etc.) fall back to manual review
+      faceState = "pending";
+      faceResult = { error: err.message };
+    }
+  }
+
+  // ── Write to Firestore ─────────────────────────────────────────────────────
   await firestoreSet(env, `users/${uid}/verification/status`, {
-    state: "pending",
+    state: faceState,
     submittedAt: new Date().toISOString(),
     idDocKey: idKey,
     selfieKey: selfieKey,
     uid,
+    faceConfidence: faceResult?.confidence ?? null,
+    faceError: faceResult?.error ?? null,
+    reviewRequired: faceState === "pending",
   });
 
-  return jsonResponse({ success: true, state: "pending" }, 200, corsHeaders);
+  return jsonResponse(
+    {
+      success: true,
+      state: faceState,
+      // Only expose confidence to client if it passed or needs review
+      // Don't expose the exact score on rejection (avoids gaming)
+      ...(faceState !== "rejected" && { confidence: faceResult?.confidence }),
+    },
+    200,
+    corsHeaders,
+  );
 }
 
+// ─── Face++ compare helper ────────────────────────────────────────────────────
+
+async function compareFaces(env, idBuffer, selfieBuffer) {
+  // Convert ArrayBuffers to base64
+  const toBase64 = (buffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  };
+
+  const idBase64 = toBase64(idBuffer);
+  const selfieBase64 = toBase64(selfieBuffer);
+
+  const form = new FormData();
+  form.append("api_key", env.FACEPP_API_KEY);
+  form.append("api_secret", env.FACEPP_API_SECRET);
+  form.append("image_base64_1", idBase64);      // ID document photo
+  form.append("image_base64_2", selfieBase64);   // Selfie
+
+  const res = await fetch("https://api-us.faceplusplus.com/facepp/v3/compare", {
+    method: "POST",
+    body: form,
+  });
+
+  const data = await res.json();
+
+  // Face++ returns error_message on failure
+  if (data.error_message) {
+    throw new Error(`Face++ error: ${data.error_message}`);
+  }
+
+  // If no faces detected in either image
+  if (!data.confidence) {
+    throw new Error("No faces detected in one or both images");
+  }
+
+  return {
+    confidence: data.confidence,           // 0–100 score
+    thresholds: data.thresholds,           // { "1e-3": 65.1, "1e-4": 74.3, "1e-5": 80.5 }
+  };
+}
 // ─── New: GET /api/verify/status ─────────────────────────────────────────────
 
 async function handleVerifyStatus(request, env, corsHeaders) {
@@ -330,16 +396,15 @@ async function firestoreGet(env, docPath) {
 }
 
 // ─── Firestore field converters ───────────────────────────────────────────────
-
 function toFirestoreFields(obj) {
   const fields = {};
   for (const [k, v] of Object.entries(obj)) {
     if (typeof v === "string") fields[k] = { stringValue: v };
-    else if (typeof v === "number") fields[k] = { integerValue: String(v) };
+    else if (typeof v === "number" && Number.isInteger(v)) fields[k] = { integerValue: String(v) };
+    else if (typeof v === "number") fields[k] = { doubleValue: v }; // 👈 handles decimals like 55.114
     else if (typeof v === "boolean") fields[k] = { booleanValue: v };
     else if (v === null) fields[k] = { nullValue: null };
-    else if (typeof v === "object")
-      fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
+    else if (typeof v === "object") fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
   }
   return fields;
 }

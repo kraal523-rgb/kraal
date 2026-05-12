@@ -50,7 +50,8 @@ const INITIAL_FORM = {
   whatsapp: "",
   description: "",
   livestockTypes: [],
-
+  vehicleType: "",  
+  capacity: "",     
   // Step 2 - Location
   country: "Zimbabwe",
   province: "",
@@ -206,8 +207,10 @@ export function useRegister() {
         city: form.city,
         address: form.address || "",
         photoUrl,
-        role: form.role, // ← NEW
-        available: form.role === "transporter", // ← drivers start as available
+        role: form.role, 
+        available: form.role === "transporter",
+        vehicleType: form.vehicleType || "",   
+        capacity: form.capacity || "", 
       });
 
       setStep(STEPS.DONE);

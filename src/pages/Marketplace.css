@@ -721,6 +721,10 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   justify-content: center;
   overflow: hidden;
 }
+.mp-nav-actions-mobile {
+  display: none;
+}
+
 .mp-card-image {
   position: absolute;
   inset: 0;
@@ -1328,7 +1332,10 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
 }
 
 @media (max-width: 768px) {
-  .mp-nav-links { display: none; }
+  .mp-nav-links {
+    display: none;
+    flex: none; 
+  }
   .mp-nav-links.open {
     display: flex;
     flex-direction: column;
@@ -1342,11 +1349,27 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
     gap: 2px;
     box-shadow: var(--shadow-sm);
     z-index: 100;
+     flex: none;
   }
-  .mp-hamburger { display: flex; }
+  .mp-hamburger { display: flex; margin-left: 8px;}
   .mp-nav-signin { display: none; }
-  .mp-nav-inner { position: relative; }
-
+  .mp-nav-inner { position: relative; justify-content: space-between; gap: 0; }
+.mp-nav-actions {
+    display: flex; 
+    gap: 8px;
+    margin-left: 0;
+  }
+   .mp-nav-actions .mp-nav-signin {
+    display: none;
+  }
+  .mp-nav-links.open .mp-nav-actions-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+  }
   .mp-header { padding: 28px 16px 36px; }
   .mp-header-text h1 { font-size: 24px; }
   .mp-searchbar { max-width: 100%; }
