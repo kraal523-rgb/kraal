@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "browse": "Browse Animals",
+    "post": "+ Post",
+    "signin": "Sign in"
+  },
+  "search": {
+    "placeholder": "Search cattle, Boer goats, road runners…",
+    "button": "Search"
+  },
+  "filters": {
+    "title": "Filters",
+    "clearAll": "Clear all",
+    "location": "📍 Location",
+    "priceRange": "💵 Price Range (USD)",
+    "animalType": "🐾 Animal Type"
+  },
+  "card": {
+    "enquire": "Enquire",
+    "today": "Today",
+    "daysAgo": "{{count}}d ago",
+    "perHead": "per head",
+    "perLot": "per lot"
+  },
+  "modal": {
+    "chatWhatsApp": "Chat on WhatsApp",
+    "save": "🤍 Save Listing",
+    "saved": "❤️ Saved",
+    "safetyTip": "Always meet in a safe, public location",
+    "verified": "Seller is verified on Kraal"
+  },
+  "empty": {
+    "title": "No listings found",
+    "subtitle": "Try adjusting your filters or search term.",
+    "clear": "Clear Filters"
+  },
+  "trust": {
+    "verified": "Verified sellers only",
+    "whatsapp": "Contact via WhatsApp",
+    "free": "Free to list",
+    "panAfrica": "Pan-African reach"
+  },
+  "ticker": {
+    "label": "📊 Live Prices"
+  }
+}

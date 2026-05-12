@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "browse": "Bheka Izilwane",
+    "post": "+ Faka",
+    "signin": "Ngena"
+  },
+  "search": {
+    "placeholder": "Sesha izinkomo, izimvu, inkukhu…",
+    "button": "Sesha"
+  },
+  "filters": {
+    "title": "Hlunga",
+    "clearAll": "Sula konke",
+    "location": "📍 Indawo",
+    "priceRange": "💵 Intengo (USD)",
+    "animalType": "🐾 Uhlobo Lwezilwane"
+  },
+  "card": {
+    "enquire": "Buza",
+    "today": "Namhlanje",
+    "daysAgo": "Izinsuku {{count}} ezidlule",
+    "perHead": "nganye",
+    "perLot": "iqoqo"
+  },
+  "modal": {
+    "chatWhatsApp": "Khuluma ku WhatsApp",
+    "save": "🤍 Gcina",
+    "saved": "❤️ Kugcinwe",
+    "safetyTip": "Hlangana endaweni ephephile",
+    "verified": "Umthengisi uqinisekisiwe ku Kraal"
+  },
+  "empty": {
+    "title": "Akukho okutholakele",
+    "subtitle": "Zama ukushintsha izinketho zakho.",
+    "clear": "Sula Izinketho"
+  },
+  "trust": {
+    "verified": "Abathengisi abaqinisekisiwe kuphela",
+    "whatsapp": "Xhumana nge WhatsApp",
+    "free": "Mahala ukufaka",
+    "panAfrica": "Ukufinyelela e-Afrika"
+  },
+  "ticker": {
+    "label": "📊 Intengo Yamanje"
+  }
+}

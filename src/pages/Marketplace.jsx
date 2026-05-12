@@ -23,7 +23,8 @@ import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
 import imgQuail from "../assets/quail.png";
 import "./Marketplace.css";
-
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -206,7 +207,7 @@ function getCategoryEmoji(categoryId) {
 export default function Marketplace() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-
+const { t } = useTranslation();
   // ── Firestore state ──
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -470,7 +471,7 @@ const filtered = useMemo(() => {
           
           </div>
           <div className="mp-nav-actions">
-            
+            <LanguageSwitcher />
             <Link to="/register" className="mp-nav-cta">
               + Post
             </Link>
@@ -529,14 +530,14 @@ const filtered = useMemo(() => {
               <span className="mp-search-icon"><SearchIcon /></span>
               <input
                 type="text"
-                placeholder="Search cattle, Boer goats, road runners…"
+                placeholder={t("search_placeholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
                 <button type="button" className="mp-search-clear" onClick={() => setSearch("")}>✕</button>
               )}
-              <button type="submit" className="mp-search-btn">Search</button>
+               <button>{t('search.button')}</button>
             </form>
             <p className="mp-banner-count">
               <strong>{filtered.length}</strong> listing{filtered.length !== 1 ? "s" : ""} found
@@ -643,7 +644,7 @@ const filtered = useMemo(() => {
 
           {/* Filters header */}
           <div className="mp-sidebar-header">
-            <h3>Filters</h3>
+           <h3>{t('filters.title')}</h3>
             {hasFilters && (
               <button className="mp-clear-btn" onClick={clearFilters}>
                 Clear all

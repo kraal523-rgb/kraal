@@ -1,0 +1,10 @@
+{
+  "nav": { "browse": "Tazama Wanyama", "post": "+ Weka", "signin": "Ingia" },
+  "search": { "placeholder": "Tafuta ng'ombe, mbuzi, kuku…", "button": "Tafuta" },
+  "filters": { "title": "Chagua", "clearAll": "Futa yote", "location": "📍 Mahali", "priceRange": "💵 Bei (USD)", "animalType": "🐾 Aina ya Mnyama" },
+  "card": { "enquire": "Uliza", "today": "Leo", "daysAgo": "Siku {{count}} zilizopita", "perHead": "kwa kichwa", "perLot": "kwa kundi" },
+  "modal": { "chatWhatsApp": "Ongea kwenye WhatsApp", "save": "🤍 Hifadhi", "saved": "❤️ Imehifadhiwa", "safetyTip": "Daima kukutana mahali salama", "verified": "Muuzaji amethibitishwa kwenye Kraal" },
+  "empty": { "title": "Hakuna matokeo", "subtitle": "Jaribu kubadilisha vichujio vyako.", "clear": "Futa Vichujio" },
+  "trust": { "verified": "Wauzaji walioidhinishwa tu", "whatsapp": "Wasiliana kupitia WhatsApp", "free": "Bure kuweka", "panAfrica": "Ufikio wa Afrika nzima" },
+  "ticker": { "label": "📊 Bei za Sasa" }
+}

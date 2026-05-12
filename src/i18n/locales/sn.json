@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "browse": "Tsvaga Mhuka",
+    "post": "+ Isa",
+    "signin": "Pinda"
+  },
+  "search": {
+    "placeholder": "Tsvaga mombe, mbudzi, huku…",
+    "button": "Tsvaga"
+  },
+  "filters": {
+    "title": "Sarudza",
+    "clearAll": "Dzima zvose",
+    "location": "📍 Nzvimbo",
+    "priceRange": "💵 Mutengo (USD)",
+    "animalType": "🐾 Mhuka"
+  },
+  "card": {
+    "enquire": "Bvunza",
+    "today": "Nhasi",
+    "daysAgo": "Mazuva {{count}} apfuura",
+    "perHead": "pamwe nemhuka",
+    "perLot": "pamwe negumi"
+  },
+  "modal": {
+    "chatWhatsApp": "Taura pa WhatsApp",
+    "save": "🤍 Chengeta",
+    "saved": "❤️ Yakachengeterwa",
+    "safetyTip": "Gara uchisangana panzvimbo yakachengeteka",
+    "verified": "Mutengesi akavimbiswa pa Kraal"
+  },
+  "empty": {
+    "title": "Hapana zvakawanikwa",
+    "subtitle": "Edza kuchinja sarudzo dzako.",
+    "clear": "Dzima Sarudzo"
+  },
+  "trust": {
+    "verified": "Vatengesi vakavimbiswa chete",
+    "whatsapp": "Taura ne WhatsApp",
+    "free": "Mahara kuisa",
+    "panAfrica": "Kusvika muAfrica yose"
+  },
+  "ticker": {
+    "label": "📊 Mutengo Wanhasi"
+  }
+}

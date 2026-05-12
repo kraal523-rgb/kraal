@@ -12,7 +12,7 @@ import {
 import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
-import "./BuyerDashboard.css";
+import "./Buyerdashboard.css";
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 

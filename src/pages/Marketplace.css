@@ -1533,7 +1533,55 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
 
 .mp-bottom-nav-item svg { width: 22px; height: 22px; }
 
-/* The centre "Post" button is elevated */
+.lang-switcher {
+  position: relative;
+}
+
+.lang-current {
+  background: none;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--gray-600);
+  transition: border-color .15s;
+}
+.lang-current:hover { border-color: var(--green-600); color: var(--green-700); }
+
+.lang-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 160px;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.lang-switcher:hover .lang-dropdown,
+.lang-switcher:focus-within .lang-dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.lang-option {
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background .12s;
+}
+.lang-option:hover  { background: var(--green-50); color: var(--green-700); }
+.lang-option.active { background: var(--green-50); color: var(--green-700); font-weight: 700; }
 .mp-bottom-nav-post {
   background: var(--green-600);
   color: #fff;

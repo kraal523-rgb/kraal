@@ -1,0 +1,10 @@
+{
+  "nav": { "browse": "Blaai Diere", "post": "+ Plaas", "signin": "Teken in" },
+  "search": { "placeholder": "Soek beeste, bokke, hoenders…", "button": "Soek" },
+  "filters": { "title": "Filters", "clearAll": "Maak alles skoon", "location": "📍 Ligging", "priceRange": "💵 Prysreeks (USD)", "animalType": "🐾 Diersoort" },
+  "card": { "enquire": "Navraag", "today": "Vandag", "daysAgo": "{{count}}d gelede", "perHead": "per kop", "perLot": "per lot" },
+  "modal": { "chatWhatsApp": "Gesels op WhatsApp", "save": "🤍 Stoor", "saved": "❤️ Gestoor", "safetyTip": "Ontmoet altyd op 'n veilige plek", "verified": "Verkoper is geverifieer op Kraal" },
+  "empty": { "title": "Geen lyste gevind nie", "subtitle": "Probeer jou filters aanpas.", "clear": "Maak Filters Skoon" },
+  "trust": { "verified": "Slegs geverifieerde verkopers", "whatsapp": "Kontak via WhatsApp", "free": "Gratis om te plaas", "panAfrica": "Pan-Afrika bereik" },
+  "ticker": { "label": "📊 Lewende Pryse" }
+}

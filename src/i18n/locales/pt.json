@@ -1,0 +1,10 @@
+{
+  "nav": { "browse": "Ver Animais", "post": "+ Publicar", "signin": "Entrar" },
+  "search": { "placeholder": "Pesquisar gado, cabras, galinhas…", "button": "Pesquisar" },
+  "filters": { "title": "Filtros", "clearAll": "Limpar tudo", "location": "📍 Localização", "priceRange": "💵 Faixa de Preço (USD)", "animalType": "🐾 Tipo de Animal" },
+  "card": { "enquire": "Consultar", "today": "Hoje", "daysAgo": "há {{count}} dias", "perHead": "por cabeça", "perLot": "por lote" },
+  "modal": { "chatWhatsApp": "Conversar no WhatsApp", "save": "🤍 Guardar", "saved": "❤️ Guardado", "safetyTip": "Encontre-se sempre em local seguro", "verified": "Vendedor verificado no Kraal" },
+  "empty": { "title": "Nenhum anúncio encontrado", "subtitle": "Tente ajustar os filtros.", "clear": "Limpar Filtros" },
+  "trust": { "verified": "Apenas vendedores verificados", "whatsapp": "Contacte via WhatsApp", "free": "Grátis para publicar", "panAfrica": "Alcance pan-africano" },
+  "ticker": { "label": "📊 Preços ao Vivo" }
+}
