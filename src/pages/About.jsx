@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import  { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
 import logo from "../assets/kraal-logo.svg";
@@ -248,21 +248,4 @@ export default function About() {
   );
 }
 
-function KraalMark() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 34 34" fill="none">
-      <circle cx="17" cy="17" r="17" fill="#2D5A27" />
-      <text
-        x="17"
-        y="23"
-        textAnchor="middle"
-        fontSize="18"
-        fill="white"
-        fontFamily="Georgia, serif"
-        fontWeight="bold"
-      >
-        K
-      </text>
-    </svg>
-  );
-}
+

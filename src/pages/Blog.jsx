@@ -599,7 +599,7 @@ export default function Blog() {
 
       <div className="blog-grid-wrap">
         <div className="blog-grid">
-          {filtered.map((post, i) => (
+          {filtered.map((post) => (
             <Link key={post.id} to={`/blog/${post.id}`} className="blog-card">
               <div className="blog-card-cover">
                 {post.cover ? (
