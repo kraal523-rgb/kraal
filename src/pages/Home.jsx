@@ -8,7 +8,7 @@ import logo from "../assets/kraal-logo.svg";
 import imgCattle from "../assets/pngegg__5.png";   
 import imgGoats from "../assets/pngegg__6.png";    
 import imgSheep from "../assets/pngegg__7.png";    
-import imgDucks from "../assets/pngegg__11.png";   
+import imgDucks from "../assets/duck-1.webp";   
 import imgGuinea from "../assets/pngegg__13.png";  
 import imgRabbits from "../assets/pngegg__14.png"; 
 import imghen from "../assets/pngegg__9.png"; 
@@ -18,22 +18,34 @@ import imgPig from "../assets/pngegg__18.png";
 import imgDog from "../assets/pngegg__4.png";
 import imgDonkey from "../assets/pngegg__3.png"
 import videoCattle from "../assets/videos/cattle-1.mp4";
+import imgGeese from "../assets/geese.png";
+import imgCats from "../assets/cat.jpg";
+import imgPigeons from "../assets/pigeon.jpg";
+import imgGuineaPig from "../assets/guineapig.png";
+import imgOstrich from "../assets/ostrich.png";
+import imgQuail from "../assets/quail.png";
 import "./Home.css";
 import Marketplace from "./Marketplace";
 import "./Marketplace.css";
 const CATEGORIES = [
-  { id: "cattle",  img: imgCattle,  label: "Cattle",       count: "1,240+" },
-  { id: "goats",   img: imgGoats,   label: "Goats",        count: "890+"  },
-  { id: "sheep",   img: imgSheep,   label: "Sheep",        count: "560+"  },
-  { id: "chicken", img: imghen,     label: "Road Runner",  count: "2,100+" },
-  { id: "guinea",  img: imgGuinea,  label: "Guinea Fowl",  count: "340+"  },
-  { id: "ducks",   img: imgDucks,   label: "Ducks",        count: "280+"  },
-  { id: "rabbits", img: imgRabbits, label: "Rabbits",      count: "410+"  },
-  { id: "turkey",  img: imgTurkey,  label: "Turkey",       count: "190+"  },
-  { id: "pigs",    img: imgPig,     label: "Pigs",         count: "320+"  },
-  { id: "horses",  img: imgHorse,   label: "Horses",       count: "95+"   },
-  { id: "dogs",    img: imgDog,    label: "Dogs",    count: "150+" },
-{ id: "donkeys", img: imgDonkey, label: "Donkeys", count: "210+" },
+  { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
+  { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },
+  { id: "sheep",      img: imgSheep,     label: "Sheep",         count: "560+"   },
+  { id: "chicken",    img: imghen,       label: "Road Runner",   count: "2,100+" },
+  { id: "guinea",     img: imgGuinea,    label: "Guinea Fowl",   count: "340+"   },
+  { id: "ducks",      img: imgDucks,     label: "Ducks",         count: "280+"   },
+  { id: "geese",      img: imgGeese,     label: "Geese",         count: "120+"   },
+  { id: "pigeons",    img: imgPigeons,   label: "Pigeons",       count: "95+"    },
+  { id: "quail",      img: imgQuail,     label: "Quail",         count: "160+"   },
+  { id: "rabbits",    img: imgRabbits,   label: "Rabbits",       count: "410+"   },
+  { id: "guineapig",  img: imgGuineaPig, label: "Mbira (Cavia)", count: "75+"    },
+  { id: "turkey",     img: imgTurkey,    label: "Turkey",        count: "190+"   },
+  { id: "pigs",       img: imgPig,       label: "Pigs",          count: "320+"   },
+  { id: "horses",     img: imgHorse,     label: "Horses",        count: "95+"    },
+  { id: "donkeys",    img: imgDonkey,    label: "Donkeys",       count: "210+"   },
+  { id: "dogs",       img: imgDog,       label: "Dogs",          count: "150+"   },
+  { id: "cats",       img: imgCats,      label: "Cats",          count: "85+"    },
+  { id: "ostrich",    img: imgOstrich,   label: "Ostrich",       count: "40+"    },
 ];
 
 const PRICE_TICKER = [
@@ -853,6 +865,8 @@ useEffect(() => {
             <div className="footer-col">
               <strong>Company</strong>
              <Link to="/about">About Kraal</Link>
+             <Link to="/blog/:slug">Blog Posts</Link>
+             <Link to="/blog">Blog</Link>
               <Link to="/contact">Contact</Link>
               <Link to="/blog">Farming Tips</Link>
              <Link to="/terms">Terms</Link>
@@ -874,18 +888,25 @@ useEffect(() => {
 }
 function getCategoryEmoji(categoryId) {
   const map = {
-    cattle: "🐄",
-    goats: "🐐",
-    sheep: "🐑",
-    chicken: "🐓",
-    guinea: "🦅",
-    ducks: "🦆",
-    rabbits: "🐇",
-    turkey: "🦃",
-    pigs: "🐖",
-    horses: "🐴",
-    dogs: "🐕",
-    donkeys: "🫏",
+    cattle:    "🐄",
+    goats:     "🐐",
+    sheep:     "🐑",
+    chicken:   "🐓",
+    guinea:    "🦅",
+    ducks:     "🦆",
+    geese:     "🪿",
+    pigeons:   "🕊️",
+    quail:     "🐦",
+    rabbits:   "🐇",
+    guineapig: "🐹",
+    turkey:    "🦃",
+    pigs:      "🐖",
+    horses:    "🐴",
+    donkeys:   "🫏",
+    dogs:      "🐕",
+    cats:      "🐱",
+    ostrich:   "🦤",
+    other:     "🐾",
   };
   return map[categoryId] || "🐾";
 }

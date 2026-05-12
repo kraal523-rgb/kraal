@@ -590,23 +590,43 @@ const toggleListingStatus = async (id) => {
               <div className="sd-form-grid">
                 <div className="sd-form-group sd-form-full">
                   <label>Listing Title</label>
-                  <input type="text" defaultValue={editListing.title} />
+                  <input
+  type="text"
+  value={editListing.title}
+  onChange={(e) => setEditListing(prev => ({ ...prev, title: e.target.value }))}
+/>
                 </div>
                 <div className="sd-form-group">
                   <label>Price (USD)</label>
-                  <input type="number" defaultValue={editListing.price} />
+                  <input
+  type="number"
+  value={editListing.price}
+  onChange={(e) => setEditListing(prev => ({ ...prev, price: e.target.value }))}
+/>
                 </div>
                 <div className="sd-form-group">
                   <label>Quantity</label>
-                  <input type="number" defaultValue={editListing.qty} />
+                 <input
+  type="number"
+  value={editListing.qty}
+  onChange={(e) => setEditListing(prev => ({ ...prev, qty: e.target.value }))}
+/>
                 </div>
                 <div className="sd-form-group">
                   <label>Age</label>
-                  <input type="text" defaultValue={editListing.age} />
+                  <input
+  type="text"
+  value={editListing.age}
+  onChange={(e) => setEditListing(prev => ({ ...prev, age: e.target.value }))}
+/>
                 </div>
                 <div className="sd-form-group">
                   <label>Weight</label>
-                  <input type="text" defaultValue={editListing.weight} />
+                 <input
+  type="text"
+  value={editListing.weight}
+  onChange={(e) => setEditListing(prev => ({ ...prev, weight: e.target.value }))}
+/>
                 </div>
               </div>
               <div className="sd-modal-footer">
@@ -617,11 +637,20 @@ const toggleListingStatus = async (id) => {
                   Cancel
                 </button>
                 <button
-                  className="sd-btn-submit"
-                  onClick={() => setEditListing(null)}
-                >
-                  Save Changes
-                </button>
+  className="sd-btn-submit"
+  onClick={async () => {
+    await updateDoc(doc(db, "listings", editListing.id), {
+      title: editListing.title,
+      price: Number(editListing.price),
+      quantity: Number(editListing.qty),
+      age: editListing.age,
+      weight: editListing.weight,
+    });
+    setEditListing(null);
+  }}
+>
+  Save Changes
+</button>
               </div>
             </div>
           </div>

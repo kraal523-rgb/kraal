@@ -3,6 +3,10 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   doc,
   getDoc,
+  addDoc,
+  serverTimestamp,
+  updateDoc,
+  increment,
   collection,
   query,
   where,
@@ -15,9 +19,12 @@ import "./ListingDetail.css";
 
 function getCategoryEmoji(categoryId) {
   const map = {
-    cattle: "🐄", goats: "🐐", sheep: "🐑", chicken: "🐓",
-    guinea: "🦤", ducks: "🦆", rabbits: "🐇", turkey: "🦃",
-    pigs: "🐖", horses: "🐴", donkeys: "🫏", other: "🐾",
+    cattle:    "🐄", goats:     "🐐", sheep:  "🐑",
+    chicken:   "🐓", guinea:    "🦅", ducks:  "🦆",
+    geese:     "🪿", pigeons:   "🕊️", quail:  "🐦",
+    rabbits:   "🐇", guineapig: "🐹", turkey: "🦃",
+    pigs:      "🐖", horses:    "🐴", donkeys:"🫏",
+    dogs:      "🐕", cats:      "🐱", ostrich:"🦤",
   };
   return map[categoryId] || "🐾";
 }
@@ -60,7 +67,9 @@ useEffect(() => {
         const sellerData = sellerSnap.exists() ? sellerSnap.data() : null;
 
         setListing({ ...listingData, seller: sellerData });
-
+        await updateDoc(doc(db, "listings", id), {
+  views: increment(1),
+});
         // 3. Fetch related listings (same category, exclude current)
         const relatedQ = query(
           collection(db, "listings"),
@@ -547,12 +556,29 @@ const totalPrice =
                     Cancel
                   </button>
                   <button
-                    className="btn-primary-sm"
-                    onClick={() => setEnquirySent(true)}
-                    disabled={!enquiryMsg.trim()}
-                  >
-                    Send message
-                  </button>
+  className="btn-primary-sm"
+  onClick={async () => {
+    if (!enquiryMsg.trim()) return;
+    try {
+      await addDoc(collection(db, "enquiries"), {
+        listingId: id,
+        listingTitle: listing.title,
+        sellerId: listing.sellerId,
+        buyerId: user?.uid || null,
+        buyerEmail: user?.email || null,
+        message: enquiryMsg,
+        createdAt: serverTimestamp(),
+        read: false,
+      });
+      setEnquirySent(true);
+    } catch (err) {
+      console.error("Enquiry failed:", err);
+    }
+  }}
+  disabled={!enquiryMsg.trim()}
+>
+  Send message
+</button>
                 </div>
               </>
             )}

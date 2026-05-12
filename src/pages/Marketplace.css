@@ -220,11 +220,7 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   transition: all .2s;
 }
 
-/* ── PAGE HEADER ─────────────────────────────────────────────── */
-.mp-header {
-  background: linear-gradient(135deg, var(--green-700) 0%, var(--green-500) 60%, var(--teal-600) 100%);
-  padding: 40px 24px 48px;
-}
+
 
 .mp-header-inner {
   max-width: 1440px;
@@ -1295,7 +1291,567 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   font-size: 12.5px;
   color: rgba(255,255,255,.4);
 }
+/* ── Category Carousel ── */
+.mp-cats-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem clamp(1rem, 3vw, 2rem);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
 
+/* Viewport clips the scrolling track */
+.mp-cats-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  /* Fade edges */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+}
+
+/* The scrolling track — no scrollbar, no snap */
+.mp-cats-track {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0.75rem 0.25rem;
+  /* Disable scroll snapping so rAF loop is smooth */
+  scroll-snap-type: none;
+  /* Prevent layout reflow during animation */
+  will-change: scroll-position;
+}
+
+.mp-cats-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Arrow buttons */
+.mp-cats-arrow {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.mp-cats-arrow:hover {
+  background: var(--soil, #2C1A0E);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+
+.mp-cats-arrow:active {
+  transform: scale(0.93);
+}
+
+/* Pills */
+.mp-cat-pill {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 1rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.10);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s,
+              color 0.2s, transform 0.2s, box-shadow 0.2s;
+  min-width: 72px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #444;
+  white-space: nowrap;
+}
+
+.mp-cat-pill:hover {
+  border-color: var(--ochre, #C8842A);
+  background: rgba(200, 132, 42, 0.06);
+  color: var(--clay, #8B4513);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 132, 42, 0.15);
+}
+
+.mp-cat-pill.active {
+  background: var(--soil, #2C1A0E);
+  border-color: var(--soil, #2C1A0E);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(44, 26, 14, 0.25);
+}
+
+.mp-pill-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.mp-pill-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+/* ── Header Banner Carousel ── */
+.mp-header {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.mp-banner-carousel {
+  position: relative;
+  width: 100%;
+  height: clamp(380px, 55vw, 620px); 
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .mp-banner-carousel { height: 420px; }
+}
+
+.mp-banner-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;           /* ← add this */
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mp-banner-slide.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+  z-index: 2;
+}
+
+.mp-banner-slide.exit {
+  opacity: 0;
+  transform: scale(0.97);
+  z-index: 1;
+}
+
+
+/* Background image */
+.mp-banner-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;          
+  object-position: center 30%; 
+  display: block;
+}
+
+.mp-banner-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+/* Content layout */
+.mp-banner-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 2.5rem clamp(2rem, 5vw, 4rem);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.mp-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  box-shadow: 0 -4px 20px rgba(0,0,0,.10);
+  padding: 8px 0 env(safe-area-inset-bottom);
+}
+
+.mp-bottom-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.mp-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  color: var(--gray-400);
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.mp-badge-new  { background: #185fa5; }
+.mp-badge-hot  { background: #c23b2a; }
+.mp-badge-sale { background: #b85c00; }
+.mp-bottom-nav-item.active { color: var(--green-600); }
+
+.mp-bottom-nav-item svg { width: 22px; height: 22px; }
+
+/* The centre "Post" button is elevated */
+.mp-bottom-nav-post {
+  background: var(--green-600);
+  color: #fff;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -20px;
+  box-shadow: 0 4px 16px rgba(59,109,17,.45);
+  font-size: 26px;
+  border: none;
+  cursor: pointer;
+}
+.mp-recent {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px 8px;
+}
+
+.mp-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 14px;
+}
+
+.mp-recent-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+.mp-recent-track::-webkit-scrollbar { display: none; }
+
+.mp-recent-card {
+  flex-shrink: 0;
+  width: 120px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+  background: #fff;
+  transition: box-shadow .2s;
+}
+.mp-recent-card:hover { box-shadow: var(--shadow-md); }
+.skeleton .mp-card-media,
+.skeleton .skeleton-line {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.skeleton-line.short { width: 60%; }
+.mp-recent-img {
+  width: 100%;
+  height: 80px;
+  background: var(--green-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  overflow: hidden;
+}
+.mp-recent-img img { width: 100%; height: 100%; object-fit: cover; }
+.mp-trust-bar {
+  background: var(--green-700);
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 7px 24px;
+  flex-wrap: wrap;
+}
+
+.mp-trust-item {
+  font-size: 12px;
+  color: rgba(255,255,255,.9);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.mp-recent-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--gray-800);
+  padding: 6px 8px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-recent-price {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green-700);
+  padding: 0 8px 8px;
+}
+@media (max-width: 768px) {
+  .mp-bottom-nav { display: block; }
+  /* Push page content up so footer isn't hidden behind nav */
+  .mp-footer { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+}
+/* Text side */
+.mp-banner-text {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.mp-banner-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono, 'DM Mono', monospace);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  padding: 0.3rem 0.9rem;
+  border-radius: 100px;
+}
+.mp-banner-headline {
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.12;
+  color: #fff;
+  white-space: pre-line;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+
+.mp-banner-sub {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 380px;
+  margin: 0;
+}
+.mp-banner-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  color: var(--soil, #2C1A0E);
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.mp-banner-cta:hover {
+  background: var(--ochre, #C8842A);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.mp-banner-search-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 1.4rem;
+}
+.mp-banner-search-wrap .mp-searchbar {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  border: none;
+}
+
+.mp-banner-search-wrap .mp-searchbar input {
+  background: transparent;
+  color: #1a1a1a;
+}
+
+.mp-banner-search-wrap .mp-searchbar input::placeholder {
+  color: #888;
+}
+.mp-banner-count {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.70rem;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin: 0;
+}
+
+.mp-banner-count strong {
+  color: #fff;
+}
+
+/* Override searchbar for dark background */
+.mp-banner-search-wrap .mp-searchbar {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.20);
+}
+
+.mp-banner-dots {
+  position: absolute;
+  bottom: 1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.45rem;
+  z-index: 5;
+}
+
+.mp-banner-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.mp-banner-dot.active {
+  background: #fff;
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ── Progress bar ── */
+.mp-banner-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 5;
+}
+
+.mp-banner-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--ochre, #C8842A);
+}
+
+.mp-banner-progress-bar.running {
+  animation: bannerProgress 5s linear forwards;
+}
+@keyframes bannerProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .mp-banner-content {
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .mp-banner-search-wrap {
+    flex: none;
+    width: 100%;
+  }
+
+  .mp-banner-text {
+    max-width: 100%;
+  }
+
+  .mp-banner-sub {
+    display: none;
+  }
+
+  .mp-banner-headline {
+    font-size: 1.5rem;
+  }
+}
+/* Mobile — hide arrows, swipe works natively */
+@media (max-width: 600px) {
+  .mp-cats-arrow {
+    display: none;
+  }
+}
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 1080px) {
   .mp-sidebar {
@@ -1554,7 +2110,29 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   color: #aaa;
   font-weight: 500;
 }
+@media (max-width: 900px) {
+  .mp-banner-carousel {
+    height: 360px;
+  }
 
+  .mp-banner-content {
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .mp-banner-headline {
+    font-size: 1.6rem;
+  }
+
+  .mp-banner-sub {
+    font-size: 0.84rem;
+  }
+
+  .mp-banner-search-wrap {
+    padding: 1rem;
+  }
+}
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .mp-ad-banner {
@@ -1584,7 +2162,92 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
     height: 80px;
   }
 }
+@media (max-width: 640px) {
+  .mp-banner-carousel {
+    height: auto;          /* let content define height */
+    min-height: 480px;
+  }
 
+  .mp-banner-slide {
+    position: relative;    /* stack instead of overlap */
+    opacity: 1;
+    transform: none;
+    display: none;
+  }
+
+  .mp-banner-slide.active {
+    display: block;
+    position: relative;
+  }
+
+  /* Image becomes a tall hero behind content */
+  .mp-banner-bg {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-position: center 30%;
+  }
+
+  /* Single column — text on top, search below */
+  .mp-banner-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-items: start;
+    padding: 2rem 1.25rem 3.5rem;
+    gap: 1.25rem;
+    min-height: 480px;
+  }
+
+  /* Text block — full width, top */
+  .mp-banner-text {
+    order: 1;
+  }
+
+  .mp-banner-tag {
+    font-size: 0.62rem;
+  }
+
+  .mp-banner-headline {
+    font-size: 1.55rem;
+    white-space: normal;   /* wrap naturally on small screens */
+  }
+
+  .mp-banner-sub {
+    font-size: 0.82rem;
+    max-width: 100%;
+    display: block;        /* show on mobile too */
+  }
+
+  .mp-banner-cta {
+    font-size: 0.70rem;
+    padding: 0.6rem 1.2rem;
+  }
+
+  /* Search block — full width, below text */
+  .mp-banner-search-wrap {
+    order: 2;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 1rem;
+  }
+
+  .mp-banner-dots {
+    bottom: 0.75rem;
+  }
+}
+
+/* ══════════════════════════════════════════
+   VERY SMALL PHONES (< 380px)
+══════════════════════════════════════════ */
+@media (max-width: 380px) {
+  .mp-banner-headline {
+    font-size: 1.3rem;
+  }
+
+  .mp-banner-content {
+    padding: 1.5rem 1rem 3rem;
+  }
+}
 @media (max-width: 600px) {
   .mp-video-ads {
     grid-template-columns: 1fr;

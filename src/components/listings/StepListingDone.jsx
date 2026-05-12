@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function StepListingDone({ listingId }) {
+export default function StepListingDone({ listingId, onPostAnother }) {
   const navigate = useNavigate();
 
   return (
@@ -16,7 +16,7 @@ export default function StepListingDone({ listingId }) {
         <button className="btn-primary" onClick={() => navigate(`/listings/${listingId}`)}>
           View my listing
         </button>
-        <button className="btn-ghost" onClick={() => navigate('/sell')}>
+        <button className="btn-ghost" onClick={onPostAnother}> {/* 👈 resets form */}
           Post another listing
         </button>
         <button className="btn-ghost" onClick={() => navigate('/seller/dashboard')}>

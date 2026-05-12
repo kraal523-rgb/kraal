@@ -186,6 +186,13 @@ export function useListing() {
       return { ...f, photos };
     });
   };
+const resetForm = () => {
+  setStep(LISTING_STEPS.ANIMAL);
+  setForm(INITIAL_FORM);
+  setError(null);
+  setListingId(null);
+};
+
 
   const nextStep = (validateFn) => {
     const err = validateFn?.(form);
@@ -202,74 +209,78 @@ export function useListing() {
     setStep((s) => Math.max(0, s - 1));
   };
 
-  const submitListing = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const user = auth.currentUser;
-      if (!user) throw new Error("Please sign in to post a listing");
+const submitListing = async () => {
+  setError(null);
+  setLoading(true);
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Please sign in to post a listing");
 
-      const token = await user.getIdToken();
+    const token = await user.getIdToken();
 
-      // Upload all photos that haven't been uploaded yet
-      const uploadedPhotos = await Promise.all(
-        form.photos.map(async (p) => {
-          if (p.url) return p; // already uploaded
+    // Fetch seller profile to get location and business name
+    const { getDoc, doc } = await import("firebase/firestore");
+    const sellerSnap = await getDoc(doc(db, "users", user.uid));
+    const sellerData = sellerSnap.exists() ? sellerSnap.data() : {};
+
+    const uploadedPhotos = await Promise.all(
+      form.photos.map(async (p) => {
+        if (p.url) return p;
+        try {
           const result = await uploadImage(p.file, "listings", token);
           return { ...p, url: result.url, id: result.id };
-        }),
-      );
+        } catch {
+          return { ...p, url: null }; // skip failed uploads gracefully
+        }
+      }),
+    );
 
-      const category = LIVESTOCK_CATEGORIES.find(
-        (c) => c.id === form.categoryId,
-      );
+    const category = LIVESTOCK_CATEGORIES.find((c) => c.id === form.categoryId);
 
-      const listing = {
-        sellerId: user.uid,
-        sellerEmail: user.email || "",
-        categoryId: form.categoryId || "",
-        categoryLabel: category?.label || "",
-        breed: (form.breed === "Other" ? form.customBreed : form.breed) || "",
-        title: form.title || "",
-        description: form.description || "",
-        gender: form.gender || "",
-        age:
-          form.ageValue && form.ageUnit
-            ? `${form.ageValue} ${form.ageUnit}`
-            : "",
-        quantity: parseInt(form.quantity) || 1,
-        weight:
-          form.weight && form.weightUnit
-            ? `${form.weight} ${form.weightUnit}`
-            : "",
-        condition: form.condition || "Good",
-        vaccinated: form.vaccinated ?? false,
-        dewormed: form.dewormed ?? false,
-        castrated: form.castrated ?? false,
-        photos: uploadedPhotos
-          .filter((p) => p.url) // drop any that failed
-          .map((p) => ({ url: p.url || "", id: p.id || "" })),
-        price: parseFloat(form.price) || 0,
-        currency: form.currency || "USD",
-        negotiable: form.negotiable ?? false,
-        pricePerHead: form.pricePerHead ?? true,
-        deliveryAvailable: form.deliveryAvailable ?? false,
-        deliveryNotes: form.deliveryAvailable ? form.deliveryNotes || "" : "",
-        views: 0,
-        status: "active",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
+    const listing = {
+      sellerId: user.uid,
+      sellerEmail: user.email || "",
+      sellerName: sellerData.businessName || user.displayName || "",  // 👈 add
+      city: sellerData.city || "",       // 👈 add
+      province: sellerData.province || "",  // 👈 add
+      country: sellerData.country || "Zimbabwe",  // 👈 add
+      categoryId: form.categoryId || "",
+      categoryLabel: category?.label || "",
+      breed: (form.breed === "Other" ? form.customBreed : form.breed) || "",
+      title: form.title || "",
+      description: form.description || "",
+      gender: form.gender || "",
+      age: form.ageValue && form.ageUnit ? `${form.ageValue} ${form.ageUnit}` : "",
+      quantity: parseInt(form.quantity) || 1,
+      weight: form.weight && form.weightUnit ? `${form.weight} ${form.weightUnit}` : "",
+      condition: form.condition || "Good",
+      vaccinated: form.vaccinated ?? false,
+      dewormed: form.dewormed ?? false,
+      castrated: form.castrated ?? false,
+      photos: uploadedPhotos
+        .filter((p) => p.url)
+        .map((p) => ({ url: p.url || "", id: p.id || "" })),
+      price: parseFloat(form.price) || 0,
+      currency: form.currency || "USD",
+      negotiable: form.negotiable ?? false,
+      pricePerHead: form.pricePerHead ?? true,
+      deliveryAvailable: form.deliveryAvailable ?? false,
+      deliveryNotes: form.deliveryAvailable ? form.deliveryNotes || "" : "",
+      views: 0,
+      status: "active",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
 
-      const ref = await addDoc(collection(db, "listings"), listing);
-      setListingId(ref.id);
-      setStep(LISTING_STEPS.DONE);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const ref = await addDoc(collection(db, "listings"), listing);
+    setListingId(ref.id);
+    setStep(LISTING_STEPS.DONE);
+  } catch (e) {
+    setError(e.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return {
     step,
@@ -284,6 +295,7 @@ export function useListing() {
     reorderPhotos,
     nextStep,
     prevStep,
+    resetForm,
     submitListing,
     setError,
   };

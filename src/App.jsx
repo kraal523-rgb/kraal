@@ -7,8 +7,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import useAuthStore from "./store/useAuthStore";
-
-// Pages
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
 import Marketplace from "./pages/Marketplace";
 import ListingDetail from "./pages/ListingDetail";
@@ -177,7 +177,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
-
+         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
         {/* Identity verification */}
         <Route
           path="/verify"

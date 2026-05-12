@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import emailjs from "@emailjs/browser";
 import "./Contact.css";
 import logo from "../assets/kraal-logo.svg";
 const CONTACT_OPTIONS = [
@@ -59,11 +62,31 @@ export default function Contact() {
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // TODO: wire to your backend or EmailJS
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    // Save to Firestore
+    await addDoc(collection(db, "contact_messages"), {
+      ...form,
+      createdAt: serverTimestamp(),
+      read: false,
+    });
+   await emailjs.send(
+  import.meta.env.VITE_EMAILJS_SERVICE_ID,
+  import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+  {
+    from_name: form.name,
+    from_email: form.email,
+    subject: form.subject,
+    message: form.message,
+  },
+  import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+);
     setSent(true);
-  };
+  } catch (err) {
+    console.error("Failed:", err);
+  }
+};
 
   return (
     <div className="contact-page">

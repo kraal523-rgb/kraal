@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Terms.css";
-import logo from "../assets/kraal-logo.svg";
+import logo from "../assets/kraal-logo-black.svg";
 const SECTIONS = [
   {
     id: "introduction",

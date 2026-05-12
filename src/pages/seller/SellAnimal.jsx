@@ -12,7 +12,7 @@ export default function SellAnimal() {
   const {
     step, form, loading, error, listingId, selectedCategory,
     update, addPhotos, removePhoto, reorderPhotos,
-    nextStep, prevStep, submitListing,
+    nextStep, prevStep, submitListing,resetForm,
   } = useListing();
 
   const isDone = step === LISTING_STEPS.DONE;
@@ -74,8 +74,8 @@ export default function SellAnimal() {
             />
           )}
           {step === LISTING_STEPS.DONE && (
-            <StepListingDone listingId={listingId} />
-          )}
+  <StepListingDone listingId={listingId} onPostAnother={resetForm} />
+)}
         </div>
       </div>
     </div>

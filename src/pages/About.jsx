@@ -18,13 +18,7 @@ const TEAM = [
     initials: "RC",
     color: "#5A8A27",
   },
-  {
-    name: "Farai Mutasa",
-    role: "Head of Seller Success",
-    bio: "Former agricultural extension officer. Has helped over 3,000 farmers list their first animal online.",
-    initials: "FM",
-    color: "#8A6A27",
-  },
+
 ];
 
 const VALUES = [
