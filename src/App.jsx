@@ -221,8 +221,15 @@ function App() {
               </DriverGuard>
             </ProtectedRoute>
           }
-        />
-<Route path="/buyer" element={<ProtectedRoute><BuyerDashboard /></ProtectedRoute>} />
+        /> 
+      <Route 
+          path="/buyer" 
+          element={
+          <ProtectedRoute>
+            <BuyerDashboard />
+            </ProtectedRoute>
+          } 
+          />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -10,9 +10,11 @@ async function getRoleRedirect(uid, from) {
   try {
     const snap = await getDoc(doc(db, "users", uid));
     const role = snap.data()?.role;
+
     if (role === "transporter") return "/driver";
     if (role === "seller" || role === "admin") return from || "/seller/dashboard";
-    return from || "/";
+    if (role === "buyer") return from || "/buyer";
+    return from || "/";  
   } catch {
     return from || "/";
   }
@@ -22,7 +24,7 @@ export default function Login() {
   const location = useLocation();
   const { signIn, signInWithGoogle } = useAuthStore();
 
- const from = location.state?.from?.pathname || "/seller/dashboard";
+ const from = location.state?.from?.pathname || null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

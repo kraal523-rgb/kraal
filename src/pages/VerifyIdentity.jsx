@@ -280,8 +280,7 @@ export default function VerifyIdentity() {
       </main>
 
       <p style={styles.legal}>
-        Your documents are encrypted in transit and stored securely in
-        Cloudflare R2. They are never shared with buyers or third parties and
+        Your documents are encrypted in transit and stored securely. They are never shared with buyers or third parties and
         are processed under POPIA.
       </p>
     </div>
@@ -353,7 +352,7 @@ function IdUploadStep({ idFile, fileInputRef, onChange, onNext, onBack }) {
       <StepLabel label="Step 1 of 2" />
       <h2 style={styles.h2}>Upload your ID document</h2>
       <p style={styles.body}>
-        Take a clear photo of your <strong>ZIM ID</strong>,{" "}
+        Take a clear photo of your <strong>ID</strong>,{" "}
         <strong>passport</strong>, or <strong>driver's licence</strong>. All
         four corners must be visible and text legible.
       </p>
@@ -568,7 +567,7 @@ function ReviewStep({
           }}
         >
           By submitting, you confirm these documents are genuine and belong to
-          you. Stored securely in Cloudflare R2 and processed under POPIA.
+          you. Stored securely and processed under POPIA.
         </p>
       </div>
 
