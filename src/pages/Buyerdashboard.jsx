@@ -13,7 +13,7 @@ import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./Buyerdashboard.css";
-
+import UserMenu from "../components/UserMenu";
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 
 const INITIAL_ORDERS = [
@@ -323,33 +323,7 @@ export default function BuyerDashboard() {
           <img src={logo} style={{ width: "140px" }} alt="Kraal" />
           <span className="bd-nav-sub">Buyer Dashboard</span>
         </div>
-        <div className="bd-nav-buyer">
-          <div className="bd-buyer-avatar-sm">
-            {user?.displayName
-              ? user.displayName
-                  .split(" ")
-                  .map((w) => w[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()
-              : (user?.email?.[0] || "?").toUpperCase()}
-          </div>
-          <div className="bd-buyer-meta-sm">
-            <span className="bd-buyer-name-sm">
-              {user?.displayName || user?.email}
-            </span>
-            <span className="bd-verified-badge">✓ Verified Buyer</span>
-          </div>
-          <button
-            className="bd-logout-btn"
-            onClick={async () => {
-              await useAuthStore.getState().logout();
-              navigate("/login", { replace: true });
-            }}
-          >
-            Sign out
-          </button>
-        </div>
+          <UserMenu />
       </nav>
 
       {/* ── PAGE HEADER ── */}

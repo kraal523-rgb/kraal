@@ -14,7 +14,7 @@ import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./DriverDashboard.css";
-
+import UserMenu from "../components/UserMenu";
 // ─── STATUS META ──────────────────────────────────────────────────────────────
 const STATUS_META = {
   open: { label: "Open", cls: "dd-status-open" },
@@ -221,24 +221,7 @@ export default function DriverDashboard() {
             <span className="dd-avail-dot" />
             {isAvailable ? "Available" : "Off Duty"}
           </button>
-          <div className="dd-nav-driver">
-            <div className="dd-driver-avatar-sm">{initials}</div>
-            <div className="dd-driver-meta-sm">
-              <span className="dd-driver-name-sm">
-                {user?.displayName || user?.email}
-              </span>
-              <span className="dd-verified-badge">🚚 Driver</span>
-            </div>
-            <button
-              className="dd-logout-btn"
-              onClick={async () => {
-                await useAuthStore.getState().logout();
-                navigate("/login", { replace: true });
-              }}
-            >
-              Sign out
-            </button>
-          </div>
+           <UserMenu />
         </div>
       </nav>
 

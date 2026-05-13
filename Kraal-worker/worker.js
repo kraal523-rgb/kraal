@@ -232,7 +232,7 @@ async function handleVerifySubmit(request, env, corsHeaders) {
   }
 
   // ── Write to Firestore ─────────────────────────────────────────────────────
-  await firestoreSet(env, `users/${uid}/verification/status`, {
+  await firestoreSet(env, `sellers/${uid}/verification/status`, {
     state: faceState,
     submittedAt: new Date().toISOString(),
     idDocKey: idKey,
@@ -306,7 +306,7 @@ async function handleVerifyStatus(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
 
-  const doc = await firestoreGet(env, `users/${uid}/verification/status`);
+  const doc = await firestoreGet(env, `sellers/${uid}/verification/status`);
   if (!doc) return jsonResponse({ state: "unverified" }, 200, corsHeaders);
 
   return jsonResponse(
