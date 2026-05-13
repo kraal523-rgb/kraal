@@ -634,7 +634,7 @@ const handleTransportSubmit = async (e) => {
         </div>
 
         {/* Stats bar */}
-        <div className="bd-stats-row">
+        <div className="bd-stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', overflow: 'visible' }}>
           {stats.map((s) => (
             <div key={s.label} className={`bd-stat-chip bd-stat-${s.type}`}>
               <span className="bd-stat-chip-icon">{s.icon}</span>
