@@ -7,7 +7,7 @@ import vaccination from "../assets/vaccination.webp";
 import roadrunner from "../assets/chicken-1.jpg";
 import drought  from "../assets/tuli-cattle.webp";
 import goat from "../assets/goats-2.jpg";
-import goat1 from "../assets/goats-1.jpg";
+import goat1 from "../assets/pngegg__6.png";
 import drought2 from "../assets/drought.png";
 import transport from "../assets/transport-1.jpg";
 import cow from "../assets/cow.png";

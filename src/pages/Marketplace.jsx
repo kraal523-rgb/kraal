@@ -22,6 +22,11 @@ import imgPigeons from "../assets/pigeon.jpg";
 import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
 import imgQuail from "../assets/quail.png";
+import brahman1 from "../assets/brahman-1.jpg";
+import goat1 from "../assets/goats-2.jpg";
+import chicken1 from "../assets/chicken-1.jpg";
+import pig1 from "../assets/pngegg__18.png";
+import all5 from "../assets/all-5.jpg";
 import "./Marketplace.css";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -109,7 +114,7 @@ const BANNER_ADS = [
 const BANNER_SLIDES = [
   {
     categoryId: "cattle",
-    img: "/brahman-1.jpg",
+    img: brahman1,
     overlay: "linear-gradient(90deg, rgba(20,10,5,0.82) 0%, rgba(20,10,5,0.35) 60%, transparent 100%)",
     tag: "🐄 Cattle · Premium Listings",
     headline: "Brahman Bulls.\nTop bloodlines,\nbest prices.",
@@ -118,7 +123,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "goats",
-    img: "/goats-2.jpg",
+    img: goat1,
     overlay: "linear-gradient(90deg, rgba(10,25,10,0.80) 0%, rgba(10,25,10,0.30) 60%, transparent 100%)",
     tag: "🐐 Goats · New Listings Daily",
     headline: "Boer Goats.\nFarm-fresh,\nready to go.",
@@ -127,7 +132,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "chicken",
-    img: "/chicken-3.jpg",
+    img: chicken1,
     overlay: "linear-gradient(90deg, rgba(60,30,5,0.82) 0%, rgba(60,30,5,0.35) 60%, transparent 100%)",
     tag: "🐓 Road Runners · Best Sellers",
     headline: "Indigenous\nchickens.\nZimbabwe's favourite.",
@@ -136,7 +141,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "pigs",
-    img: "/pigs-4.jpg",
+    img: pig1,
     overlay: "linear-gradient(90deg, rgba(15,15,40,0.82) 0%, rgba(15,15,40,0.35) 60%, transparent 100%)",
     tag: "🤝 Sell on Kraal · It's Free",
     headline: "Reach buyers\nacross Africa.\nNo middlemen.",
@@ -145,7 +150,7 @@ const BANNER_SLIDES = [
   },
   {
     categoryId: "all",
-    img: "/all-5.jpg",
+    img: all5,
     overlay: "linear-gradient(90deg, rgba(30,15,5,0.80) 0%, rgba(30,15,5,0.30) 60%, transparent 100%)",
     tag: "🌍 All Animals · Southern Africa",
     headline: "Zimbabwe's #1\nlivestock\nmarketplace.",
