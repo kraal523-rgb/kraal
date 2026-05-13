@@ -8,16 +8,17 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-  addDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./DriverDashboard.css";
 import UserMenu from "../components/UserMenu";
+
 // ─── STATUS META ──────────────────────────────────────────────────────────────
 const STATUS_META = {
   open: { label: "Open", cls: "dd-status-open" },
+  quoted: { label: "Quoted", cls: "dd-status-accepted" },
   accepted: { label: "Accepted", cls: "dd-status-accepted" },
   in_transit: { label: "In Transit", cls: "dd-status-transit" },
   delivered: { label: "Delivered", cls: "dd-status-delivered" },
@@ -26,7 +27,7 @@ const STATUS_META = {
 
 const TABS = ["Available Jobs", "My Deliveries", "Overview"];
 
-function getCategoryEmoji(categoryId) {
+function getCategoryEmoji(cat) {
   const map = {
     cattle: "🐄",
     goats: "🐐",
@@ -41,7 +42,7 @@ function getCategoryEmoji(categoryId) {
     donkeys: "🫏",
     other: "🐾",
   };
-  return map[categoryId] || "🐾";
+  return map[cat?.toLowerCase()] || "🐾";
 }
 
 function timeAgo(ts) {
@@ -51,6 +52,11 @@ function timeAgo(ts) {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function formatLocation(town, province) {
+  if (town && province) return `${town}, ${province}`;
+  return town || province || "TBC";
 }
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
@@ -64,14 +70,34 @@ export default function DriverDashboard() {
   const [loadingOpen, setLoadingOpen] = useState(true);
   const [loadingMine, setLoadingMine] = useState(true);
   const [deliveryFilter, setDeliveryFilter] = useState("all");
-  const [accepting, setAccepting] = useState(null); // jobId being processed
+  const [accepting, setAccepting] = useState(null);
   const [isAvailable, setIsAvailable] = useState(true);
 
-  // ── Live feed of OPEN jobs (all drivers can see these)
+  // ── Live feed of OPEN jobs in the driver's province ───────────────────────
+  // Read the driver's province from their user profile
+  const [driverProvince, setDriverProvince] = useState(null);
+
   useEffect(() => {
+    if (!user?.uid) return;
+    // Load driver's province from their profile once
+    import("firebase/firestore").then(({ getDoc, doc: firestoreDoc }) => {
+      getDoc(firestoreDoc(db, "users", user.uid)).then((snap) => {
+        if (snap.exists()) {
+          setDriverProvince(snap.data().province || null);
+          setIsAvailable(snap.data().available ?? true);
+        }
+      });
+    });
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (!driverProvince) return;
+    // ✅ Correct collection: transport_requests
+    // ✅ Filter by province so drivers only see relevant jobs
     const q = query(
-      collection(db, "transportRequests"),
+      collection(db, "transport_requests"),
       where("status", "==", "open"),
+      where("pickupProvince", "==", driverProvince),
     );
     const unsub = onSnapshot(q, (snap) => {
       setOpenJobs(
@@ -85,14 +111,15 @@ export default function DriverDashboard() {
       setLoadingOpen(false);
     });
     return () => unsub();
-  }, []);
+  }, [driverProvince]);
 
-  // ── This driver's own deliveries
+  // ── This driver's own accepted/in-transit/delivered jobs ──────────────────
   useEffect(() => {
     if (!user?.uid) return;
+    // ✅ Correct collection + correct field name "driverUid" (matches buyer dashboard)
     const q = query(
-      collection(db, "transportRequests"),
-      where("acceptedBy", "==", user.uid),
+      collection(db, "transport_requests"),
+      where("driverUid", "==", user.uid),
     );
     const unsub = onSnapshot(q, (snap) => {
       setMyDeliveries(
@@ -100,7 +127,8 @@ export default function DriverDashboard() {
           .map((d) => ({ id: d.id, ...d.data() }))
           .sort(
             (a, b) =>
-              (b.updatedAt?.toMillis() || 0) - (a.updatedAt?.toMillis() || 0),
+              (b.updatedAt?.toMillis() || b.createdAt?.toMillis() || 0) -
+              (a.updatedAt?.toMillis() || a.createdAt?.toMillis() || 0),
           ),
       );
       setLoadingMine(false);
@@ -108,15 +136,18 @@ export default function DriverDashboard() {
     return () => unsub();
   }, [user?.uid]);
 
-  // ── Accept a job
+  // ── Accept a job ──────────────────────────────────────────────────────────
   const acceptJob = async (job) => {
     if (accepting) return;
     setAccepting(job.id);
     try {
-      await updateDoc(doc(db, "transportRequests", job.id), {
-        status: "accepted",
-        acceptedBy: user.uid,
+      // ✅ Write driverUid + driverName so buyer dashboard can read them
+      // ✅ Set status to "quoted" to match buyer's STATUS_META
+      await updateDoc(doc(db, "transport_requests", job.id), {
+        status: "quoted",
+        driverUid: user.uid,
         driverName: user.displayName || user.email,
+        quotedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       setActiveTab("My Deliveries");
@@ -127,15 +158,15 @@ export default function DriverDashboard() {
     }
   };
 
-  // ── Update delivery status
+  // ── Update delivery status ────────────────────────────────────────────────
   const updateStatus = async (jobId, newStatus) => {
-    await updateDoc(doc(db, "transportRequests", jobId), {
+    await updateDoc(doc(db, "transport_requests", jobId), {
       status: newStatus,
       updatedAt: serverTimestamp(),
     });
   };
 
-  // ── Toggle driver availability
+  // ── Toggle driver availability ────────────────────────────────────────────
   const toggleAvailability = async () => {
     const next = !isAvailable;
     setIsAvailable(next);
@@ -144,7 +175,7 @@ export default function DriverDashboard() {
     }
   };
 
-  // ── Stats
+  // ── Stats ─────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const delivered = myDeliveries.filter((d) => d.status === "delivered");
     const inTransit = myDeliveries.filter((d) => d.status === "in_transit");
@@ -213,7 +244,6 @@ export default function DriverDashboard() {
           <span className="dd-nav-sub">Driver Dashboard</span>
         </div>
         <div className="dd-nav-right">
-          {/* Availability toggle */}
           <button
             className={`dd-availability-btn ${isAvailable ? "dd-avail-on" : "dd-avail-off"}`}
             onClick={toggleAvailability}
@@ -221,7 +251,7 @@ export default function DriverDashboard() {
             <span className="dd-avail-dot" />
             {isAvailable ? "Available" : "Off Duty"}
           </button>
-           <UserMenu />
+          <UserMenu />
         </div>
       </nav>
 
@@ -230,7 +260,7 @@ export default function DriverDashboard() {
         <div className="dd-page-header-inner">
           <div>
             <h1>Hey, {user?.displayName?.split(" ")[0] || "Driver"} 🚚</h1>
-            <p>📍 {user?.email}</p>
+            <p>📍 {driverProvince || user?.email}</p>
           </div>
           <div className="dd-header-badge">
             <span className={`dd-pulse-dot ${isAvailable ? "active" : ""}`} />
@@ -271,7 +301,10 @@ export default function DriverDashboard() {
             ) : openJobs.length === 0 ? (
               <div className="dd-empty">
                 <span className="dd-empty-emoji">📡</span>
-                <p>No transport jobs right now.</p>
+                <p>
+                  No transport jobs in {driverProvince || "your area"} right
+                  now.
+                </p>
                 <span className="dd-empty-sub">
                   New jobs appear here instantly when buyers request transport.
                 </span>
@@ -282,11 +315,14 @@ export default function DriverDashboard() {
                   <div key={job.id} className="dd-job-card">
                     <div className="dd-job-card-header">
                       <div className="dd-job-meta">
+                        {/* ✅ Use animalType (field buyer saves) not categoryId */}
                         <span className="dd-job-emoji">
-                          {getCategoryEmoji(job.categoryId)}
+                          {getCategoryEmoji(job.animalType)}
                         </span>
                         <div>
-                          <h3 className="dd-job-title">{job.listing}</h3>
+                          <h3 className="dd-job-title">
+                            {job.quantity}× {job.animalType}
+                          </h3>
                           <span className="dd-job-time">
                             {timeAgo(job.createdAt)}
                           </span>
@@ -304,8 +340,9 @@ export default function DriverDashboard() {
                         <span className="dd-route-icon">📍</span>
                         <div>
                           <span className="dd-route-label">Pickup</span>
+                          {/* ✅ Use pickupTown/pickupProvince (fields buyer saves) */}
                           <span className="dd-route-loc">
-                            {job.pickupLocation || "TBC"}
+                            {formatLocation(job.pickupTown, job.pickupProvince)}
                           </span>
                         </div>
                       </div>
@@ -316,37 +353,41 @@ export default function DriverDashboard() {
                         <span className="dd-route-icon">🏁</span>
                         <div>
                           <span className="dd-route-label">Dropoff</span>
+                          {/* ✅ Use dropTown/dropProvince (fields buyer saves) */}
                           <span className="dd-route-loc">
-                            {job.dropoffLocation || "TBC"}
+                            {formatLocation(job.dropTown, job.dropProvince) ||
+                              "TBD"}
                           </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="dd-job-details">
-                      {job.amount && (
+                      {job.preferredDate && (
                         <span className="dd-job-detail-pill">
-                          💵 Order: USD {job.amount.toLocaleString()}
+                          📅 {job.preferredDate}
                         </span>
                       )}
-                      {job.transportFee && (
-                        <span className="dd-job-detail-pill dd-fee-pill">
-                          🤝 Fee: USD {job.transportFee.toLocaleString()}
+                      {job.quantity && (
+                        <span className="dd-job-detail-pill">
+                          📦 Qty: {job.quantity}
                         </span>
                       )}
-                      {job.qty && (
+                      {job.contactPhone && (
                         <span className="dd-job-detail-pill">
-                          📦 Qty: {job.qty}
+                          📞 {job.contactPhone}
                         </span>
                       )}
                     </div>
 
+                    {job.notes && (
+                      <div className="dd-job-notes">"{job.notes}"</div>
+                    )}
+
                     <div className="dd-job-footer">
-                      <div className="dd-job-ids">
-                        <span className="dd-job-id">
-                          Order {job.orderId || "—"}
-                        </span>
-                      </div>
+                      <span className="dd-job-buyer">
+                        Posted by {job.buyerName || "Buyer"}
+                      </span>
                       <button
                         className="dd-accept-btn"
                         disabled={accepting === job.id || !isAvailable}
@@ -372,7 +413,7 @@ export default function DriverDashboard() {
         {activeTab === "My Deliveries" && (
           <div className="dd-deliveries-panel">
             <div className="dd-order-filters">
-              {["all", "accepted", "in_transit", "delivered", "cancelled"].map(
+              {["all", "quoted", "in_transit", "delivered", "cancelled"].map(
                 (f) => (
                   <button
                     key={f}
@@ -415,13 +456,14 @@ export default function DriverDashboard() {
                     <div className="dd-delivery-header">
                       <div className="dd-delivery-title-row">
                         <span className="dd-job-emoji">
-                          {getCategoryEmoji(job.categoryId)}
+                          {getCategoryEmoji(job.animalType)}
                         </span>
                         <div>
-                          <h3 className="dd-job-title">{job.listing}</h3>
+                          <h3 className="dd-job-title">
+                            {job.quantity}× {job.animalType}
+                          </h3>
                           <span className="dd-job-time">
-                            Order {job.orderId || "—"} · Updated{" "}
-                            {timeAgo(job.updatedAt)}
+                            Updated {timeAgo(job.updatedAt)}
                           </span>
                         </div>
                       </div>
@@ -438,7 +480,7 @@ export default function DriverDashboard() {
                         <div>
                           <span className="dd-route-label">Pickup</span>
                           <span className="dd-route-loc">
-                            {job.pickupLocation || "TBC"}
+                            {formatLocation(job.pickupTown, job.pickupProvince)}
                           </span>
                         </div>
                       </div>
@@ -450,15 +492,15 @@ export default function DriverDashboard() {
                         <div>
                           <span className="dd-route-label">Dropoff</span>
                           <span className="dd-route-loc">
-                            {job.dropoffLocation || "TBC"}
+                            {formatLocation(job.dropTown, job.dropProvince) ||
+                              "TBD"}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Action buttons based on status */}
                     <div className="dd-delivery-actions">
-                      {job.status === "accepted" && (
+                      {job.status === "quoted" && (
                         <>
                           <button
                             className="dd-action-btn dd-action-transit"
@@ -467,7 +509,7 @@ export default function DriverDashboard() {
                             🚚 Start Transit
                           </button>
                           <a
-                            href={`https://wa.me/?text=Hi, I'm your driver for order ${job.orderId} (${job.listing}). I'll be picking up from ${job.pickupLocation} shortly.`}
+                            href={`https://wa.me/?text=Hi, I'm your driver for ${job.quantity}× ${job.animalType} from ${job.pickupTown || job.pickupProvince}. I'll be picking up shortly.`}
                             target="_blank"
                             rel="noreferrer"
                             className="dd-wa-btn"
@@ -485,7 +527,7 @@ export default function DriverDashboard() {
                             ✅ Mark Delivered
                           </button>
                           <a
-                            href={`https://wa.me/?text=Hi, your order ${job.orderId} (${job.listing}) is on the way! ETA soon.`}
+                            href={`https://wa.me/?text=Hi, your ${job.quantity}× ${job.animalType} is on the way! ETA soon.`}
                             target="_blank"
                             rel="noreferrer"
                             className="dd-wa-btn"
@@ -560,12 +602,16 @@ export default function DriverDashboard() {
                   {myDeliveries.slice(0, 4).map((job) => (
                     <div key={job.id} className="dd-mini-card">
                       <span className="dd-mini-emoji">
-                        {getCategoryEmoji(job.categoryId)}
+                        {getCategoryEmoji(job.animalType)}
                       </span>
                       <div className="dd-mini-info">
-                        <span className="dd-mini-title">{job.listing}</span>
+                        <span className="dd-mini-title">
+                          {job.quantity}× {job.animalType}
+                        </span>
                         <span className="dd-mini-route">
-                          {job.pickupLocation} → {job.dropoffLocation}
+                          {formatLocation(job.pickupTown, job.pickupProvince)} →{" "}
+                          {formatLocation(job.dropTown, job.dropProvince) ||
+                            "TBD"}
                         </span>
                       </div>
                       <span
@@ -600,12 +646,16 @@ export default function DriverDashboard() {
                   {openJobs.slice(0, 3).map((job) => (
                     <div key={job.id} className="dd-mini-card">
                       <span className="dd-mini-emoji">
-                        {getCategoryEmoji(job.categoryId)}
+                        {getCategoryEmoji(job.animalType)}
                       </span>
                       <div className="dd-mini-info">
-                        <span className="dd-mini-title">{job.listing}</span>
+                        <span className="dd-mini-title">
+                          {job.quantity}× {job.animalType}
+                        </span>
                         <span className="dd-mini-route">
-                          {job.pickupLocation} → {job.dropoffLocation}
+                          {formatLocation(job.pickupTown, job.pickupProvince)} →{" "}
+                          {formatLocation(job.dropTown, job.dropProvince) ||
+                            "TBD"}
                         </span>
                       </div>
                       <div className="dd-mini-right">
