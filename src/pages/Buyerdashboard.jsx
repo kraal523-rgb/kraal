@@ -100,7 +100,25 @@ function initials(name = "") {
   );
 }
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+
+async function addDocWithRetry(collectionRef, data, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await addDoc(collectionRef, data);
+    } catch (err) {
+      const isInternalError =
+        err?.message?.includes("INTERNAL ASSERTION FAILED") ||
+        err?.code === undefined;
+
+      if (isInternalError && i < retries) {
+        console.warn(`🔄 Firestore internal error, retrying (${i + 1})…`);
+        await new Promise((res) => setTimeout(res, 500 * (i + 1))); 
+        continue;
+      }
+      throw err; 
+    }
+  }
+}
 
 export default function BuyerDashboard() {
   const { user } = useAuthStore();
@@ -441,14 +459,11 @@ const handleTransportSubmit = async (e) => {
   e.preventDefault();
   if (!transportForm.pickupProvince || !transportForm.animalType) return;
   setTransportSubmitting(true);
- 
-  // Capture display string BEFORE the form is cleared
-  const pickupDisplay =
-    transportForm.pickupTown || transportForm.pickupProvince;
- 
+
+  const pickupDisplay = transportForm.pickupTown || transportForm.pickupProvince;
+
   try {
-    // 1. Write to transport_requests
-    const reqRef = await addDoc(collection(db, "transport_requests"), {
+    const reqRef = await addDocWithRetry(collection(db, "transport_requests"), {
       ...transportForm,
       buyerId: user.uid,
       buyerName: user.displayName || user.email,
@@ -456,37 +471,28 @@ const handleTransportSubmit = async (e) => {
       status: "open",
       createdAt: serverTimestamp(),
     });
- 
-    // 2. Find drivers matching pickup province.
-    //    Drivers can store their coverage as either:
-    //      province: "Harare"           (single string)
-    //      serviceProvinces: ["Harare", "Mashonaland East"]  (array)
-    //    We run two queries and merge results.
+
     const [byProvince, byServiceArray] = await Promise.all([
       getDocs(
         query(
-          collection(db, "users"),
-          where("role", "==", "transporter"),
+          collection(db, "transporters"),
           where("province", "==", transportForm.pickupProvince),
         ),
       ),
       getDocs(
         query(
-          collection(db, "users"),
-          where("role", "==", "transporter"),
+          collection(db, "transporters"),
           where("serviceProvinces", "array-contains", transportForm.pickupProvince),
         ),
       ),
     ]);
- 
-    // Merge, de-duplicate by doc id
+
     const driverMap = new Map();
     [...byProvince.docs, ...byServiceArray.docs].forEach((d) =>
       driverMap.set(d.id, d),
     );
     const allDrivers = [...driverMap.values()];
- 
-    // Optional: further filter by town if provided
+
     const pickupTownNorm = transportForm.pickupTown?.trim().toLowerCase();
     const matchedDrivers = allDrivers.filter((d) => {
       if (!pickupTownNorm) return true;
@@ -497,11 +503,10 @@ const handleTransportSubmit = async (e) => {
         pickupTownNorm.includes(driverTown)
       );
     });
- 
-    // 3. Fan-out notifications
+
     await Promise.all(
       matchedDrivers.map((d) =>
-        addDoc(collection(db, "notifications"), {
+        addDocWithRetry(collection(db, "notifications"), {
           toUid: d.id,
           type: "transport_request",
           transportRequestId: reqRef.id,
@@ -513,8 +518,7 @@ const handleTransportSubmit = async (e) => {
         }),
       ),
     );
- 
-    // 4. Save display string, THEN clear the form
+
     setSuccessArea(pickupDisplay);
     setTransportSuccess(true);
     setTransportForm({
@@ -528,14 +532,14 @@ const handleTransportSubmit = async (e) => {
       notes: "",
       contactPhone: "",
     });
- 
+
     setTimeout(() => {
       setTransportSuccess(false);
       setSuccessArea("");
       setShowTransportModal(false);
     }, 3000);
   } catch (err) {
-    console.error("Transport request failed:", err);
+    console.error("Transport request failed:", err.code, err.message);
   } finally {
     setTransportSubmitting(false);
   }

@@ -81,7 +81,7 @@ export default function DriverDashboard() {
     if (!user?.uid) return;
     // Load driver's province from their profile once
     import("firebase/firestore").then(({ getDoc, doc: firestoreDoc }) => {
-      getDoc(firestoreDoc(db, "users", user.uid)).then((snap) => {
+      getDoc(firestoreDoc(db, "transporters", user.uid)).then((snap) => {
         if (snap.exists()) {
           setDriverProvince(snap.data().province || null);
           setIsAvailable(snap.data().available ?? true);
@@ -171,7 +171,7 @@ export default function DriverDashboard() {
     const next = !isAvailable;
     setIsAvailable(next);
     if (user?.uid) {
-      await updateDoc(doc(db, "users", user.uid), { available: next });
+      await updateDoc(doc(db, "transporters", user.uid), { available: next });
     }
   };
 

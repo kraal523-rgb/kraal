@@ -56,51 +56,50 @@ const useAuthStore = create(
         return cred.user;
       },
 
-      // ── Create profile (called at end of registration for ALL roles) ─────────
-      createSellerProfile: async (uid, profileData) => {
-        const now = serverTimestamp();
-        const role = profileData.role || 'buyer';
+    createSellerProfile: async (uid, profileData) => {
+  const now = serverTimestamp();
+  const role = profileData.role || 'buyer';
 
-        // ── users/{uid} — role lookup used by guards (DriverGuard etc.) ────────
-        const userDoc = {
-          uid,
-          email:       profileData.email,
-          displayName: profileData.businessName || profileData.email,
-          role,
-          available:   role === 'transporter' ? true : false,
-          verified:    false,
-          createdAt:   now,
-          updatedAt:   now,
-        };
-        await setDoc(doc(db, 'users', uid), userDoc, { merge: true });
+  const userDoc = {
+    uid,
+    email:       profileData.email,
+    displayName: profileData.businessName || profileData.email,
+    role,
+    province:    profileData.province || "",
+    city:        profileData.city || "",
+    available:   role === 'transporter' ? true : false,
+    verified:    false,
+    createdAt:   now,
+    updatedAt:   now,
+  };
+  await setDoc(doc(db, 'transporters', uid), userDoc, { merge: true });
 
-        // ── Role-specific collection ─────────────────────────────────────────
-        // sellers/{uid} — for sellers (existing behaviour, unchanged)
-        // transporters/{uid} — for transport providers
-        // buyers/{uid} — for buyers (lightweight, just essentials)
-        const roleCollection = role === 'seller'
-          ? 'sellers'
-          : role === 'transporter'
-            ? 'transporters'
-            : 'buyers';
+  const roleCollection = role === 'seller'
+    ? 'sellers'
+    : role === 'transporter'
+      ? 'transporters'
+      : 'buyers';
 
-        const profileDoc = {
-          ...profileData,
-          uid,
-          role,
-          verified:  false,
-          createdAt: now,
-          updatedAt: now,
-        };
-        await setDoc(doc(db, roleCollection, uid), profileDoc);
+  const profileDoc = {
+    ...profileData,
+    uid,
+    role,
+    verified: false,
+    createdAt: now,
+    updatedAt: now,
+    ...(role === 'transporter' && {
+      serviceProvinces: profileData.province ? [profileData.province] : [],
+    }),
+  };
+  await setDoc(doc(db, roleCollection, uid), profileDoc);
 
-        set({
-          userProfile: profileDoc,
-          sellerProfile: role === 'seller' ? profileDoc : null,
-        });
+  set({
+    userProfile: profileDoc,
+    sellerProfile: role === 'seller' ? profileDoc : null,
+  });
 
-        return profileDoc;
-      },
+  return profileDoc;
+},
 
       // ── Fetch profile on login (checks role-specific collection) ────────────
       fetchUserProfile: async (uid) => {
