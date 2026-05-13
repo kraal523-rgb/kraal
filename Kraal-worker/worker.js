@@ -216,9 +216,9 @@ async function handleVerifySubmit(request, env, corsHeaders) {
       // confidence > 74  → likely same person     (1 in 10,000 false positive)
       // confidence > 65  → possible match         (1 in 1,000 false positive)
       // We use 74 as our auto-approve threshold
-      if (faceResult.confidence >= 74) {
+      if (faceResult.confidence >= 50) {
         faceState = "approved";
-      } else if (faceResult.confidence < 65) {
+      } else if (faceResult.confidence < 45) {
         faceState = "rejected";
       } else {
         faceState = "pending"; // 65–74 range → manual review

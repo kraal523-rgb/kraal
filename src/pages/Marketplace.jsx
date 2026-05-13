@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import UserMenu from "../components/UserMenu";
+import useAuthStore from "../store/useAuthStore";
 import logo from "../assets/kraal-logo-black.svg";
 import imgCattle from "../assets/pngegg__5.png";
 import imgGoats from "../assets/pngegg__6.png";
@@ -477,12 +479,10 @@ const filtered = useMemo(() => {
           </div>
           <div className="mp-nav-actions">
             <LanguageSwitcher />
-            <Link to="/register" className="mp-nav-cta">
+            <Link to="/sell" className="mp-nav-cta">
               + Post
             </Link>
-            <Link to="/login" className="mp-nav-signin">
-              Sign in
-            </Link>
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -1343,7 +1343,7 @@ const filtered = useMemo(() => {
     <Link to="/marketplace?saved=1" className="mp-bottom-nav-item">
       🤍<span>Saved</span>
     </Link>
-    <Link to="/register" className="mp-bottom-nav-post">+</Link>
+    <Link to="/sell" className="mp-bottom-nav-post">+</Link>
     <Link to="/alerts" className="mp-bottom-nav-item">
       🔔<span>Alerts</span>
     </Link>

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import InstallButton from '../components/InstallButton'
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp  } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import UserMenu from "../components/UserMenu";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/kraal-logo.svg";
 import imgCattle from "../assets/pngegg__5.png";   
@@ -320,11 +321,10 @@ useEffect(() => {
 <Link to="/marketplace?category=cattle">Cattle</Link>
 <Link to="/marketplace?category=goats">Goats</Link>
 <Link to="/about">About</Link>
-<Link to="/signin" className="nav-signin">Sign In</Link>
           </div>
           <div className="nav-actions">
-            <Link to="/login" className="nav-signin">Sign in</Link>
-            <Link to="/register" className="nav-cta">
+           <UserMenu />
+            <Link to="/sell" className="nav-cta">
               <span>+ Post</span>
             </Link>
             <InstallButton />

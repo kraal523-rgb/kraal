@@ -5,6 +5,7 @@ import { db } from "../lib/firebase";
 import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./SellerDashboard.css";
+import UserMenu from "../components/UserMenu";
 import RequestTransportButton from "../components/RequestTransportButton";
 
 const SELLER = {
@@ -223,28 +224,7 @@ const toggleListingStatus = async (id) => {
            <img src={logo} style={{ width: "140px" }} alt="Kraal" />
           <span className="sd-nav-sub">Seller Dashboard</span>
         </div>
-        <div className="sd-nav-seller">
-          <div className="sd-seller-avatar-sm">
-          {user?.displayName
-  ? user.displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
-  : (user?.email?.[0] || "?").toUpperCase()}
-          </div>
-          <div className="sd-seller-meta-sm">
-            <span className="sd-seller-name-sm">{user?.displayName}</span>
-            {SELLER.verified && (
-              <span className="sd-verified-badge">✓ Verified</span>
-            )}
-          </div>
-          <button
-      className="sd-logout-btn"
-      onClick={async () => {
-        await useAuthStore.getState().logout();
-        navigate("/login", { replace: true });
-      }}
-    >
-      Sign out
-    </button>
-        </div>
+       <UserMenu />
       </nav>
 
       {/* ── CONTENT ── */}
