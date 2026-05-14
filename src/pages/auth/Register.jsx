@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { useRegister, STEPS, STEP_LABELS, ROLES } from '../../hooks/useRegister';
 import StepAccount from '../../components/auth/StepAccount';
 import StepBusiness from '../../components/auth/StepBusiness';
@@ -159,12 +159,3 @@ function RoleSelector({ selected, onSelect }) {
   );
 }
 
-// ─── Logo ─────────────────────────────────────────────────────────────────────
-function KraalLogo() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="24" fill="#2D5A27" />
-      <text x="24" y="32" textAnchor="middle" fontSize="28" fill="white">K</text>
-    </svg>
-  );
-}

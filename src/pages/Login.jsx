@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../store/useAuthStore";
 import { doc, getDoc } from "firebase/firestore";
@@ -221,24 +221,6 @@ function friendlyError(code) {
   }
 }
 
-function KraalMark() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-      <circle cx="17" cy="17" r="17" fill="#2D5A27" />
-      <text
-        x="17"
-        y="23"
-        textAnchor="middle"
-        fontSize="18"
-        fill="white"
-        fontFamily="Georgia, serif"
-        fontWeight="bold"
-      >
-        K
-      </text>
-    </svg>
-  );
-}
 
 function GoogleIcon() {
   return (

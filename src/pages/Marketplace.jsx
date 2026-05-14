@@ -1,10 +1,9 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import {  useSearchParams, Link } from "react-router-dom";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import UserMenu from "../components/UserMenu";
-import useAuthStore from "../store/useAuthStore";
 import logo from "../assets/kraal-logo-black.svg";
 import imgCattle from "../assets/pngegg__5.png";
 import imgGoats from "../assets/pngegg__6.png";
@@ -212,8 +211,8 @@ function getCategoryEmoji(categoryId) {
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function Marketplace() {
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchParams] = useSearchParams();
 const { t } = useTranslation();
   // ── Firestore state ──
   const [listings, setListings] = useState([]);
@@ -250,6 +249,7 @@ useEffect(() => {
   }, 5000);
   return () => clearInterval(t);
 }, [activeBanner]);
+// eslint-disable-next-line no-unused-vars
 const openModal = (id) => {
   setActiveModal(id);
   const listing = listings.find(l => l.id === id);
@@ -326,6 +326,7 @@ useEffect(() => {
   const cat = searchParams.get("category") || "all";
   const q = searchParams.get("q") || "";
   const loc = searchParams.get("location") || "All Locations";
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   setCategory(cat);
   setSearch(q);
   setLocation(loc);

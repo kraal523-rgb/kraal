@@ -20,6 +20,7 @@ export function useTransportRequests(user, { province, town } = {}) {
  
   useEffect(() => {
     if (!user?.uid || !province) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }

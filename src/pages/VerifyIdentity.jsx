@@ -81,12 +81,12 @@ async function getIdToken() {
 }
 
 // ─── Steps ────────────────────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 const STEPS = ["intro", "id-upload", "selfie", "review", "done"];
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function VerifyIdentity() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const status = useVerificationStatus();
 
   const [step, setStep] = useState("intro");
@@ -104,6 +104,7 @@ export default function VerifyIdentity() {
   // If already pending/approved, jump to done screen
   useEffect(() => {
     if (status?.state === "pending" || status?.state === "approved") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStep("done");
     }
   }, [status]);
@@ -144,6 +145,7 @@ export default function VerifyIdentity() {
   }, [stopCamera]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (step === "selfie" && !selfieData) startCamera();
     return () => {
       if (step !== "selfie") stopCamera();

@@ -220,6 +220,7 @@ export default function DriverDashboard() {
     [myDeliveries, deliveryFilter],
   );
 
+  // eslint-disable-next-line no-unused-vars
   const initials = user?.displayName
     ? user.displayName
         .split(" ")

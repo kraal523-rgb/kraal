@@ -26,7 +26,6 @@ import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
 import imgQuail from "../assets/quail.png";
 import "./Home.css";
-import Marketplace from "./Marketplace";
 import "./Marketplace.css";
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
@@ -265,6 +264,7 @@ const fetchFeatured = useCallback(async () => {
     return () => observerRef.current?.disconnect();
   }, []);
 useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   fetchFeatured();
 }, [fetchFeatured]);
   const handleSearch = (e) => {

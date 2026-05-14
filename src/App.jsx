@@ -50,6 +50,7 @@ export function DriverGuard({ children }) {
 
   useEff(() => {
     if (!user?.uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("denied");
       return;
     }

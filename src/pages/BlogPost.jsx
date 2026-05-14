@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   collection,
@@ -116,6 +116,7 @@ export default function BlogPost() {
 
   const timeAgo = (ts) => {
     if (!ts?.seconds) return "";
+    // eslint-disable-next-line react-hooks/purity
     const diff = Date.now() / 1000 - ts.seconds;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;

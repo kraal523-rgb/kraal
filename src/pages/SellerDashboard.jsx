@@ -8,6 +8,7 @@ import "./SellerDashboard.css";
 import UserMenu from "../components/UserMenu";
 import RequestTransportButton from "../components/RequestTransportButton";
 
+// eslint-disable-next-line no-unused-vars
 const SELLER = {
   name: "Takudzwa M.",
   location: "Marondera, Mashonaland",
@@ -86,6 +87,7 @@ const STATUS_META = {
   cancelled: { label: "Cancelled", cls: "sd-status-cancelled" },
 };
 
+// eslint-disable-next-line no-unused-vars
 const TABS = ["Overview", "My Listings", "Orders"];
 function getCategoryEmoji(categoryId) {
   const map = {
