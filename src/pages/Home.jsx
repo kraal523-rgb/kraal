@@ -850,6 +850,14 @@ useEffect(() => {
             </div>
           </div>
           <div className="footer-links">
+             <div className="footer-col">
+              <strong>Socials</strong>
+              <Link to="https://www.x.com/@Kraalmarketzim">X / Twitter</Link>
+              <Link to="https://www.linkedin.com/company/kraal">LinkedIn</Link>
+              <Link to="https://www.youtube.com/channel/UCq0f7mTpFuPRDNCVkgpdyYw">Youtube</Link>
+              <Link to="https://www.instagram.com/kraalmarket?utm_source=qr">Instagram</Link>
+              <Link to="https://www.facebook.com/profile.php?id=61589812884808">Facebook</Link>
+            </div>
             <div className="footer-col">
               <strong>Marketplace</strong>
               <Link to="/marketplace">Browse all</Link>
