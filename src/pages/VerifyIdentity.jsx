@@ -21,7 +21,7 @@ export function useVerificationStatus() {
       return;
     }
 
-    const ref = doc(db, "users", user.uid, "verification", "status");
+    const ref = doc(db, "sellers", user.uid, "verification", "status");
     const unsub = onSnapshot(
       ref,
       (snap) => {
