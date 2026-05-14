@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import React from 'react';
 import { useListing, LISTING_STEPS, LISTING_STEP_LABELS } from '../../hooks/useListing';
 import StepAnimal from '../../components/listings/StepAnimal';

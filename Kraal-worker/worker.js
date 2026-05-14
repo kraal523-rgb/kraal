@@ -43,33 +43,45 @@ export default {
         return await handleVerifyStatus(request, env, corsHeaders);
       }
       if (url.pathname === "/api/ai/listing" && request.method === "POST") {
-  return await handleAIListing(request, env, corsHeaders);
-}
- 
-// ── POST /api/ai/insights  (overview analytics insight card) ─────────────────
-if (url.pathname === "/api/ai/insights" && request.method === "POST") {
-  return await handleAIInsights(request, env, corsHeaders);
-}
- 
-// ── POST /api/ai/orders  (smart summary of pending/recent orders) ─────────────
-if (url.pathname === "/api/ai/orders" && request.method === "POST") {
-  return await handleAIOrders(request, env, corsHeaders);
-}
-if (url.pathname === "/api/ai/buyer/price-check" && request.method === "POST") {
-  return await handleBuyerPriceCheck(request, env, corsHeaders);
-}
- 
-if (url.pathname === "/api/ai/buyer/insights" && request.method === "POST") {
-  return await handleBuyerInsights(request, env, corsHeaders);
-}
- 
-if (url.pathname === "/api/ai/buyer/transport-estimate" && request.method === "POST") {
-  return await handleTransportEstimate(request, env, corsHeaders);
-}
- 
-if (url.pathname === "/api/ai/buyer/reply-suggestions" && request.method === "POST") {
-  return await handleReplySuggestions(request, env, corsHeaders);
-}
+        return await handleAIListing(request, env, corsHeaders);
+      }
+
+      // ── POST /api/ai/insights  (overview analytics insight card) ─────────────────
+      if (url.pathname === "/api/ai/insights" && request.method === "POST") {
+        return await handleAIInsights(request, env, corsHeaders);
+      }
+
+      // ── POST /api/ai/orders  (smart summary of pending/recent orders) ─────────────
+      if (url.pathname === "/api/ai/orders" && request.method === "POST") {
+        return await handleAIOrders(request, env, corsHeaders);
+      }
+      if (
+        url.pathname === "/api/ai/buyer/price-check" &&
+        request.method === "POST"
+      ) {
+        return await handleBuyerPriceCheck(request, env, corsHeaders);
+      }
+
+      if (
+        url.pathname === "/api/ai/buyer/insights" &&
+        request.method === "POST"
+      ) {
+        return await handleBuyerInsights(request, env, corsHeaders);
+      }
+
+      if (
+        url.pathname === "/api/ai/buyer/transport-estimate" &&
+        request.method === "POST"
+      ) {
+        return await handleTransportEstimate(request, env, corsHeaders);
+      }
+
+      if (
+        url.pathname === "/api/ai/buyer/reply-suggestions" &&
+        request.method === "POST"
+      ) {
+        return await handleReplySuggestions(request, env, corsHeaders);
+      }
       // ── GET /:key  (R2 file serving) ─────────────────────────────────────────
       if (request.method === "GET") {
         const key = url.pathname.slice(1);
@@ -197,27 +209,45 @@ async function handleVerifySubmit(request, env, corsHeaders) {
     );
   }
 
-  const ALLOWED_ID_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+  const ALLOWED_ID_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+  ];
   const ALLOWED_SELFIE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_SIZE = 10 * 1024 * 1024;
 
   if (!ALLOWED_ID_TYPES.includes(idDoc.type)) {
-    return jsonResponse({ error: "ID document must be JPG, PNG, WebP, or PDF" }, 400, corsHeaders);
+    return jsonResponse(
+      { error: "ID document must be JPG, PNG, WebP, or PDF" },
+      400,
+      corsHeaders,
+    );
   }
   if (!ALLOWED_SELFIE_TYPES.includes(selfie.type)) {
-    return jsonResponse({ error: "Selfie must be JPG, PNG, or WebP" }, 400, corsHeaders);
+    return jsonResponse(
+      { error: "Selfie must be JPG, PNG, or WebP" },
+      400,
+      corsHeaders,
+    );
   }
 
   const idBuffer = await idDoc.arrayBuffer();
   const selfieBuffer = await selfie.arrayBuffer();
 
   if (idBuffer.byteLength > MAX_SIZE || selfieBuffer.byteLength > MAX_SIZE) {
-    return jsonResponse({ error: "File size must be under 10 MB" }, 400, corsHeaders);
+    return jsonResponse(
+      { error: "File size must be under 10 MB" },
+      400,
+      corsHeaders,
+    );
   }
 
   // ── Store in R2 ────────────────────────────────────────────────────────────
   const ts = Date.now();
-  const ext = (type) => type === "application/pdf" ? "pdf" : type.split("/")[1];
+  const ext = (type) =>
+    type === "application/pdf" ? "pdf" : type.split("/")[1];
   const idKey = `verifications/${uid}/id_${ts}.${ext(idDoc.type)}`;
   const selfieKey = `verifications/${uid}/selfie_${ts}.${ext(selfie.type)}`;
 
@@ -303,8 +333,8 @@ async function compareFaces(env, idBuffer, selfieBuffer) {
   const form = new FormData();
   form.append("api_key", env.FACEPP_API_KEY);
   form.append("api_secret", env.FACEPP_API_SECRET);
-  form.append("image_base64_1", idBase64);      // ID document photo
-  form.append("image_base64_2", selfieBase64);   // Selfie
+  form.append("image_base64_1", idBase64); // ID document photo
+  form.append("image_base64_2", selfieBase64); // Selfie
 
   const res = await fetch("https://api-us.faceplusplus.com/facepp/v3/compare", {
     method: "POST",
@@ -324,8 +354,8 @@ async function compareFaces(env, idBuffer, selfieBuffer) {
   }
 
   return {
-    confidence: data.confidence,           // 0–100 score
-    thresholds: data.thresholds,           // { "1e-3": 65.1, "1e-4": 74.3, "1e-5": 80.5 }
+    confidence: data.confidence, // 0–100 score
+    thresholds: data.thresholds, // { "1e-3": 65.1, "1e-4": 74.3, "1e-5": 80.5 }
   };
 }
 // ─── New: GET /api/verify/status ─────────────────────────────────────────────
@@ -428,11 +458,14 @@ function toFirestoreFields(obj) {
   const fields = {};
   for (const [k, v] of Object.entries(obj)) {
     if (typeof v === "string") fields[k] = { stringValue: v };
-    else if (typeof v === "number" && Number.isInteger(v)) fields[k] = { integerValue: String(v) };
-    else if (typeof v === "number") fields[k] = { doubleValue: v }; // 👈 handles decimals like 55.114
+    else if (typeof v === "number" && Number.isInteger(v))
+      fields[k] = { integerValue: String(v) };
+    else if (typeof v === "number")
+      fields[k] = { doubleValue: v }; // 👈 handles decimals like 55.114
     else if (typeof v === "boolean") fields[k] = { booleanValue: v };
     else if (v === null) fields[k] = { nullValue: null };
-    else if (typeof v === "object") fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
+    else if (typeof v === "object")
+      fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
   }
   return fields;
 }
@@ -532,22 +565,29 @@ async function verifyFirebaseToken(idToken, projectId) {
 async function handleAIListing(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
-  const { title, category, quantity, weight, age, price, location } = body;
- 
-  if (!title || !category) {
-    return jsonResponse({ error: "title and category are required" }, 400, corsHeaders);
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
   }
- 
+
+  const { title, category, quantity, weight, age, price, location } = body;
+
+  if (!title || !category) {
+    return jsonResponse(
+      { error: "title and category are required" },
+      400,
+      corsHeaders,
+    );
+  }
+
   const systemPrompt =
     "You are a livestock marketplace assistant for Kraal, a platform in Zimbabwe and southern Africa. " +
     "You help sellers write better listings and price their animals correctly. " +
     "Always respond with a single valid JSON object and nothing else — no markdown, no explanation.";
- 
+
   const userPrompt =
     `Generate listing help for:\n` +
     `- Animal: ${title}\n` +
@@ -560,57 +600,67 @@ async function handleAIListing(request, env, corsHeaders) {
     `Respond ONLY with this JSON:\n` +
     `{"description":"2-3 sentence listing description","priceAdvice":"one sentence price advice",` +
     `"suggestedPrice":null,"strengths":["point1","point2"],"tips":["one tip"]}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user",   content: userPrompt   },
+        { role: "user", content: userPrompt },
       ],
       max_tokens: 500,
     });
- 
+
     const raw = result?.response || "";
     // Extract JSON from the response (model sometimes adds a little preamble)
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON in response");
- 
+
     const parsed = JSON.parse(jsonMatch[0]);
     return jsonResponse(parsed, 200, corsHeaders);
- 
   } catch (err) {
     console.error("Workers AI listing error:", err.message);
-    return jsonResponse({
-      description: "A quality animal available now. Contact seller for more details.",
-      priceAdvice:   "Price based on current market conditions.",
-      suggestedPrice: null,
-      strengths:     [],
-      tips:          ["Add a photo to get more buyer interest."],
-    }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        description:
+          "A quality animal available now. Contact seller for more details.",
+        priceAdvice: "Price based on current market conditions.",
+        suggestedPrice: null,
+        strengths: [],
+        tips: ["Add a photo to get more buyer interest."],
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
- 
- 
+
 // ── POST /api/ai/insights ─────────────────────────────────────────────────────
 async function handleAIInsights(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
+  }
+
   const { listings = [], orders = [] } = body;
- 
-  const activeCount     = listings.filter((l) => l.status === "active").length;
-  const totalViews      = listings.reduce((s, l) => s + (l.views || 0), 0);
-  const pendingCount    = orders.filter((o) => o.status === "pending").length;
-  const completedCount  = orders.filter((o) => o.status === "completed").length;
-  const cancelledCount  = orders.filter((o) => o.status === "cancelled").length;
-  const avgPrice        = activeCount
-    ? Math.round(listings.filter((l) => l.status === "active").reduce((s, l) => s + (l.price || 0), 0) / activeCount)
+
+  const activeCount = listings.filter((l) => l.status === "active").length;
+  const totalViews = listings.reduce((s, l) => s + (l.views || 0), 0);
+  const pendingCount = orders.filter((o) => o.status === "pending").length;
+  const completedCount = orders.filter((o) => o.status === "completed").length;
+  const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
+  const avgPrice = activeCount
+    ? Math.round(
+        listings
+          .filter((l) => l.status === "active")
+          .reduce((s, l) => s + (l.price || 0), 0) / activeCount,
+      )
     : 0;
- 
+
   const prompt =
     `Seller dashboard data:\n` +
     `- Active listings: ${activeCount}, total views: ${totalViews}\n` +
@@ -619,52 +669,87 @@ async function handleAIInsights(request, env, corsHeaders) {
     `Give a performance insight. Respond ONLY with JSON:\n` +
     `{"headline":"short upbeat headline max 8 words","insight":"2 sentences of specific advice",` +
     `"action":"one clear next action","score":7}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
-        { role: "system", content: "You are a livestock business advisor for Kraal marketplace in Zimbabwe. Respond only with valid JSON." },
-        { role: "user",   content: prompt },
+        {
+          role: "system",
+          content:
+            "You are a livestock business advisor for Kraal marketplace in Zimbabwe. Respond only with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ],
       max_tokens: 300,
     });
- 
+
     const raw = result?.response || "";
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON");
- 
+
     return jsonResponse(JSON.parse(jsonMatch[0]), 200, corsHeaders);
- 
   } catch (err) {
     console.error("Workers AI insights error:", err.message);
     // Fallback: compute a basic insight without AI
-    const score = Math.min(10, Math.max(1, Math.round(
-      (activeCount > 0 ? 3 : 0) +
-      (totalViews > 50 ? 2 : totalViews > 10 ? 1 : 0) +
-      (completedCount > 0 ? 2 : 0) +
-      (pendingCount > 0 ? 2 : 0) +
-      (cancelledCount === 0 ? 1 : 0)
-    )));
- 
-    return jsonResponse({
-      headline: activeCount > 0 ? "You have active listings!" : "Post your first listing",
-      insight:  `You have ${activeCount} active listing(s) with ${totalViews} total views. ` +
-                (pendingCount > 0 ? `You have ${pendingCount} pending order(s) that need action.` : "Keep adding listings to grow your reach."),
-      action:   pendingCount > 0 ? "Confirm your pending orders via WhatsApp." : "Post a new listing to attract more buyers.",
-      score,
-    }, 200, corsHeaders);
+    const score = Math.min(
+      10,
+      Math.max(
+        1,
+        Math.round(
+          (activeCount > 0 ? 3 : 0) +
+            (totalViews > 50 ? 2 : totalViews > 10 ? 1 : 0) +
+            (completedCount > 0 ? 2 : 0) +
+            (pendingCount > 0 ? 2 : 0) +
+            (cancelledCount === 0 ? 1 : 0),
+        ),
+      ),
+    );
+
+    return jsonResponse(
+      {
+        headline:
+          activeCount > 0
+            ? "You have active listings!"
+            : "Post your first listing",
+        insight:
+          `You have ${activeCount} active listing(s) with ${totalViews} total views. ` +
+          (pendingCount > 0
+            ? `You have ${pendingCount} pending order(s) that need action.`
+            : "Keep adding listings to grow your reach."),
+        action:
+          pendingCount > 0
+            ? "Confirm your pending orders via WhatsApp."
+            : "Post a new listing to attract more buyers.",
+        score,
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
- async function handleBuyerPriceCheck(request, env, corsHeaders) {
+async function handleBuyerPriceCheck(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
-  const { title, category, price, breed, age, weight, vaccinated, quantity, location } = body;
- 
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
+  }
+
+  const {
+    title,
+    category,
+    price,
+    breed,
+    age,
+    weight,
+    vaccinated,
+    quantity,
+    location,
+  } = body;
+
   const prompt =
     `You are a livestock price analyst for Zimbabwe's Kraal marketplace.\n\n` +
     `Evaluate this listing:\n` +
@@ -681,51 +766,63 @@ async function handleAIInsights(request, env, corsHeaders) {
     `Respond ONLY with JSON:\n` +
     `{"verdict":"fair"|"good_deal"|"overpriced","explanation":"one honest sentence",` +
     `"marketRange":"e.g. USD 80–120 per head","tip":"one negotiation or buying tip"}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
-        { role: "system", content: "You are a Zimbabwe livestock market analyst. Respond only with valid JSON and nothing else." },
+        {
+          role: "system",
+          content:
+            "You are a Zimbabwe livestock market analyst. Respond only with valid JSON and nothing else.",
+        },
         { role: "user", content: prompt },
       ],
       max_tokens: 250,
     });
- 
+
     const raw = result?.response || "";
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON");
     return jsonResponse(JSON.parse(match[0]), 200, corsHeaders);
- 
   } catch (err) {
     console.error("Price check error:", err.message);
-    return jsonResponse({
-      verdict: "fair",
-      explanation: "Price appears within typical market range for this animal type in Zimbabwe.",
-      marketRange: "Varies by location and condition",
-      tip: "Ask the seller about vaccination records and recent vet checks before buying.",
-    }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        verdict: "fair",
+        explanation:
+          "Price appears within typical market range for this animal type in Zimbabwe.",
+        marketRange: "Varies by location and condition",
+        tip: "Ask the seller about vaccination records and recent vet checks before buying.",
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
- 
- 
+
 // ── Buyer overview insight card ───────────────────────────────────────────────
 async function handleBuyerInsights(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
+  }
+
   const { orders = [], savedListings = [], transportOrders = [] } = body;
- 
+
   const totalSpent = orders
     .filter((o) => o.status === "completed")
     .reduce((s, o) => s + Number(o.totalAmount || o.amount || 0), 0);
   const pendingCount = orders.filter((o) => o.status === "pending").length;
-  const savedCategories = [...new Set(savedListings.map((l) => l.categoryId).filter(Boolean))];
+  const savedCategories = [
+    ...new Set(savedListings.map((l) => l.categoryId).filter(Boolean)),
+  ];
   const transportCount = transportOrders.length;
- 
+
   const prompt =
     `Buyer activity on Kraal livestock marketplace (Zimbabwe):\n` +
     `- Total spent: USD ${totalSpent} across ${orders.length} orders\n` +
@@ -736,54 +833,81 @@ async function handleBuyerInsights(request, env, corsHeaders) {
     `Respond ONLY with JSON:\n` +
     `{"headline":"short headline max 8 words","insight":"2 practical sentences for this buyer",` +
     `"marketTip":"one current Zimbabwe livestock market tip","bestTimeToBuy":"e.g. cattle prices drop in April-May in Zimbabwe"}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
-        { role: "system", content: "You are a Zimbabwe livestock market analyst for Kraal marketplace. Respond only with valid JSON." },
+        {
+          role: "system",
+          content:
+            "You are a Zimbabwe livestock market analyst for Kraal marketplace. Respond only with valid JSON.",
+        },
         { role: "user", content: prompt },
       ],
       max_tokens: 300,
     });
- 
+
     const raw = result?.response || "";
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON");
     return jsonResponse(JSON.parse(match[0]), 200, corsHeaders);
- 
   } catch (err) {
     console.error("Buyer insights error:", err.message);
     // Computed fallback
-    return jsonResponse({
-      headline: savedListings.length > 0 ? "You have saved listings to review" : "Start browsing livestock",
-      insight: totalSpent > 0
-        ? `You've spent USD ${totalSpent.toLocaleString()} across ${orders.length} order(s). ${pendingCount > 0 ? `You have ${pendingCount} pending order(s) awaiting seller confirmation.` : "All your orders are up to date."}`
-        : "Browse available livestock and save listings you're interested in to track prices.",
-      marketTip: "Always check vaccination records and request a vet certificate for cattle over USD 500.",
-      bestTimeToBuy: "Prices tend to be lower at the end of the farming season when farmers need to reduce herd sizes.",
-    }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        headline:
+          savedListings.length > 0
+            ? "You have saved listings to review"
+            : "Start browsing livestock",
+        insight:
+          totalSpent > 0
+            ? `You've spent USD ${totalSpent.toLocaleString()} across ${orders.length} order(s). ${pendingCount > 0 ? `You have ${pendingCount} pending order(s) awaiting seller confirmation.` : "All your orders are up to date."}`
+            : "Browse available livestock and save listings you're interested in to track prices.",
+        marketTip:
+          "Always check vaccination records and request a vet certificate for cattle over USD 500.",
+        bestTimeToBuy:
+          "Prices tend to be lower at the end of the farming season when farmers need to reduce herd sizes.",
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
- 
- 
+
 // ── Transport cost estimator — called before submitting the form ──────────────
 async function handleTransportEstimate(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
-  const { animalType, quantity, pickupProvince, pickupTown, dropProvince, dropTown } = body;
- 
-  if (!animalType || !pickupProvince) {
-    return jsonResponse({ error: "animalType and pickupProvince are required" }, 400, corsHeaders);
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
   }
- 
+
+  const {
+    animalType,
+    quantity,
+    pickupProvince,
+    pickupTown,
+    dropProvince,
+    dropTown,
+  } = body;
+
+  if (!animalType || !pickupProvince) {
+    return jsonResponse(
+      { error: "animalType and pickupProvince are required" },
+      400,
+      corsHeaders,
+    );
+  }
+
   const from = [pickupTown, pickupProvince].filter(Boolean).join(", ");
-  const to   = [dropTown, dropProvince].filter(Boolean).join(", ") || "destination TBD";
- 
+  const to =
+    [dropTown, dropProvince].filter(Boolean).join(", ") || "destination TBD";
+
   const prompt =
     `Estimate livestock transport cost in Zimbabwe:\n` +
     `- Animal type: ${animalType}\n` +
@@ -794,52 +918,75 @@ async function handleTransportEstimate(request, env, corsHeaders) {
     `Respond ONLY with JSON:\n` +
     `{"estimateLow":50,"estimateHigh":150,"currency":"USD",` +
     `"basis":"one sentence explaining the estimate","tips":["loading tip","animal welfare tip"]}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
-        { role: "system", content: "You are a Zimbabwe livestock transport cost estimator. Respond only with valid JSON. Estimates should reflect realistic local rates." },
+        {
+          role: "system",
+          content:
+            "You are a Zimbabwe livestock transport cost estimator. Respond only with valid JSON. Estimates should reflect realistic local rates.",
+        },
         { role: "user", content: prompt },
       ],
       max_tokens: 250,
     });
- 
+
     const raw = result?.response || "";
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON");
     return jsonResponse(JSON.parse(match[0]), 200, corsHeaders);
- 
   } catch (err) {
     console.error("Transport estimate error:", err.message);
-    return jsonResponse({
-      estimateLow: 40,
-      estimateHigh: 200,
-      currency: "USD",
-      basis: "Estimate based on typical Zimbabwe livestock truck rates. Final price depends on driver and distance.",
-      tips: ["Confirm loading/unloading is included in the quote.", "Ensure water and feed is available for journeys over 3 hours."],
-    }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        estimateLow: 40,
+        estimateHigh: 200,
+        currency: "USD",
+        basis:
+          "Estimate based on typical Zimbabwe livestock truck rates. Final price depends on driver and distance.",
+        tips: [
+          "Confirm loading/unloading is included in the quote.",
+          "Ensure water and feed is available for journeys over 3 hours.",
+        ],
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
- 
- 
+
 // ── Smart reply suggestions in the Messages tab ───────────────────────────────
 async function handleReplySuggestions(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
+  }
+
   // lastMessage: the most recent message from the other party
   // context: conversation context string (e.g. "Inquiry about 10 Brahman Bulls")
   // otherRole: "seller" | "transporter"
   const { lastMessage, context, otherRole } = body;
- 
+
   if (!lastMessage) {
-    return jsonResponse({ suggestions: ["I'm interested, can we negotiate?", "Is this still available?", "Can you send more photos?"] }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        suggestions: [
+          "I'm interested, can we negotiate?",
+          "Is this still available?",
+          "Can you send more photos?",
+        ],
+      },
+      200,
+      corsHeaders,
+    );
   }
- 
+
   const prompt =
     `A buyer on Kraal livestock marketplace (Zimbabwe) received this message from a ${otherRole || "seller"}:\n` +
     `"${lastMessage}"\n` +
@@ -847,103 +994,140 @@ async function handleReplySuggestions(request, env, corsHeaders) {
     `Suggest 3 short, natural reply options the buyer could send. Keep each under 12 words.\n` +
     `Respond ONLY with JSON:\n` +
     `{"suggestions":["reply 1","reply 2","reply 3"]}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
-        { role: "system", content: "You generate short, natural message suggestions for livestock buyers. Respond only with valid JSON." },
+        {
+          role: "system",
+          content:
+            "You generate short, natural message suggestions for livestock buyers. Respond only with valid JSON.",
+        },
         { role: "user", content: prompt },
       ],
       max_tokens: 150,
     });
- 
+
     const raw = result?.response || "";
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON");
     return jsonResponse(JSON.parse(match[0]), 200, corsHeaders);
- 
   } catch (err) {
     console.error("Reply suggestions error:", err.message);
-    return jsonResponse({
-      suggestions: [
-        "Thanks, when can I collect?",
-        "Can we agree on a lower price?",
-        "I'll confirm by end of day.",
-      ],
-    }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        suggestions: [
+          "Thanks, when can I collect?",
+          "Can we agree on a lower price?",
+          "I'll confirm by end of day.",
+        ],
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
- 
+
 // ── POST /api/ai/orders ───────────────────────────────────────────────────────
 async function handleAIOrders(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
- 
+
   let body;
-  try { body = await request.json(); }
-  catch { return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders); }
- 
-  const { orders = [] } = body;
- 
-  if (orders.length === 0) {
-    return jsonResponse({
-      summary: "No orders yet. Once buyers place orders they will appear here.",
-      urgentActions: [],
-      bestBuyerLocation: null,
-      totalPotentialRevenue: 0,
-    }, 200, corsHeaders);
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, corsHeaders);
   }
- 
+
+  const { orders = [] } = body;
+
+  if (orders.length === 0) {
+    return jsonResponse(
+      {
+        summary:
+          "No orders yet. Once buyers place orders they will appear here.",
+        urgentActions: [],
+        bestBuyerLocation: null,
+        totalPotentialRevenue: 0,
+      },
+      200,
+      corsHeaders,
+    );
+  }
+
   // Compute fallback stats client-side so we always have them
-  const pending    = orders.filter((o) => o.status === "pending");
-  const confirmed  = orders.filter((o) => o.status === "confirmed");
-  const locations  = orders.map((o) => o.location).filter(Boolean);
+  const pending = orders.filter((o) => o.status === "pending");
+  const confirmed = orders.filter((o) => o.status === "confirmed");
+  const locations = orders.map((o) => o.location).filter(Boolean);
   const topLocation = locations.length
-    ? Object.entries(locations.reduce((acc, l) => { acc[l] = (acc[l] || 0) + 1; return acc; }, {}))
-        .sort((a, b) => b[1] - a[1])[0][0]
+    ? Object.entries(
+        locations.reduce((acc, l) => {
+          acc[l] = (acc[l] || 0) + 1;
+          return acc;
+        }, {}),
+      ).sort((a, b) => b[1] - a[1])[0][0]
     : null;
-  const potentialRevenue = [...pending, ...confirmed].reduce((s, o) => s + (o.amount || 0), 0);
- 
+  const potentialRevenue = [...pending, ...confirmed].reduce(
+    (s, o) => s + (o.amount || 0),
+    0,
+  );
+
   const orderLines = orders
     .slice(0, 8) // cap to avoid token overflow
-    .map((o) => `${o.id}: ${o.listing}, USD ${o.amount}, ${o.status}, buyer in ${o.location}`)
+    .map(
+      (o) =>
+        `${o.id}: ${o.listing}, USD ${o.amount}, ${o.status}, buyer in ${o.location}`,
+    )
     .join("\n");
- 
+
   const prompt =
     `Seller's recent orders:\n${orderLines}\n\n` +
     `Summarise and flag urgent actions. Respond ONLY with JSON:\n` +
     `{"summary":"2 sentence plain summary","urgentActions":["action if any"],` +
     `"bestBuyerLocation":"top city","totalPotentialRevenue":${potentialRevenue}}`;
- 
+
   try {
     const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
       messages: [
-        { role: "system", content: "You are a livestock business advisor for Kraal in Zimbabwe. Respond only with valid JSON." },
-        { role: "user",   content: prompt },
+        {
+          role: "system",
+          content:
+            "You are a livestock business advisor for Kraal in Zimbabwe. Respond only with valid JSON.",
+        },
+        { role: "user", content: prompt },
       ],
       max_tokens: 300,
     });
- 
+
     const raw = result?.response || "";
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON");
- 
+
     const parsed = JSON.parse(jsonMatch[0]);
     // Always use computed revenue as source of truth
     parsed.totalPotentialRevenue = potentialRevenue;
-    parsed.bestBuyerLocation     = parsed.bestBuyerLocation || topLocation;
+    parsed.bestBuyerLocation = parsed.bestBuyerLocation || topLocation;
     return jsonResponse(parsed, 200, corsHeaders);
- 
   } catch (err) {
     console.error("Workers AI orders error:", err.message);
     // Graceful fallback — still useful without AI
-    return jsonResponse({
-      summary: `You have ${pending.length} pending and ${confirmed.length} confirmed order(s). ` +
-               (pending.length > 0 ? "Confirm pending orders promptly to keep buyers happy." : "All active orders are confirmed."),
-      urgentActions: pending.map((o) => `Confirm order ${o.id} for ${o.buyer} — ${o.listing}`),
-      bestBuyerLocation: topLocation,
-      totalPotentialRevenue: potentialRevenue,
-    }, 200, corsHeaders);
+    return jsonResponse(
+      {
+        summary:
+          `You have ${pending.length} pending and ${confirmed.length} confirmed order(s). ` +
+          (pending.length > 0
+            ? "Confirm pending orders promptly to keep buyers happy."
+            : "All active orders are confirmed."),
+        urgentActions: pending.map(
+          (o) => `Confirm order ${o.id} for ${o.buyer} — ${o.listing}`,
+        ),
+        bestBuyerLocation: topLocation,
+        totalPotentialRevenue: potentialRevenue,
+      },
+      200,
+      corsHeaders,
+    );
   }
 }
 // ─── JSON response helper ─────────────────────────────────────────────────────
