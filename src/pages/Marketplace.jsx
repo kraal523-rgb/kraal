@@ -29,6 +29,7 @@ import chicken1 from "../assets/chicken-1.jpg";
 import pig1 from "../assets/pngegg__18.png";
 import all5 from "../assets/all-5.jpg";
 import ProfileSheet from "../components/ProfileSheet";
+import ListingGalleryModal from "../components/ListingGalleryModal";
 import "./Marketplace.css";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -1240,155 +1241,16 @@ export default function Marketplace() {
         </main>
       </div>
 
-      {/* ── LISTING MODAL ── */}
-      {activeListing && (
-        <div className="mp-modal-overlay" onClick={() => setActiveModal(null)}>
-          <div className="mp-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="mp-modal-close"
-              onClick={() => setActiveModal(null)}
-            >
-              ✕
-            </button>
-
-            <div className="mp-modal-header">
-              <div className="mp-modal-emoji">
-                {activeListing.emoji ||
-                  getCategoryEmoji(activeListing.categoryId)}
-              </div>
-              <div className="mp-modal-title-block">
-                <span className="mp-modal-badge">
-                  {activeListing.vaccinated
-                    ? "Vaccinated"
-                    : activeListing.badge ||
-                      activeListing.condition ||
-                      "Listed"}
-                </span>
-                <h2>{activeListing.title}</h2>
-                <p className="mp-modal-location">
-                  📍{" "}
-                  {activeListing.city ||
-                    activeListing.location ||
-                    activeListing.province ||
-                    "Zimbabwe"}
-                </p>
-              </div>
-            </div>
-
-            <div className="mp-modal-body">
-              <div className="mp-modal-details">
-                <div className="mp-modal-detail-grid">
-                  {[
-                    { label: "Breed", value: activeListing.breed },
-                    { label: "Age", value: activeListing.age },
-                    { label: "Weight", value: activeListing.weight },
-                    {
-                      label: "Quantity",
-                      value: activeListing.qty
-                        ? `${activeListing.qty} available`
-                        : "—",
-                    },
-                    {
-                      label: "Listed",
-                      // FIX 3: compute daysAgo from Timestamp in modal too
-                      value: (() => {
-                        const d = getDaysAgo(activeListing.createdAt);
-                        return d === 0
-                          ? "Today"
-                          : `${d} day${d !== 1 ? "s" : ""} ago`;
-                      })(),
-                    },
-                    {
-                      label: "Views",
-                      value: activeListing.views
-                        ? `${activeListing.views} views`
-                        : "—",
-                    },
-                  ]
-                    .filter((d) => d.value)
-                    .map((d) => (
-                      <div key={d.label} className="mp-modal-detail">
-                        <span className="mp-modal-detail-label">{d.label}</span>
-                        <span className="mp-modal-detail-value">{d.value}</span>
-                      </div>
-                    ))}
-                </div>
-
-                <div className="mp-modal-desc">
-                  <h4>Description</h4>
-                  <p>
-                    {activeListing.description ||
-                      activeListing.desc ||
-                      "No description provided."}
-                  </p>
-                </div>
-
-                <div className="mp-modal-seller">
-                  <div className="mp-modal-seller-avatar">
-                    {(activeListing.sellerName || activeListing.seller || "?")
-                      .split(" ")
-                      .map((w) => w[0])
-                      .join("")
-                      .slice(0, 2)}
-                  </div>
-                  <div>
-                    <strong>
-                      {activeListing.sellerName ||
-                        activeListing.seller ||
-                        "Seller"}
-                    </strong>
-                    {activeListing.sellerRating && (
-                      <>
-                        <div className="mp-modal-stars">{"★".repeat(5)}</div>
-                        <span className="mp-modal-rating">
-                          {activeListing.sellerRating} / 5.0
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mp-modal-action-panel">
-                <div className="mp-modal-price">
-                  <strong>
-                    {activeListing.currency || "USD"}{" "}
-                    {activeListing.price?.toLocaleString()}
-                  </strong>
-                  <span>
-                    {activeListing.pricePerHead
-                      ? "per head"
-                      : activeListing.unit || "per lot"}
-                  </span>
-                </div>
-
-                <a
-                  href={`https://wa.me/?text=Hi, I'm interested in your listing: ${encodeURIComponent(activeListing.title)} on Kraal Market`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mp-modal-whatsapp"
-                >
-                  <WhatsAppIcon /> Chat on WhatsApp
-                </a>
-
-                <button
-                  className={`mp-modal-save ${savedItems.has(activeListing.id) ? "saved" : ""}`}
-                  onClick={() => toggleSave(activeListing.id)}
-                >
-                  {savedItems.has(activeListing.id)
-                    ? "❤️ Saved"
-                    : "🤍 Save Listing"}
-                </button>
-
-                <div className="mp-modal-safety">
-                  <span>🔒 Always meet in a safe, public location</span>
-                  <span>✅ Seller is verified on Kraal</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+     {activeListing && (
+  <ListingGalleryModal
+    listing={activeListing}
+    onClose={() => setActiveModal(null)}
+    savedItems={savedItems}
+    onToggleSave={toggleSave}
+    onStartConversation={undefined}  
+    getCategoryEmoji={getCategoryEmoji}
+  />
+)}
 
       {/* ── FOOTER ── */}
       <footer className="mp-footer">
