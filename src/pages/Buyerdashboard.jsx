@@ -100,7 +100,6 @@ function initials(name = "") {
   );
 }
 
-
 async function addDocWithRetry(collectionRef, data, retries = 2) {
   for (let i = 0; i <= retries; i++) {
     try {
@@ -112,10 +111,10 @@ async function addDocWithRetry(collectionRef, data, retries = 2) {
 
       if (isInternalError && i < retries) {
         console.warn(`🔄 Firestore internal error, retrying (${i + 1})…`);
-        await new Promise((res) => setTimeout(res, 500 * (i + 1))); 
+        await new Promise((res) => setTimeout(res, 500 * (i + 1)));
         continue;
       }
-      throw err; 
+      throw err;
     }
   }
 }
@@ -129,7 +128,7 @@ export default function BuyerDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orderFilter, setOrderFilter] = useState("all");
   const [savedSearch, setSavedSearch] = useState("");
-const [successArea, setSuccessArea] = useState("");
+  const [successArea, setSuccessArea] = useState("");
   // ── Data state ────────────────────────────────────────────────────────────
   const [savedListings, setSavedListings] = useState([]);
   const [savedLoading, setSavedLoading] = useState(true);
@@ -137,8 +136,12 @@ const [successArea, setSuccessArea] = useState("");
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [transportOrders, setTransportOrders] = useState([]);
   const [transportLoading, setTransportLoading] = useState(true);
-
-  // ── Messaging state ───────────────────────────────────────────────────────
+  const [buyerInsights, setBuyerInsights] = useState(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [transportEstimate, setTransportEstimate] = useState(null);
+  const [estimateLoading, setEstimateLoading] = useState(false);
+  const [replySuggestions, setReplySuggestions] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [convoLoading, setConvoLoading] = useState(true);
   const [activeConvo, setActiveConvo] = useState(null);
@@ -147,8 +150,8 @@ const [successArea, setSuccessArea] = useState("");
   const [msgSending, setMsgSending] = useState(false);
   const msgBodyRef = useRef(null);
   const msgUnsubRef = useRef(null);
-
-  // ── Transport modal state ─────────────────────────────────────────────────
+  const [priceChecks, setPriceChecks] = useState({});
+  const [priceCheckLoading, setPriceCheckLoading] = useState({});
   const [showTransportModal, setShowTransportModal] = useState(false);
   const [transportForm, setTransportForm] = useState({
     animalType: "",
@@ -214,14 +217,13 @@ const [successArea, setSuccessArea] = useState("");
     })();
   }, [user?.uid]);
 
-
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(
-  collection(db, "transport_requests"), 
-  where("buyerId", "==", user.uid),
-  orderBy("createdAt", "desc"),
-);
+      collection(db, "transport_requests"),
+      where("buyerId", "==", user.uid),
+      orderBy("createdAt", "desc"),
+    );
     return onSnapshot(
       q,
       (snap) => {
@@ -231,7 +233,22 @@ const [successArea, setSuccessArea] = useState("");
       () => setTransportLoading(false),
     );
   }, [user?.uid]);
-
+  useEffect(() => {
+    if (ordersLoading || savedLoading || transportLoading) return;
+    if (buyerInsights) return; // already fetched
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setInsightsLoading(true);
+    fetch("/api/ai/buyer/insights", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ orders, savedListings, transportOrders }),
+    })
+      .then((r) => r.json())
+      .then((data) => setBuyerInsights(data))
+      .catch(() => {})
+      .finally(() => setInsightsLoading(false));
+  }, [ordersLoading, savedLoading, transportLoading]); // eslint-disable-line
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -279,13 +296,111 @@ const [successArea, setSuccessArea] = useState("");
       if (msgUnsubRef.current) msgUnsubRef.current();
     };
   }, [activeConvo?.id, user?.uid]);
-
-  // ── Auto-scroll messages ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!showTransportModal) return;
+    if (!transportForm.pickupProvince || !transportForm.animalType) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEstimateLoading(true);
+    setTransportEstimate(null);
+    const timer = setTimeout(() => {
+      fetch("/api/ai/buyer/transport-estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          animalType: transportForm.animalType,
+          quantity: transportForm.quantity,
+          pickupProvince: transportForm.pickupProvince,
+          pickupTown: transportForm.pickupTown,
+          dropProvince: transportForm.dropProvince,
+          dropTown: transportForm.dropTown,
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => setTransportEstimate(data))
+        .catch(() => {})
+        .finally(() => setEstimateLoading(false));
+    }, 600); // debounce
+    return () => clearTimeout(timer);
+  }, [
+    transportForm.animalType,
+    transportForm.pickupProvince,
+    transportForm.pickupTown,
+    transportForm.dropProvince,
+    transportForm.dropTown,
+    transportForm.quantity,
+    showTransportModal,
+  ]);
+  useEffect(() => {
+    if (!activeConvo?.id || convoMessages.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setReplySuggestions([]);
+      return;
+    }
+    const lastMsg = convoMessages[convoMessages.length - 1];
+    if (lastMsg.senderId === user?.uid) {
+      setReplySuggestions([]); // don't suggest after own message
+      return;
+    }
+    setSuggestionsLoading(true);
+    fetch("/api/ai/buyer/reply-suggestions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        lastMessage: lastMsg.text,
+        context: activeConvo.context || "",
+        otherRole:
+          activeConvo.participantRoles?.[
+            activeConvo.participantIds?.find((id) => id !== user?.uid)
+          ] || "seller",
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => setReplySuggestions(data.suggestions || []))
+      .catch(() => {})
+      .finally(() => setSuggestionsLoading(false));
+  }, [convoMessages.length, activeConvo?.id]); // eslint-disable-line
   useEffect(() => {
     if (msgBodyRef.current)
       msgBodyRef.current.scrollTop = msgBodyRef.current.scrollHeight;
   }, [convoMessages]);
+  const fetchPriceCheck = useCallback(
+    async (listing) => {
+      if (priceChecks[listing.id] || priceCheckLoading[listing.id]) return;
+      setPriceCheckLoading((p) => ({ ...p, [listing.id]: true }));
+      try {
+        const res = await fetch("/api/ai/buyer/price-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            title: listing.title,
+            category: listing.categoryId,
+            price: listing.price,
+            breed: listing.breed,
+            age: listing.age,
+            weight: listing.weight,
+            vaccinated: listing.vaccinated,
+            quantity: listing.quantity,
+            location: listing.province || listing.city,
+          }),
+        });
+        const data = await res.json();
+        setPriceChecks((p) => ({ ...p, [listing.id]: data }));
+      } catch {
+        // silently fail
+      } finally {
+        setPriceCheckLoading((p) => ({ ...p, [listing.id]: false }));
+      }
+    },
+    [priceChecks, priceCheckLoading],
+  );
 
+  // Trigger checks when savedListings loads
+  useEffect(() => {
+    savedListings.forEach((l) => fetchPriceCheck(l));
+  }, [savedListings]); // eslint-disable-line
   // ── Stats ─────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const completed = orders.filter((o) => o.status === "completed");
@@ -455,95 +570,103 @@ const [successArea, setSuccessArea] = useState("");
     setSavedListings((p) => p.filter((l) => l.id !== id));
 
   // ── Submit transport request ──────────────────────────────────────────────
-const handleTransportSubmit = async (e) => {
-  e.preventDefault();
-  if (!transportForm.pickupProvince || !transportForm.animalType) return;
-  setTransportSubmitting(true);
+  const handleTransportSubmit = async (e) => {
+    e.preventDefault();
+    if (!transportForm.pickupProvince || !transportForm.animalType) return;
+    setTransportSubmitting(true);
 
-  const pickupDisplay = transportForm.pickupTown || transportForm.pickupProvince;
+    const pickupDisplay =
+      transportForm.pickupTown || transportForm.pickupProvince;
 
-  try {
-    const reqRef = await addDocWithRetry(collection(db, "transport_requests"), {
-      ...transportForm,
-      buyerId: user.uid,
-      buyerName: user.displayName || user.email,
-      buyerEmail: user.email,
-      status: "open",
-      createdAt: serverTimestamp(),
-    });
-
-    const [byProvince, byServiceArray] = await Promise.all([
-      getDocs(
-        query(
-          collection(db, "transporters"),
-          where("province", "==", transportForm.pickupProvince),
-        ),
-      ),
-      getDocs(
-        query(
-          collection(db, "transporters"),
-          where("serviceProvinces", "array-contains", transportForm.pickupProvince),
-        ),
-      ),
-    ]);
-
-    const driverMap = new Map();
-    [...byProvince.docs, ...byServiceArray.docs].forEach((d) =>
-      driverMap.set(d.id, d),
-    );
-    const allDrivers = [...driverMap.values()];
-
-    const pickupTownNorm = transportForm.pickupTown?.trim().toLowerCase();
-    const matchedDrivers = allDrivers.filter((d) => {
-      if (!pickupTownNorm) return true;
-      const driverTown = (d.data().town || d.data().city || "").toLowerCase();
-      return (
-        !driverTown ||
-        driverTown.includes(pickupTownNorm) ||
-        pickupTownNorm.includes(driverTown)
-      );
-    });
-
-    await Promise.all(
-      matchedDrivers.map((d) =>
-        addDocWithRetry(collection(db, "notifications"), {
-          toUid: d.id,
-          type: "transport_request",
-          transportRequestId: reqRef.id,
-          message: `New job: ${transportForm.quantity}× ${transportForm.animalType} from ${transportForm.pickupTown || transportForm.pickupProvince} → ${transportForm.dropTown || transportForm.dropProvince || "TBD"}`,
-          pickupProvince: transportForm.pickupProvince,
-          pickupTown: transportForm.pickupTown,
+    try {
+      const reqRef = await addDocWithRetry(
+        collection(db, "transport_requests"),
+        {
+          ...transportForm,
+          buyerId: user.uid,
+          buyerName: user.displayName || user.email,
+          buyerEmail: user.email,
+          status: "open",
           createdAt: serverTimestamp(),
-          read: false,
-        }),
-      ),
-    );
+        },
+      );
 
-    setSuccessArea(pickupDisplay);
-    setTransportSuccess(true);
-    setTransportForm({
-      animalType: "",
-      quantity: "",
-      pickupProvince: "",
-      pickupTown: "",
-      dropProvince: "",
-      dropTown: "",
-      preferredDate: "",
-      notes: "",
-      contactPhone: "",
-    });
+      const [byProvince, byServiceArray] = await Promise.all([
+        getDocs(
+          query(
+            collection(db, "transporters"),
+            where("province", "==", transportForm.pickupProvince),
+          ),
+        ),
+        getDocs(
+          query(
+            collection(db, "transporters"),
+            where(
+              "serviceProvinces",
+              "array-contains",
+              transportForm.pickupProvince,
+            ),
+          ),
+        ),
+      ]);
 
-    setTimeout(() => {
-      setTransportSuccess(false);
-      setSuccessArea("");
-      setShowTransportModal(false);
-    }, 3000);
-  } catch (err) {
-    console.error("Transport request failed:", err.code, err.message);
-  } finally {
-    setTransportSubmitting(false);
-  }
-};
+      const driverMap = new Map();
+      [...byProvince.docs, ...byServiceArray.docs].forEach((d) =>
+        driverMap.set(d.id, d),
+      );
+      const allDrivers = [...driverMap.values()];
+
+      const pickupTownNorm = transportForm.pickupTown?.trim().toLowerCase();
+      const matchedDrivers = allDrivers.filter((d) => {
+        if (!pickupTownNorm) return true;
+        const driverTown = (d.data().town || d.data().city || "").toLowerCase();
+        return (
+          !driverTown ||
+          driverTown.includes(pickupTownNorm) ||
+          pickupTownNorm.includes(driverTown)
+        );
+      });
+
+      await Promise.all(
+        matchedDrivers.map((d) =>
+          addDocWithRetry(collection(db, "notifications"), {
+            toUid: d.id,
+            type: "transport_request",
+            transportRequestId: reqRef.id,
+            message: `New job: ${transportForm.quantity}× ${transportForm.animalType} from ${transportForm.pickupTown || transportForm.pickupProvince} → ${transportForm.dropTown || transportForm.dropProvince || "TBD"}`,
+            pickupProvince: transportForm.pickupProvince,
+            pickupTown: transportForm.pickupTown,
+            createdAt: serverTimestamp(),
+            read: false,
+          }),
+        ),
+      );
+
+      setSuccessArea(pickupDisplay);
+      setTransportSuccess(true);
+      setTransportForm({
+        animalType: "",
+        quantity: "",
+        pickupProvince: "",
+        pickupTown: "",
+        dropProvince: "",
+        dropTown: "",
+        preferredDate: "",
+        notes: "",
+        contactPhone: "",
+      });
+
+      setTimeout(() => {
+        setTransportSuccess(false);
+        setSuccessArea("");
+        setShowTransportModal(false);
+      }, 3000);
+    } catch (err) {
+      console.error("Transport request failed:", err.code, err.message);
+    } finally {
+      setTransportSubmitting(false);
+    }
+  };
 
   const setTab = (id) => {
     setActiveTab(id);
@@ -634,7 +757,14 @@ const handleTransportSubmit = async (e) => {
         </div>
 
         {/* Stats bar */}
-        <div className="bd-stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', overflow: 'visible' }}>
+        <div
+          className="bd-stats-row"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            overflow: "visible",
+          }}
+        >
           {stats.map((s) => (
             <div key={s.label} className={`bd-stat-chip bd-stat-${s.type}`}>
               <span className="bd-stat-chip-icon">{s.icon}</span>
@@ -714,7 +844,38 @@ const handleTransportSubmit = async (e) => {
                 </button>
               ))}
             </div>
-
+            {activeTab === "Overview" && (
+              <section className="bd-card bd-card-full bd-ai-insights-card">
+                <div className="bd-card-head">
+                  <h2>🤖 AI Market Briefing</h2>
+                  <span className="bd-ai-badge">Powered by AI</span>
+                </div>
+                {insightsLoading ? (
+                  <div className="bd-ai-insights-loading">
+                    <Spinner /> <span>Analysing your activity…</span>
+                  </div>
+                ) : buyerInsights ? (
+                  <div className="bd-ai-insights-body">
+                    <div className="bd-ai-headline">
+                      {buyerInsights.headline}
+                    </div>
+                    <p className="bd-ai-insight-text">
+                      {buyerInsights.insight}
+                    </p>
+                    <div className="bd-ai-insight-row">
+                      <div className="bd-ai-insight-chip">
+                        <span>💡</span>
+                        <span>{buyerInsights.marketTip}</span>
+                      </div>
+                      <div className="bd-ai-insight-chip">
+                        <span>📅</span>
+                        <span>{buyerInsights.bestTimeToBuy}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+            )}
             <div className="bd-two-col">
               {/* Saved preview */}
               <section className="bd-card">
@@ -958,6 +1119,39 @@ const handleTransportSubmit = async (e) => {
                         {l.age && <span>📅 {l.age}</span>}
                         {l.weight && <span>⚖️ {l.weight}</span>}
                       </div>
+                      {/* AI Price Badge — add after bd-sc-tags div */}
+                      {priceCheckLoading[l.id] ? (
+                        <div className="bd-ai-price-loading">
+                          🤖 Checking price…
+                        </div>
+                      ) : priceChecks[l.id] ? (
+                        <div
+                          className={`bd-ai-price-badge bd-ai-price-${priceChecks[l.id].verdict}`}
+                        >
+                          <span className="bd-ai-price-icon">
+                           {priceChecks[l.id].verdict === "good_deal"
+  ? "↓"
+  : priceChecks[l.id].verdict === "overpriced"
+    ? "↑"
+    : "→"}
+                          </span>
+                          <div>
+                            <div className="bd-ai-price-verdict">
+                              {priceChecks[l.id].verdict === "good_deal"
+                                ? "Great Deal"
+                                : priceChecks[l.id].verdict === "overpriced"
+                                  ? "Overpriced"
+                                  : "Fair Price"}
+                            </div>
+                            <div className="bd-ai-price-explanation">
+                              {priceChecks[l.id].explanation}
+                            </div>
+                            <div className="bd-ai-price-range">
+                              Market: {priceChecks[l.id].marketRange}
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
                       <div className="bd-sc-footer">
                         <div>
                           <strong className="bd-sc-price">
@@ -1378,7 +1572,27 @@ const handleTransportSubmit = async (e) => {
                         </div>
                       ))}
                     </div>
-
+                    {/* AI Reply Suggestions */}
+                    {(suggestionsLoading || replySuggestions.length > 0) && (
+                      <div className="bd-reply-suggestions">
+                        {suggestionsLoading ? (
+                          <span className="bd-rs-loading">🤖 Thinking…</span>
+                        ) : (
+                          replySuggestions.map((s, i) => (
+                            <button
+                              key={i}
+                              className="bd-rs-chip"
+                              onClick={() => {
+                                setMsgInput(s);
+                                setReplySuggestions([]);
+                              }}
+                            >
+                              {s}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
                     <div className="bd-msg-input-row">
                       <textarea
                         className="bd-msg-input"
@@ -1444,14 +1658,10 @@ const handleTransportSubmit = async (e) => {
                 <div className="bd-ts-icon">✅</div>
                 <h3>Request Sent!</h3>
                 <p>
-
-   Transport providers near{" "}
-
-   <strong>{successArea || "your pickup area"}</strong>{" "}
-
-   have been notified. You'll receive quotes shortly.
-
- </p>
+                  Transport providers near{" "}
+                  <strong>{successArea || "your pickup area"}</strong> have been
+                  notified. You'll receive quotes shortly.
+                </p>
               </div>
             ) : (
               <form
@@ -1629,7 +1839,30 @@ const handleTransportSubmit = async (e) => {
                     }
                   />
                 </div>
-
+                {(estimateLoading || transportEstimate) && (
+                  <div className="bd-transport-estimate">
+                    {estimateLoading ? (
+                      <div className="bd-te-loading">🤖 Estimating cost…</div>
+                    ) : transportEstimate ? (
+                      <>
+                        <div className="bd-te-header">
+                          <span>🤖 AI Cost Estimate</span>
+                          <strong className="bd-te-range">
+                            {transportEstimate.currency}{" "}
+                            {transportEstimate.estimateLow}–
+                            {transportEstimate.estimateHigh}
+                          </strong>
+                        </div>
+                        <p className="bd-te-basis">{transportEstimate.basis}</p>
+                        {transportEstimate.tips?.map((tip, i) => (
+                          <div key={i} className="bd-te-tip">
+                            💡 {tip}
+                          </div>
+                        ))}
+                      </>
+                    ) : null}
+                  </div>
+                )}
                 <div className="bd-modal-actions">
                   <button
                     type="button"

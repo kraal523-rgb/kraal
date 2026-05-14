@@ -596,7 +596,118 @@
   top: 8px;
   right: 8px;
 }
+.bd-ai-price-badge {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.bd-ai-price-good_deal  { background: #f5f5f5; border: 1px solid #ddd; }
+.bd-ai-price-fair       { background: #f5f5f5; border: 1px solid #ddd; }
+.bd-ai-price-overpriced { background: #f5f5f5; border: 1px solid #ddd; }
+.bd-ai-price-good_deal  .bd-ai-price-verdict { color: #2a2a2a; }
+.bd-ai-price-fair       .bd-ai-price-verdict { color: #2a2a2a; }
+.bd-ai-price-overpriced .bd-ai-price-verdict { color: #2a2a2a; }
+.bd-ai-price-verdict {
+  font-weight: 700;
+}
+.bd-ai-price-explanation {
+  opacity: 0.85;
+}
+.bd-ai-price-range {
+  opacity: 0.65;
+  font-size: 0.73rem;
+  margin-top: 2px;
+}
+.bd-ai-price-loading {
+  font-size: 0.78rem;
+  opacity: 0.6;
+  padding: 4px 0;
+}
 
+.bd-ai-insights-card { border-left: 3px solid #d0d0d0; }
+.bd-ai-badge {
+  font-size: 0.72rem;
+  background: #f0f0f0;
+  color: #555;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.bd-ai-headline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.bd-ai-insight-text {
+  font-size: 0.88rem;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+.bd-ai-insight-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bd-ai-insight-chip { display: flex; gap: 6px; align-items: flex-start;
+                      background: #f5f5f5; border: 1px solid #e2e2e2;
+                      border-radius: 8px; padding: 7px 10px;
+                      font-size: 0.82rem; flex: 1; min-width: 200px; }
+.bd-ai-insights-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  padding: 8px 0;
+}
+
+.bd-transport-estimate { background: #f7f7f7; border: 1px solid #e0e0e0;
+                         border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+.bd-te-loading {
+  font-size: 0.83rem;
+  opacity: 0.65;
+}
+.bd-te-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.bd-te-range           { color: #222; font-size: 1rem; }
+.bd-te-basis {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin: 4px 0;
+}
+.bd-te-tip {
+  font-size: 0.78rem;
+  opacity: 0.7;
+  margin-top: 3px;
+}
+.bd-reply-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid #eee;
+}
+.bd-rs-chip       { background: #f2f2f2; border: 1px solid #ddd; color: #333;
+                    border-radius: 20px; padding: 5px 12px; font-size: 0.8rem;
+                    cursor: pointer; transition: background 0.15s; }
+.bd-rs-chip:hover { background: #e8e8e8; }
+.bd-rs-loading {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  padding: 4px 0;
+}
 .bd-sc-info {
   padding: 14px;
   flex: 1;

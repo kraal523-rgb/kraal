@@ -109,8 +109,13 @@ function getCategoryEmoji(categoryId) {
   const [orderFilter, setOrderFilter] = useState("all");
   const [listingSearch, setListingSearch] = useState("");
   const [editListing, setEditListing] = useState(null);
-
-  // ← Fetch real listings from Firestore
+  const [aiAssist, setAiAssist]       = useState(null);   
+const [aiAssistLoading, setAiAssistLoading] = useState(false);
+const [aiInsight, setAiInsight]     = useState(null);   
+const [aiInsightLoading, setAiInsightLoading] = useState(false);
+const [aiOrders, setAiOrders]       = useState(null);   
+const [aiOrdersLoading, setAiOrdersLoading]   = useState(false);
+const WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL || "https://kraal-upload.kraal523.workers.dev";
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -212,6 +217,91 @@ const toggleListingStatus = async (id) => {
   await deleteDoc(doc(db, "listings", id));
   // Firestore onSnapshot will automatically update the UI
 };
+async function getIdToken() {
+  const { getAuth } = await import("firebase/auth");
+  const auth = getAuth();
+  return auth.currentUser?.getIdToken();
+}
+ 
+// Call /api/ai/listing — AI description + price for the listing being edited
+async function runAIAssist() {
+  if (!editListing) return;
+  setAiAssistLoading(true);
+  setAiAssist(null);
+  try {
+    const token = await getIdToken();
+    const res = await fetch(`${WORKER_URL}/api/ai/listing`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title:    editListing.title,
+        category: editListing.categoryId || editListing.category || "livestock",
+        quantity: editListing.qty,
+        weight:   editListing.weight,
+        age:      editListing.age,
+        price:    editListing.price,
+        location: user?.location || "Zimbabwe",
+      }),
+    });
+    if (!res.ok) throw new Error("AI request failed");
+    const data = await res.json();
+    setAiAssist(data);
+  } catch (err) {
+    console.error("AI assist error:", err);
+    setAiAssist({ error: "Could not load AI suggestions. Try again." });
+  } finally {
+    setAiAssistLoading(false);
+  }
+}
+ 
+// Call /api/ai/insights — overview performance summary
+async function loadAIInsights() {
+  if (aiInsight || aiInsightLoading) return; // only load once
+  setAiInsightLoading(true);
+  try {
+    const token = await getIdToken();
+    const res = await fetch(`${WORKER_URL}/api/ai/insights`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ listings, orders }),
+    });
+    if (!res.ok) throw new Error();
+    setAiInsight(await res.json());
+  } catch {
+    setAiInsight({ error: "Could not load insights." });
+  } finally {
+    setAiInsightLoading(false);
+  }
+}
+ 
+// Call /api/ai/orders — smart order summary
+async function loadAIOrders() {
+  if (aiOrders || aiOrdersLoading) return;
+  setAiOrdersLoading(true);
+  try {
+    const token = await getIdToken();
+    const res = await fetch(`${WORKER_URL}/api/ai/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ orders }),
+    });
+    if (!res.ok) throw new Error();
+    setAiOrders(await res.json());
+  } catch {
+    setAiOrders({ error: "Could not summarise orders." });
+  } finally {
+    setAiOrdersLoading(false);
+  }
+}
   return (
     <div className="sd">
       {/* ── TOP NAV ── */}
@@ -249,6 +339,38 @@ const toggleListingStatus = async (id) => {
   </div>
 ))}
             </div>
+            {activeTab === "Overview" && (
+  <div className="sd-ai-insight-card">
+    <div className="sd-ai-insight-header">
+      <span>✨ AI Business Insight</span>
+      {!aiInsight && !aiInsightLoading && (
+        <button className="sd-ai-load-btn" onClick={loadAIInsights}>
+          Analyse my dashboard
+        </button>
+      )}
+      {aiInsightLoading && <span className="sd-ai-loading">Thinking…</span>}
+    </div>
+ 
+    {aiInsight && !aiInsight.error && (
+      <div className="sd-ai-insight-body">
+        <div className="sd-ai-score">
+          <span className="sd-ai-score-num">{aiInsight.score}</span>
+          <span className="sd-ai-score-label">/10</span>
+        </div>
+        <div className="sd-ai-insight-text">
+          <strong>{aiInsight.headline}</strong>
+          <p>{aiInsight.insight}</p>
+          {aiInsight.action && (
+            <div className="sd-ai-action-pill">👉 {aiInsight.action}</div>
+          )}
+        </div>
+      </div>
+    )}
+    {aiInsight?.error && (
+      <p className="sd-ai-error">{aiInsight.error}</p>
+    )}
+  </div>
+)}
 
             {/* Recent listings preview */}
             <div className="sd-section">
@@ -448,6 +570,40 @@ const toggleListingStatus = async (id) => {
         {/* ══ ORDERS ══ */}
         {activeTab === "Orders" && (
           <div className="sd-orders-panel">
+            {activeTab === "Orders" && (
+  <div className="sd-ai-orders-card">
+    <div className="sd-ai-insight-header">
+      <span>🤖 AI Order Summary</span>
+      {!aiOrders && !aiOrdersLoading && (
+        <button className="sd-ai-load-btn" onClick={loadAIOrders}>
+          Summarise my orders
+        </button>
+      )}
+      {aiOrdersLoading && <span className="sd-ai-loading">Analysing…</span>}
+    </div>
+    {aiOrders && !aiOrders.error && (
+      <div className="sd-ai-orders-body">
+        <p>{aiOrders.summary}</p>
+        {aiOrders.urgentActions?.length > 0 && (
+          <ul className="sd-ai-urgent-list">
+            {aiOrders.urgentActions.map((a, i) => (
+              <li key={i}>⚡ {a}</li>
+            ))}
+          </ul>
+        )}
+        <div className="sd-ai-orders-meta">
+          {aiOrders.bestBuyerLocation && (
+            <span>📍 Top buyer region: <strong>{aiOrders.bestBuyerLocation}</strong></span>
+          )}
+          {aiOrders.totalPotentialRevenue != null && (
+            <span>💵 Potential revenue: <strong>USD {aiOrders.totalPotentialRevenue.toLocaleString()}</strong></span>
+          )}
+        </div>
+      </div>
+    )}
+    {aiOrders?.error && <p className="sd-ai-error">{aiOrders.error}</p>}
+  </div>
+)}
             {/* Filter tabs */}
             <div className="sd-order-filters">
               {["all", "pending", "confirmed", "completed", "cancelled"].map(
@@ -569,6 +725,73 @@ const toggleListingStatus = async (id) => {
               </button>
             </div>
             <div className="sd-modal-body">
+              <div className="sd-ai-assist-section">
+  <button
+    className="sd-ai-assist-btn"
+    onClick={runAIAssist}
+    disabled={aiAssistLoading}
+  >
+    {aiAssistLoading ? "✨ Generating…" : "✨ AI Assist — get description & price advice"}
+  </button>
+ 
+  {aiAssist && !aiAssist.error && (
+    <div className="sd-ai-assist-result">
+      {/* Description */}
+      <div className="sd-ai-result-row">
+        <label>Suggested description</label>
+        <p className="sd-ai-desc-text">{aiAssist.description}</p>
+        <button
+          className="sd-ai-copy-btn"
+          onClick={() => navigator.clipboard.writeText(aiAssist.description)}
+        >
+          Copy
+        </button>
+      </div>
+ 
+      {/* Price advice */}
+      {aiAssist.priceAdvice && (
+        <div className="sd-ai-result-row">
+          <label>Price advice</label>
+          <p>{aiAssist.priceAdvice}</p>
+          {aiAssist.suggestedPrice && (
+            <button
+              className="sd-ai-apply-btn"
+              onClick={() =>
+                setEditListing((prev) => ({
+                  ...prev,
+                  price: aiAssist.suggestedPrice,
+                }))
+              }
+            >
+              Apply suggested price: USD {aiAssist.suggestedPrice}
+            </button>
+          )}
+        </div>
+      )}
+ 
+      {/* Strengths */}
+      {aiAssist.strengths?.length > 0 && (
+        <div className="sd-ai-result-row">
+          <label>Selling strengths</label>
+          <div className="sd-ai-tags">
+            {aiAssist.strengths.map((s, i) => (
+              <span key={i} className="sd-ai-tag sd-ai-tag-green">✓ {s}</span>
+            ))}
+          </div>
+        </div>
+      )}
+ 
+      {/* Tips */}
+      {aiAssist.tips?.length > 0 && (
+        <div className="sd-ai-result-row">
+          <label>Quick tip</label>
+          <p className="sd-ai-tip">💡 {aiAssist.tips[0]}</p>
+        </div>
+      )}
+    </div>
+  )}
+  {aiAssist?.error && <p className="sd-ai-error">{aiAssist.error}</p>}
+</div>
               <div className="sd-form-grid">
                 <div className="sd-form-group sd-form-full">
                   <label>Listing Title</label>

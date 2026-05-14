@@ -26,6 +26,20 @@ export default function UserMenu() {
     navigate("/login", { replace: true });
   };
 
+  // Route to the correct dashboard based on the user's role
+  const handleDashboard = () => {
+    setOpen(false);
+    const role = user?.role;
+    if (role === "transporter") {
+      navigate("/driver");
+    } else if (role === "buyer") {
+      navigate("/buyer");
+    } else {
+      // Default: seller dashboard (covers "seller" role or any unrecognised role)
+      navigate("/seller/dashboard");
+    }
+  };
+
   // Derive initials and display name
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Account";
   const initials = displayName
@@ -127,10 +141,10 @@ export default function UserMenu() {
             </Link>
           )}
 
-          <Link
-            to="/seller/dashboard"
+          {/* Dashboard — navigates to the role-appropriate dashboard */}
+          <button
             className="um-item"
-            onClick={() => setOpen(false)}
+            onClick={handleDashboard}
             role="menuitem"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -140,7 +154,7 @@ export default function UserMenu() {
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </svg>
             Dashboard
-          </Link>
+          </button>
 
           <div className="um-divider" />
 

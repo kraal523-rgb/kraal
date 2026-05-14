@@ -20,6 +20,10 @@
     }
   ],
 
+  "ai": {
+    "binding": "AI"
+  },
+
   "env": {
     "production": {
       "name": "kraal-upload-prod",
@@ -39,7 +43,11 @@
           "binding": "BUCKET",
           "bucket_name": "kraal-media-prod"
         }
-      ]
+      ],
+
+      "ai": {
+        "binding": "AI"
+      }
     }
   }
 }
