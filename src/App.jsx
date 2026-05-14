@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -6,7 +6,10 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./lib/firebase";
 import useAuthStore from "./store/useAuthStore";
+
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
@@ -22,74 +25,6 @@ import Terms from "./pages/Terms";
 import VerifyIdentity, { VerificationGuard } from "./pages/VerifyIdentity";
 import DriverDashboard from "./pages/DriverDashboard";
 import BuyerDashboard from "./pages/Buyerdashboard";
-// ─── ProtectedRoute ───────────────────────────────────────────────────────────
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuthStore();
-  const location = useLocation();
-
-  if (loading) return <KraalSpinner />;
-
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  return children;
-}
-
-// ─── DriverGuard ──────────────────────────────────────────────────────────────
-// Sits INSIDE ProtectedRoute — user is already authenticated at this point.
-// Checks Firestore users/{uid}.role === "transporter".
-// If not a transporter → redirects to /marketplace with a flash message.
-import { useState, useEffect as useEff } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./lib/firebase";
-
-export function DriverGuard({ children }) {
-  const { user } = useAuthStore();
-  const [status, setStatus] = useState("loading"); // loading | allowed | denied
-
-  useEff(() => {
-    if (!user?.uid) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStatus("denied");
-      return;
-    }
-
-    getDoc(doc(db, "users", user.uid))
-      .then((snap) => {
-        const role = snap.data()?.role;
-        setStatus(role === "transporter" ? "allowed" : "denied");
-      })
-      .catch(() => setStatus("denied"));
-  }, [user?.uid]);
-
-  if (status === "loading") return <KraalSpinner />;
-
-  if (status === "denied") {
-    return (
-      <Navigate
-        to="/marketplace"
-        state={{
-          notice:
-            "Driver dashboard is only accessible to registered transport providers.",
-        }}
-        replace
-      />
-    );
-  }
-
-  return children;
-}
-
-// ─── AuthInit ─────────────────────────────────────────────────────────────────
-function AuthInit() {
-  const init = useAuthStore((s) => s.init);
-  useEffect(() => {
-    const unsubscribe = init();
-    return unsubscribe;
-  }, [init]);
-  return null;
-}
 
 // ─── Shared spinner ───────────────────────────────────────────────────────────
 function KraalSpinner() {
@@ -120,6 +55,68 @@ function KraalSpinner() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
+}
+
+// ─── ProtectedRoute ───────────────────────────────────────────────────────────
+// Redirects unauthenticated users to /login.
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuthStore();
+  const location = useLocation();
+
+  if (loading) return <KraalSpinner />;
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+// ─── RoleGuard ────────────────────────────────────────────────────────────────
+// Sits INSIDE ProtectedRoute — user is already authenticated at this point.
+// Checks the user's role against allowedRoles.
+// Uses the Zustand store first (no extra Firestore read if profile is loaded).
+// Falls back to a Firestore read if the store doesn't have the role yet.
+function RoleGuard({ allowedRoles, redirectTo = "/marketplace", children }) {
+  const { user, userProfile } = useAuthStore();
+  const [status, setStatus] = useState("loading"); // loading | allowed | denied
+
+  useEffect(() => {
+    if (!user?.uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStatus("denied");
+      return;
+    }
+
+    // Use cached profile from store — avoids an extra Firestore read
+    if (userProfile?.role) {
+      setStatus(allowedRoles.includes(userProfile.role) ? "allowed" : "denied");
+      return;
+    }
+
+    // Fall back to Firestore if store doesn't have the role yet
+    getDoc(doc(db, "users", user.uid))
+      .then((snap) => {
+        const role = snap.data()?.role;
+        setStatus(allowedRoles.includes(role) ? "allowed" : "denied");
+      })
+      .catch(() => setStatus("denied"));
+  }, [user?.uid, userProfile?.role, allowedRoles, redirectTo]);
+
+  if (status === "loading") return <KraalSpinner />;
+  if (status === "denied") return <Navigate to={redirectTo} replace />;
+  return children;
+}
+
+// ─── AuthInit ─────────────────────────────────────────────────────────────────
+// Starts the Firebase Auth listener once on mount.
+function AuthInit() {
+  const init = useAuthStore((s) => s.init);
+  useEffect(() => {
+    const unsubscribe = init();
+    return unsubscribe;
+  }, [init]);
+  return null;
 }
 
 // ─── Content protection ───────────────────────────────────────────────────────
@@ -168,7 +165,7 @@ function App() {
       <AuthInit />
 
       <Routes>
-        {/* Public routes */}
+        {/* ── Public routes ──────────────────────────────────────────────── */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/marketplace" element={<Marketplace />} />
@@ -178,9 +175,10 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
-         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
-        {/* Identity verification */}
+
+        {/* ── Identity verification (any logged-in user) ─────────────────── */}
         <Route
           path="/verify"
           element={
@@ -190,47 +188,57 @@ function App() {
           }
         />
 
-        {/* Seller dashboard */}
+        {/* ── Seller dashboard (sellers only) ───────────────────────────── */}
         <Route
           path="/seller/dashboard"
           element={
             <ProtectedRoute>
-              <SellerDashboard />
+              <RoleGuard allowedRoles={["seller"]} redirectTo="/marketplace">
+                <SellerDashboard />
+              </RoleGuard>
             </ProtectedRoute>
           }
         />
 
-        {/* List an animal */}
+        {/* ── List an animal (sellers only + must be verified) ──────────── */}
         <Route
           path="/sell"
           element={
             <ProtectedRoute>
-             
-                <SellAnimal />
-          
+              <RoleGuard allowedRoles={["seller"]} redirectTo="/marketplace">
+                <VerificationGuard>
+                  <SellAnimal />
+                </VerificationGuard>
+              </RoleGuard>
             </ProtectedRoute>
           }
         />
 
-        {/* Driver dashboard — login + transporter role required */}
+        {/* ── Buyer dashboard (buyers only) ─────────────────────────────── */}
+        <Route
+          path="/buyer"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["buyer"]} redirectTo="/marketplace">
+                <BuyerDashboard />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── Driver dashboard (transporters only) ──────────────────────── */}
         <Route
           path="/driver"
           element={
             <ProtectedRoute>
-              <DriverGuard>
+              <RoleGuard allowedRoles={["transporter"]} redirectTo="/marketplace">
                 <DriverDashboard />
-              </DriverGuard>
+              </RoleGuard>
             </ProtectedRoute>
           }
-        /> 
-      <Route 
-          path="/buyer" 
-          element={
-          <ProtectedRoute>
-            <BuyerDashboard />
-            </ProtectedRoute>
-          } 
-          />
+        />
+
+        {/* ── Fallback ───────────────────────────────────────────────────── */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
