@@ -205,9 +205,9 @@ function App() {
           path="/sell"
           element={
             <ProtectedRoute>
-              <VerificationGuard>
+             
                 <SellAnimal />
-              </VerificationGuard>
+          
             </ProtectedRoute>
           }
         />
