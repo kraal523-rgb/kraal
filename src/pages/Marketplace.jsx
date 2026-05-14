@@ -1435,25 +1435,25 @@ export default function Marketplace() {
         </div>
       </footer>
       <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
-      <nav className="mp-bottom-nav">
-        <div className="mp-bottom-nav-inner">
-          <Link to="/marketplace" className="mp-bottom-nav-item active">
-            🏪<span>Browse</span>
-          </Link>
-          <Link to="/marketplace?saved=1" className="mp-bottom-nav-item">
-            🤍<span>Saved</span>
-          </Link>
-          <Link to="/sell" className="mp-bottom-nav-post">
-            +
-          </Link>
-          <Link to="/alerts" className="mp-bottom-nav-item">
-            🔔<span>Alerts</span>
-          </Link>
-        <Link  className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
-  👤<span>Profile</span>
-</Link>
-        </div>
-      </nav>
+     <nav className="mp-bottom-nav">
+  <div className="mp-bottom-nav-inner">
+    <Link to="/marketplace" className="mp-bottom-nav-item active">
+      🏪<span>Browse</span>
+    </Link>
+    <Link to="/marketplace?saved=1" className="mp-bottom-nav-item">
+      🤍<span>Saved</span>
+    </Link>
+    <Link to="/sell" className="mp-bottom-nav-post">
+      +
+    </Link>
+    <Link to="/alerts" className="mp-bottom-nav-item">
+      🔔<span>Alerts</span>
+    </Link>
+    <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+      👤<span>Profile</span>
+    </Link>
+  </div>
+</nav>
     </div>
   );
 }
