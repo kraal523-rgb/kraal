@@ -56,9 +56,15 @@ const useAuthStore = create(
         return cred.user;
       },
 
-    createSellerProfile: async (uid, profileData) => {
+createSellerProfile: async (uid, profileData) => {
   const now = serverTimestamp();
   const role = profileData.role || 'buyer';
+
+  const roleCollection = role === 'seller'
+    ? 'sellers'
+    : role === 'transporter'
+      ? 'transporters'
+      : 'buyers';
 
   const userDoc = {
     uid,
@@ -67,38 +73,36 @@ const useAuthStore = create(
     role,
     province:    profileData.province || "",
     city:        profileData.city || "",
-    available:   role === 'transporter' ? true : false,
     verified:    false,
     createdAt:   now,
     updatedAt:   now,
-  };
-  await setDoc(doc(db, 'transporters', uid), userDoc, { merge: true });
-
-  const roleCollection = role === 'seller'
-    ? 'sellers'
-    : role === 'transporter'
-      ? 'transporters'
-      : 'buyers';
-
-  const profileDoc = {
-    ...profileData,
-    uid,
-    role,
-    verified: false,
-    createdAt: now,
-    updatedAt: now,
+    ...(role === 'transporter' && { available: true }),
     ...(role === 'transporter' && {
       serviceProvinces: profileData.province ? [profileData.province] : [],
     }),
   };
-  await setDoc(doc(db, roleCollection, uid), profileDoc);
 
-  set({
-    userProfile: profileDoc,
-    sellerProfile: role === 'seller' ? profileDoc : null,
+  // ✅ STEP 1 — write users/{uid} FIRST so Firestore rules can resolve isRole()
+  await setDoc(doc(db, 'users', uid), {
+    uid,
+    email:    profileData.email,
+    role,
+    province: profileData.province || "",
+    city:     profileData.city || "",
+    verified: false,
+    createdAt: now,
+    updatedAt: now,
   });
 
-  return profileDoc;
+  // ✅ STEP 2 — now write the role collection (rules call isRole() which reads users/{uid})
+  await setDoc(doc(db, roleCollection, uid), { ...profileData, ...userDoc });
+
+  set({
+    userProfile: userDoc,
+    sellerProfile: role === 'seller' ? userDoc : null,
+  });
+
+  return userDoc;
 },
 
       // ── Fetch profile on login (checks role-specific collection) ────────────
