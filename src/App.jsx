@@ -9,7 +9,6 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
 import useAuthStore from "./store/useAuthStore";
-
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";

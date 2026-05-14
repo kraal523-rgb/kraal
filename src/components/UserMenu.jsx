@@ -4,7 +4,7 @@ import useAuthStore from "../store/useAuthStore";
 import "./UserMenu.css";
 
 export default function UserMenu() {
-  const { user, logout } = useAuthStore();
+ const { user, logout, userProfile } = useAuthStore();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
@@ -29,7 +29,7 @@ export default function UserMenu() {
   // Route to the correct dashboard based on the user's role
   const handleDashboard = () => {
     setOpen(false);
-    const role = user?.role;
+    const role = userProfile?.role;
     if (role === "transporter") {
       navigate("/driver");
     } else if (role === "buyer") {
@@ -50,7 +50,7 @@ export default function UserMenu() {
     .toUpperCase();
 
   // Detect if this user is a transporter (adjust the field name to match your Firestore schema)
-  const isTransporter = user?.role === "transporter";
+const isTransporter = userProfile?.role === "transporter";
 
   if (!user) {
     // Not signed in — show the standard Sign In link
