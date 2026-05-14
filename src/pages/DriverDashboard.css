@@ -396,7 +396,96 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+/* ── BOTTOM NAV (mobile only) ── */
+.sd-bottom-nav {
+  display: none;
+}
 
+@media (max-width: 768px) {
+  .sd-bottom-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .sd-bottom-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 56px;
+    padding: 0 8px;
+  }
+
+  .sd-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 8px;
+    transition: color 0.2s;
+    min-width: 48px;
+  }
+
+  .sd-bottom-nav-item span {
+    font-size: 10px;
+  }
+
+  .sd-bottom-nav-item.active {
+    color: #2D5A27;
+  }
+
+  .sd-bottom-nav-item:hover {
+    color: #2D5A27;
+    background: rgba(45, 90, 39, 0.06);
+  }
+
+  .sd-bottom-nav-post {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: #2D5A27;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 4px;
+  }
+
+  .sd-bottom-nav-post:hover {
+    background: #234820;
+    transform: scale(1.07);
+  }
+
+  /* Push page content above the nav bar */
+  .sd-body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  /* Hide the existing desktop tab bar on mobile if you have one */
+  .sd-tabs {
+    display: none;
+  }
+}
 .dd-action-btn {
   padding: 8px 16px;
   border-radius: 8px;

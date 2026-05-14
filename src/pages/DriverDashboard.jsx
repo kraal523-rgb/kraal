@@ -677,6 +677,41 @@ export default function DriverDashboard() {
           </div>
         )}
       </div>
+      {/* ── BOTTOM NAV (mobile) ── */}
+<nav className="sd-bottom-nav">
+  <div className="sd-bottom-nav-inner">
+    <button
+      className={`sd-bottom-nav-item ${activeTab === "Overview" ? "active" : ""}`}
+      onClick={() => setActiveTab("Overview")}
+    >
+      📊<span>Overview</span>
+    </button>
+    <button
+      className={`sd-bottom-nav-item ${activeTab === "My Listings" ? "active" : ""}`}
+      onClick={() => setActiveTab("My Listings")}
+    >
+      📋<span>Listings</span>
+    </button>
+    <button
+      className="sd-bottom-nav-post"
+      onClick={() => navigate("/sell")}
+    >
+      +
+    </button>
+    <button
+      className={`sd-bottom-nav-item ${activeTab === "Orders" ? "active" : ""}`}
+      onClick={() => setActiveTab("Orders")}
+    >
+      📦<span>Orders</span>
+    </button>
+    <button
+      className="sd-bottom-nav-item"
+      onClick={() => navigate("/marketplace")}
+    >
+      🏪<span>Market</span>
+    </button>
+  </div>
+</nav>
     </div>
   );
 }
