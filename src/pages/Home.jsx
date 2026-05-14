@@ -883,6 +883,26 @@ useEffect(() => {
           </span>
         </div>
       </footer>
+      {/* ── BOTTOM NAV (mobile) ── */}
+<nav className="home-bottom-nav">
+  <div className="home-bottom-nav-inner">
+    <Link to="/" className="home-bottom-nav-item active">
+      🏠<span>Home</span>
+    </Link>
+    <Link to="/marketplace" className="home-bottom-nav-item">
+      🏪<span>Browse</span>
+    </Link>
+    <Link to="/sell" className="home-bottom-nav-post">
+      +
+    </Link>
+    <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
+      🤍<span>Saved</span>
+    </Link>
+    <Link to="/profile" className="home-bottom-nav-item">
+      👤<span>Profile</span>
+    </Link>
+  </div>
+</nav>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import logo from "../assets/kraal-logo.svg";
 import heroImage from "../assets/hero-image.jpg";
 const TEAM = [
   {
-    name: "Gabriel Mazambani",
+    name: "Zayn Sovereign",
     role: "Co-founder & CEO",
     bio: "Third-generation cattle farmer from Masvingo. Built Kraal to give every farmer the reach of a city trader.",
     initials: "TM",
