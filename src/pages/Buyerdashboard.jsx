@@ -18,6 +18,7 @@ import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./Buyerdashboard.css";
 import UserMenu from "../components/UserMenu";
+import ProfileSheet from "../components/ProfileSheet";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -122,7 +123,7 @@ async function addDocWithRetry(collectionRef, data, retries = 2) {
 export default function BuyerDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-
+const [profileOpen, setProfileOpen] = useState(false);
   // ── UI state ──────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState("Overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1886,6 +1887,8 @@ export default function BuyerDashboard() {
           </div>
         </div>
       )}
+
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       {/* ── BOTTOM NAV (mobile) ── */}
 <nav className="sd-bottom-nav">
   <div className="sd-bottom-nav-inner">
@@ -1913,12 +1916,9 @@ export default function BuyerDashboard() {
     >
       📦<span>Orders</span>
     </button>
-    <button
-      className="sd-bottom-nav-item"
-      onClick={() => navigate("/marketplace")}
-    >
-      🏪<span>Market</span>
-    </button>
+   <button className="sd-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+  👤<span>Profile</span>
+</button>
   </div>
 </nav>
     </div>

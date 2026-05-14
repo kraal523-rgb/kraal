@@ -14,7 +14,7 @@ import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./DriverDashboard.css";
 import UserMenu from "../components/UserMenu";
-
+import ProfileSheet from "../components/ProfileSheet";
 // ─── STATUS META ──────────────────────────────────────────────────────────────
 const STATUS_META = {
   open: { label: "Open", cls: "dd-status-open" },
@@ -72,7 +72,7 @@ export default function DriverDashboard() {
   const [deliveryFilter, setDeliveryFilter] = useState("all");
   const [accepting, setAccepting] = useState(null);
   const [isAvailable, setIsAvailable] = useState(true);
-
+const [profileOpen, setProfileOpen] = useState(false);
   // ── Live feed of OPEN jobs in the driver's province ───────────────────────
   // Read the driver's province from their user profile
   const [driverProvince, setDriverProvince] = useState(null);
@@ -677,6 +677,7 @@ export default function DriverDashboard() {
           </div>
         )}
       </div>
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       {/* ── BOTTOM NAV (mobile) ── */}
 <nav className="sd-bottom-nav">
   <div className="sd-bottom-nav-inner">
@@ -704,12 +705,9 @@ export default function DriverDashboard() {
     >
       📦<span>Orders</span>
     </button>
-    <button
-      className="sd-bottom-nav-item"
-      onClick={() => navigate("/marketplace")}
-    >
-      🏪<span>Market</span>
-    </button>
+   <button className="sd-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+  👤<span>Profile</span>
+</button>
   </div>
 </nav>
     </div>

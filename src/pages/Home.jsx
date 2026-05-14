@@ -24,6 +24,7 @@ import imgCats from "../assets/cat.jpg";
 import imgPigeons from "../assets/pigeon.jpg";
 import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
+import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
 import "./Home.css";
 import "./Marketplace.css";
@@ -216,6 +217,7 @@ export default function Home() {
   const [ setVisibleSections] = useState({});
   const observerRef = useRef(null);
   const [fetchError, setFetchError] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   // Rotate testimonials
   useEffect(() => {
     const t = setInterval(
@@ -883,6 +885,7 @@ useEffect(() => {
           </span>
         </div>
       </footer>
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       {/* ── BOTTOM NAV (mobile) ── */}
 <nav className="home-bottom-nav">
   <div className="home-bottom-nav-inner">
@@ -898,9 +901,9 @@ useEffect(() => {
     <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
       🤍<span>Saved</span>
     </Link>
-    <Link to="/profile" className="home-bottom-nav-item">
-      👤<span>Profile</span>
-    </Link>
+   <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+  👤<span>Profile</span>
+</Link>
   </div>
 </nav>
     </div>

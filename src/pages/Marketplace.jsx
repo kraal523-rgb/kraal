@@ -28,6 +28,7 @@ import goat1 from "../assets/goats-2.jpg";
 import chicken1 from "../assets/chicken-1.jpg";
 import pig1 from "../assets/pngegg__18.png";
 import all5 from "../assets/all-5.jpg";
+import ProfileSheet from "../components/ProfileSheet";
 import "./Marketplace.css";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -230,6 +231,7 @@ export default function Marketplace() {
   const [location, setLocation] = useState(
     searchParams.get("location") || "All Locations",
   );
+  const [profileOpen, setProfileOpen] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
@@ -1432,6 +1434,7 @@ export default function Marketplace() {
           <span>From the farm gate to the world.</span>
         </div>
       </footer>
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       <nav className="mp-bottom-nav">
         <div className="mp-bottom-nav-inner">
           <Link to="/marketplace" className="mp-bottom-nav-item active">
@@ -1446,9 +1449,9 @@ export default function Marketplace() {
           <Link to="/alerts" className="mp-bottom-nav-item">
             🔔<span>Alerts</span>
           </Link>
-          <Link to="/profile" className="mp-bottom-nav-item">
-            👤<span>Profile</span>
-          </Link>
+        <Link  className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+  👤<span>Profile</span>
+</Link>
         </div>
       </nav>
     </div>
