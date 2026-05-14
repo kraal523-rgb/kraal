@@ -1940,7 +1940,9 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
     flex: none;
     width: 100%;
   }
-
+.mp-nav-logo-text {
+  display: none;
+}
   .mp-banner-text {
     max-width: 100%;
   }
