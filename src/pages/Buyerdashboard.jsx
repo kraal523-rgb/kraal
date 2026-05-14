@@ -124,7 +124,7 @@ export default function BuyerDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 const [profileOpen, setProfileOpen] = useState(false);
-  // ── UI state ──────────────────────────────────────────────────────────────
+ const WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL || "https://kraal-upload.kraal523.workers.dev";
   const [activeTab, setActiveTab] = useState("Overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orderFilter, setOrderFilter] = useState("all");
@@ -234,22 +234,103 @@ const [profileOpen, setProfileOpen] = useState(false);
       () => setTransportLoading(false),
     );
   }, [user?.uid]);
-  useEffect(() => {
-    if (ordersLoading || savedLoading || transportLoading) return;
-    if (buyerInsights) return; // already fetched
+  
+async function getIdToken() {
+  const { getAuth } = await import("firebase/auth");
+  const auth = getAuth();
+  return auth.currentUser?.getIdToken();
+}
+// ✅ Buyer insights
+useEffect(() => {
+  if (ordersLoading || savedLoading || transportLoading) return;
+  if (buyerInsights) return;
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  setInsightsLoading(true);
+  (async () => {
+    try {
+      const token = await getIdToken();
+      const res = await fetch(`${WORKER_URL}/api/ai/buyer/insights`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orders, savedListings, transportOrders }),
+      });
+      const data = await res.json();
+      setBuyerInsights(data);
+    } catch {}
+    finally { setInsightsLoading(false); }
+  })();
+}, [ordersLoading, savedLoading, transportLoading]);
+useEffect(() => {
+  if (!showTransportModal) return;
+  if (!transportForm.pickupProvince || !transportForm.animalType) return;
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  setEstimateLoading(true);
+  setTransportEstimate(null);
+  const timer = setTimeout(async () => {
+    try {
+      const token = await getIdToken();
+      const res = await fetch(`${WORKER_URL}/api/ai/buyer/transport-estimate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          animalType: transportForm.animalType,
+          quantity: transportForm.quantity,
+          pickupProvince: transportForm.pickupProvince,
+          pickupTown: transportForm.pickupTown,
+          dropProvince: transportForm.dropProvince,
+          dropTown: transportForm.dropTown,
+        }),
+      });
+      const data = await res.json();
+      setTransportEstimate(data);
+    } catch {""}
+    finally { setEstimateLoading(false); }
+  }, 600);
+  return () => clearTimeout(timer);
+}, [transportForm.animalType, transportForm.pickupProvince, transportForm.pickupTown, transportForm.dropProvince, transportForm.dropTown, transportForm.quantity, showTransportModal, WORKER_URL]);
+useEffect(() => {
+  if (!activeConvo?.id || convoMessages.length === 0) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInsightsLoading(true);
-    fetch("/api/ai/buyer/insights", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ orders, savedListings, transportOrders }),
-    })
-      .then((r) => r.json())
-      .then((data) => setBuyerInsights(data))
-      .catch(() => {})
-      .finally(() => setInsightsLoading(false));
-  }, [ordersLoading, savedLoading, transportLoading]); // eslint-disable-line
+    setReplySuggestions([]);
+    return;
+  }
+  const lastMsg = convoMessages[convoMessages.length - 1];
+  if (lastMsg.senderId === user?.uid) {
+    setReplySuggestions([]);
+    return;
+  }
+  (async () => {
+    setSuggestionsLoading(true);
+    try {
+      const token = await getIdToken();
+      const res = await fetch(`${WORKER_URL}/api/ai/buyer/reply-suggestions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          lastMessage: lastMsg.text,
+          context: activeConvo.context || "",
+          otherRole:
+            activeConvo.participantRoles?.[
+              activeConvo.participantIds?.find((id) => id !== user?.uid)
+            ] || "seller",
+        }),
+      });
+      const data = await res.json();
+      setReplySuggestions(data.suggestions || []);
+    } catch {""}
+    finally { setSuggestionsLoading(false); }
+  })();
+}, [convoMessages.length, activeConvo?.id]); // eslint-disable-line
+
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -366,37 +447,39 @@ const [profileOpen, setProfileOpen] = useState(false);
     if (msgBodyRef.current)
       msgBodyRef.current.scrollTop = msgBodyRef.current.scrollHeight;
   }, [convoMessages]);
-  const fetchPriceCheck = useCallback(
-    async (listing) => {
-      if (priceChecks[listing.id] || priceCheckLoading[listing.id]) return;
-      setPriceCheckLoading((p) => ({ ...p, [listing.id]: true }));
-      try {
-        const res = await fetch("/api/ai/buyer/price-check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            title: listing.title,
-            category: listing.categoryId,
-            price: listing.price,
-            breed: listing.breed,
-            age: listing.age,
-            weight: listing.weight,
-            vaccinated: listing.vaccinated,
-            quantity: listing.quantity,
-            location: listing.province || listing.city,
-          }),
-        });
-        const data = await res.json();
-        setPriceChecks((p) => ({ ...p, [listing.id]: data }));
-      } catch {
-        // silently fail
-      } finally {
-        setPriceCheckLoading((p) => ({ ...p, [listing.id]: false }));
-      }
-    },
-    [priceChecks, priceCheckLoading],
-  );
+const fetchPriceCheck = useCallback(
+  async (listing) => {
+    if (priceChecks[listing.id] || priceCheckLoading[listing.id]) return;
+    setPriceCheckLoading((p) => ({ ...p, [listing.id]: true }));
+    try {
+      const token = await getIdToken();
+      const res = await fetch(`${WORKER_URL}/api/ai/buyer/price-check`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: listing.title,
+          category: listing.categoryId,
+          price: listing.price,
+          breed: listing.breed,
+          age: listing.age,
+          weight: listing.weight,
+          vaccinated: listing.vaccinated,
+          quantity: listing.quantity,
+          location: listing.province || listing.city,
+        }),
+      });
+      const data = await res.json();
+      setPriceChecks((p) => ({ ...p, [listing.id]: data }));
+    } catch {}
+    finally {
+      setPriceCheckLoading((p) => ({ ...p, [listing.id]: false }));
+    }
+  },
+  [priceChecks, priceCheckLoading],
+);
 
   // Trigger checks when savedListings loads
   useEffect(() => {
