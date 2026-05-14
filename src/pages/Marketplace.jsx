@@ -605,7 +605,7 @@ export default function Marketplace() {
                         ✕
                       </button>
                     )}
-                    <button>{t("search.button")}</button>
+                   <button style={{ border: "none", background: "var(--primary-color)", paddingLeft: "10px", paddingRight: "10px" }}>{t("search.button")}</button>
                   </form>
                   <p className="mp-banner-count">
                     <strong>{filtered.length}</strong> listing
