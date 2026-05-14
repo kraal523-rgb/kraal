@@ -26,7 +26,7 @@
   border-radius: 99px;
   padding: 4px 10px 4px 4px;
   cursor: pointer;
-  color: inherit;
+  color: white;
   transition:
     background 0.15s,
     border-color 0.15s;

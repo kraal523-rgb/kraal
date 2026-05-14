@@ -1,7 +1,9 @@
+// eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Terms.css";
 import logo from "../assets/kraal-logo-black.svg";
+import ProfileSheet from "../components/ProfileSheet";
 const SECTIONS = [
   {
     id: "introduction",
@@ -103,7 +105,7 @@ export default function Terms() {
   const [active, setActive] = useState("introduction");
 
   const activeSection = SECTIONS.find((s) => s.id === active);
-
+const [profileOpen, setProfileOpen] = useState(false);
   return (
     <div className="terms-page">
       {/* ── NAV ── */}
@@ -201,25 +203,28 @@ export default function Terms() {
           </div>
         </div>
       </footer>
+       <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+      <nav className="home-bottom-nav">
+        <div className="home-bottom-nav-inner">
+          <Link to="/" className="home-bottom-nav-item active">
+            🏠<span>Home</span>
+          </Link>
+          <Link to="/marketplace" className="home-bottom-nav-item">
+            🏪<span>Browse</span>
+          </Link>
+          <Link to="/sell" className="home-bottom-nav-post">
+            +
+          </Link>
+          <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
+            🤍<span>Saved</span>
+          </Link>
+         <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+        👤<span>Profile</span>
+      </Link>
+        </div>
+      </nav>
     </div>
   );
 }
 
-function KraalMark() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 34 34" fill="none">
-      <circle cx="17" cy="17" r="17" fill="#2D5A27" />
-      <text
-        x="17"
-        y="23"
-        textAnchor="middle"
-        fontSize="18"
-        fill="white"
-        fontFamily="Georgia, serif"
-        fontWeight="bold"
-      >
-        K
-      </text>
-    </svg>
-  );
-}
+

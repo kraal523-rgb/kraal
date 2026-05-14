@@ -15,7 +15,8 @@ import breeds from "../assets/breeds.jpg";
 import records from "../assets/records.jpg";
 import online1 from "../assets/online-1.jpg";
 import "./Blog.css";
-
+import ProfileSheet from "../components/ProfileSheet";
+// eslint-disable-next-line react-refresh/only-export-components
 export const BLOG_POSTS = [
   {
     id: "how-to-price-livestock",
@@ -549,6 +550,7 @@ Creating a listing on Kraal takes under 10 minutes. You set your price, upload y
 ];
 
 export default function Blog() {
+  const [profileOpen, setProfileOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const categories = ["All", ...new Set(BLOG_POSTS.map((p) => p.category))];
   const filtered =
@@ -632,6 +634,26 @@ export default function Blog() {
           </div>
         </div>
       </footer>
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+    <nav className="home-bottom-nav">
+      <div className="home-bottom-nav-inner">
+        <Link to="/" className="home-bottom-nav-item active">
+          🏠<span>Home</span>
+        </Link>
+        <Link to="/marketplace" className="home-bottom-nav-item">
+          🏪<span>Browse</span>
+        </Link>
+        <Link to="/sell" className="home-bottom-nav-post">
+          +
+        </Link>
+        <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
+          🤍<span>Saved</span>
+        </Link>
+       <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+      👤<span>Profile</span>
+    </Link>
+      </div>
+    </nav>
     </div>
   );
 }

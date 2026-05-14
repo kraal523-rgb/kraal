@@ -1916,7 +1916,14 @@ body,
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     padding-bottom: env(safe-area-inset-bottom);
   }
-
+.home-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13, 41, 16, 0.97);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
   .home-bottom-nav-inner {
     display: flex;
     align-items: center;

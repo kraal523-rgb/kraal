@@ -1,8 +1,9 @@
-import  { useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
 import logo from "../assets/kraal-logo.svg";
 import heroImage from "../assets/hero-image.jpg";
+import ProfileSheet from "../components/ProfileSheet";
 const TEAM = [
   {
     name: "Zayn Sovereign",
@@ -53,7 +54,7 @@ const STATS = [
 
 export default function About() {
   const observerRef = useRef(null);
-
+const [profileOpen, setProfileOpen] = useState(false);
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -244,6 +245,26 @@ export default function About() {
           </div>
         </div>
       </footer>
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+      <nav className="home-bottom-nav">
+        <div className="home-bottom-nav-inner">
+          <Link to="/" className="home-bottom-nav-item active">
+            🏠<span>Home</span>
+          </Link>
+          <Link to="/marketplace" className="home-bottom-nav-item">
+            🏪<span>Browse</span>
+          </Link>
+          <Link to="/sell" className="home-bottom-nav-post">
+            +
+          </Link>
+          <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
+            🤍<span>Saved</span>
+          </Link>
+         <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+        👤<span>Profile</span>
+      </Link>
+        </div>
+      </nav>
     </div>
   );
 }

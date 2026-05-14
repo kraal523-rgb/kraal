@@ -214,7 +214,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertEmail, setAlertEmail] = useState("");
   const [alertSubmitted, setAlertSubmitted] = useState(false);
-  const [ setVisibleSections] = useState({});
+  const [visibleSections, setVisibleSections] = useState(new Set());
   const observerRef = useRef(null);
   const [fetchError, setFetchError] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -251,10 +251,11 @@ const fetchFeatured = useCallback(async () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setVisibleSections((prev) => ({
-              ...prev,
-              [entry.target.id]: true,
-            }));
+           setVisibleSections((prev) => {
+  const next = new Set(prev);
+  next.add(entry.target.id);
+  return next;
+});
           }
         });
       },

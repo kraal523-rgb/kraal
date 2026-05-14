@@ -4,6 +4,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import emailjs from "@emailjs/browser";
 import "./Contact.css";
+import ProfileSheet from "../components/ProfileSheet";
 import logo from "../assets/kraal-logo.svg";
 const CONTACT_OPTIONS = [
   {
@@ -61,7 +62,7 @@ export default function Contact() {
   });
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-
+const [profileOpen, setProfileOpen] = useState(false);
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
@@ -277,6 +278,26 @@ const handleSubmit = async (e) => {
           </div>
         </div>
       </footer>
+      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+      <nav className="home-bottom-nav">
+        <div className="home-bottom-nav-inner">
+          <Link to="/" className="home-bottom-nav-item active">
+            🏠<span>Home</span>
+          </Link>
+          <Link to="/marketplace" className="home-bottom-nav-item">
+            🏪<span>Browse</span>
+          </Link>
+          <Link to="/sell" className="home-bottom-nav-post">
+            +
+          </Link>
+          <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
+            🤍<span>Saved</span>
+          </Link>
+         <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
+        👤<span>Profile</span>
+      </Link>
+        </div>
+      </nav>
     </div>
   );
 }
