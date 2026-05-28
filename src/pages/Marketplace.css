@@ -776,6 +776,7 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   justify-content: center;
   overflow: hidden;
 }
+
 .mp-nav-actions-mobile {
   display: none;
 }
@@ -2434,4 +2435,225 @@ body { font-family: var(--font); background: var(--gray-50); color: var(--gray-8
   .mp-video-ads {
     grid-template-columns: 1fr;
   }
+}
+/* ── RECENTLY SOLD TICKER ── */
+.sold-ticker-band {
+  background: #0a1f0a;
+  color: #a8d5a2;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  border-bottom: 1px solid rgba(168, 213, 162, 0.15);
+}
+
+.sold-ticker-label {
+  flex-shrink: 0;
+  padding: 0 16px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  border-right: 1px solid rgba(168, 213, 162, 0.2);
+  white-space: nowrap;
+}
+
+.sold-ticker-scroll {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sold-ticker-track {
+  display: flex;
+  gap: 0;
+  animation: tickerScroll 40s linear infinite;
+  width: max-content;
+}
+
+.sold-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  white-space: nowrap;
+}
+
+.st-dot {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.st-time {
+  color: #6aaa64;
+  font-size: 0.7rem;
+}
+
+.st-text {
+  color: #c8eec4;
+}
+
+.st-text strong {
+  color: #fff;
+}
+
+.st-sep {
+  color: rgba(168, 213, 162, 0.3);
+  margin-left: 4px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── SPOTLIGHT / TOP FARMERS ── */
+.spotlight-section {
+  padding: 64px 0;
+  background: #fafaf8;
+}
+
+.spotlight-track-wrap {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 8px;
+  /* subtle fade edges */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 3%,
+    black 97%,
+    transparent 100%
+  );
+}
+
+.spotlight-track-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.spotlight-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  padding: 8px 4px 16px;
+}
+
+.spotlight-card {
+  background: #fff;
+  border: 1px solid #e8e4dc;
+  border-radius: 16px;
+  padding: 20px;
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.spotlight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+.sp-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sp-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.sp-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sp-name {
+  font-size: 0.85rem;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-farm {
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-verified {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.sp-location,
+.sp-sells {
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.sp-sells {
+  color: #444;
+  font-weight: 500;
+}
+
+.sp-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px solid #f0ece4;
+}
+
+.sp-rating {
+  font-size: 0.8rem;
+  color: #c8960c;
+  font-weight: 700;
+}
+
+.sp-sales {
+  font-size: 0.72rem;
+  color: #888;
+}
+
+.sp-cta {
+  background: none;
+  border: 1.5px solid var(--green-deep, #2D5A27);
+  color: var(--green-deep, #2D5A27);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  margin-top: auto;
+}
+
+.sp-cta:hover {
+  background: var(--green-deep, #2D5A27);
+  color: #fff;
 }

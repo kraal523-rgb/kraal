@@ -13,6 +13,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
 import Marketplace from "./pages/Marketplace";
+import AdminDashboard from "./pages/AdminDashboard";
 import ListingDetail from "./pages/ListingDetail";
 import Login from "./pages/Login";
 import Register from "./pages/auth/Register";
@@ -212,7 +213,16 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["admin"]} redirectTo="/">
+                <AdminDashboard />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
         {/* ── Buyer dashboard (buyers only) ─────────────────────────────── */}
         <Route
           path="/buyer"
@@ -230,7 +240,10 @@ function App() {
           path="/driver"
           element={
             <ProtectedRoute>
-              <RoleGuard allowedRoles={["transporter"]} redirectTo="/marketplace">
+              <RoleGuard
+                allowedRoles={["transporter"]}
+                redirectTo="/marketplace"
+              >
                 <DriverDashboard />
               </RoleGuard>
             </ProtectedRoute>

@@ -81,7 +81,16 @@ const LOCATIONS = [
   "Kadoma",
   "Zvishavane",
 ];
-
+const RECENTLY_SOLD = [
+  { time: "2h ago",  qty: "15",  animal: "Boer Goats",      location: "Gweru"      },
+  { time: "4h ago",  qty: "3",   animal: "Brahman Bulls",   location: "Marondera"  },
+  { time: "5h ago",  qty: "200", animal: "Road Runners",    location: "Mutare"     },
+  { time: "6h ago",  qty: "8",   animal: "Duroc Piglets",   location: "Chinhoyi"   },
+  { time: "9h ago",  qty: "12",  animal: "Merino Ewes",     location: "Bulawayo"   },
+  { time: "11h ago", qty: "1",   animal: "Thoroughbred Mare", location: "Harare"   },
+  { time: "1d ago",  qty: "50",  animal: "Guinea Fowl",     location: "Masvingo"   },
+  { time: "1d ago",  qty: "6",   animal: "Nguni Cows",      location: "Bindura"    },
+];
 const PRICE_TICKER = [
   { label: "Brahman Bull", price: "USD 1,200", trend: "up" },
   { label: "Nguni Cow", price: "USD 850", trend: "up" },
@@ -182,7 +191,74 @@ const VIDEO_ADS = [
     label: "Sponsored",
   },
 ];
-
+const TOP_FARMERS = [
+  {
+    initials: "TM",
+    name: "Takudzwa Moyo",
+    farm: "Moyo Cattle Farm",
+    location: "Marondera",
+    sells: "Brahman Bulls, Nguni Cows",
+    rating: 4.9,
+    sales: 47,
+    color: "#2D5A27",
+    verified: true,
+  },
+  {
+    initials: "SN",
+    name: "Sithembile Ndlovu",
+    farm: "Ndlovu Poultry",
+    location: "Bulawayo",
+    sells: "Road Runners, Guinea Fowl",
+    rating: 4.8,
+    sales: 132,
+    color: "#C85A2A",
+    verified: true,
+  },
+  {
+    initials: "FC",
+    name: "Farai Chikwanda",
+    farm: "Chikwanda Goats",
+    location: "Mutare",
+    sells: "Boer Goats, Sheep",
+    rating: 4.7,
+    sales: 61,
+    color: "#7A5C1E",
+    verified: true,
+  },
+  {
+    initials: "BM",
+    name: "Blessing Mutasa",
+    farm: "Mutasa Mixed Farm",
+    location: "Gweru",
+    sells: "Pigs, Cattle, Goats",
+    rating: 4.9,
+    sales: 89,
+    color: "#1A5C6B",
+    verified: true,
+  },
+  {
+    initials: "RZ",
+    name: "Rudo Zvobgo",
+    farm: "Zvobgo Piggery",
+    location: "Chinhoyi",
+    sells: "Duroc Pigs, Landrace",
+    rating: 4.6,
+    sales: 38,
+    color: "#5C1A6B",
+    verified: true,
+  },
+  {
+    initials: "JM",
+    name: "Joseph Mhuri",
+    farm: "Mhuri Horse Stud",
+    location: "Harare",
+    sells: "Thoroughbreds, Warmbloods",
+    rating: 5.0,
+    sales: 14,
+    color: "#1A3A6B",
+    verified: true,
+  },
+];
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 function getDaysAgo(createdAt) {
@@ -465,7 +541,25 @@ export default function Marketplace() {
           </div>
         </div>
       </div>
-
+{/* ── RECENTLY SOLD TICKER ── */}
+<div className="sold-ticker-band" aria-label="Recently sold animals">
+  <div className="sold-ticker-label">🟢 Recently Sold</div>
+  <div className="sold-ticker-scroll">
+    <div className="sold-ticker-track">
+      {[...RECENTLY_SOLD, ...RECENTLY_SOLD].map((item, i) => (
+        <span key={i} className="sold-ticker-item">
+          <span className="st-dot" />
+          <span className="st-time">{item.time}</span>
+          <span className="st-text">
+            <strong>{item.qty}× {item.animal}</strong>
+            {" "}sold in {item.location}
+          </span>
+          <span className="st-sep">·</span>
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
       {/* ── NAV ── */}
       <nav className="mp-nav">
         <div className="mp-nav-inner">
@@ -565,7 +659,7 @@ export default function Marketplace() {
                 className="mp-banner-overlay"
                 style={{ background: slide.overlay }}
               />
-              <div className="mp-banner-content">
+              <div className="mp-banner-content" style={{ padding: "2rem 1rem", boxSizing: "border-box" }}>
                 <div className="mp-banner-text">
                   <span className="mp-banner-tag">{slide.tag}</span>
                   <h1 className="mp-banner-headline">{slide.headline}</h1>
@@ -1251,7 +1345,50 @@ export default function Marketplace() {
     getCategoryEmoji={getCategoryEmoji}
   />
 )}
-
+{/* ── TOP FARMERS ── */}
+{/* ── TOP FARMERS ── */}
+<section className="spotlight-section">
+  <div className="section-inner">
+    <div className="section-header">
+      <div>
+        <p className="section-eyebrow">Community</p>
+        <h2 className="section-title">Top Farmers on Kraal</h2>
+      </div>
+    </div>
+    <div className="spotlight-track-wrap">
+      <div className="spotlight-track">
+        {TOP_FARMERS.map((farmer, i) => (
+          <div key={i} className="spotlight-card">
+            <div className="sp-header">
+              <div className="sp-avatar" style={{ background: farmer.color }}>
+                {farmer.initials}
+              </div>
+              <div className="sp-meta">
+                <strong className="sp-name">{farmer.name}</strong>
+                <span className="sp-farm">{farmer.farm}</span>
+              </div>
+              {farmer.verified && (
+                <span className="sp-verified" title="Verified seller">✅</span>
+              )}
+            </div>
+            <div className="sp-location">📍 {farmer.location}</div>
+            <div className="sp-sells">🐾 {farmer.sells}</div>
+            <div className="sp-stats">
+              <span className="sp-rating">★ {farmer.rating}</span>
+              <span className="sp-sales">{farmer.sales} sold</span>
+            </div>
+            <button
+              className="sp-cta"
+              onClick={() => setSearch(farmer.name)}
+            >
+              View Listings →
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
       {/* ── FOOTER ── */}
       <footer className="mp-footer">
         <div className="mp-footer-inner">

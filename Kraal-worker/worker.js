@@ -1,3 +1,5 @@
+
+import { handleWebhookVerification, handleWebhookEvent } from "./webhook.js";
 export default {
   // eslint-disable-next-line no-unused-vars
   async fetch(request, env, ctx) {
@@ -45,7 +47,23 @@ export default {
       if (url.pathname === "/api/ai/listing" && request.method === "POST") {
         return await handleAIListing(request, env, corsHeaders);
       }
-
+      if (request.method === "GET" && url.pathname === "/whatsapp/webhook") {
+      return handleWebhookVerification(request, env);
+    }
+ 
+    // ── Incoming messages (POST)
+    if (request.method === "POST" && url.pathname === "/whatsapp/webhook") {
+      ctx.waitUntil(handleWebhookEvent(request, env));
+      // Always respond 200 immediately — Meta will retry if you don't
+      return new Response("OK", { status: 200 });
+    }
+ 
+    // ── Health check
+    if (url.pathname === "/health") {
+      return new Response(JSON.stringify({ status: "ok", service: "kraal-whatsapp" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
       // ── POST /api/ai/insights  (overview analytics insight card) ─────────────────
       if (url.pathname === "/api/ai/insights" && request.method === "POST") {
         return await handleAIInsights(request, env, corsHeaders);

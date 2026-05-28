@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import InstallButton from '../components/InstallButton'
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp  } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -28,6 +29,7 @@ import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
 import "./Home.css";
 import "./Marketplace.css";
+import KraalOnboardingForm from "../components/KraalOnboardingForm";
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
   { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },
@@ -48,7 +50,14 @@ const CATEGORIES = [
   { id: "cats",       img: imgCats,      label: "Cats",          count: "85+"    },
   { id: "ostrich",    img: imgOstrich,   label: "Ostrich",       count: "40+"    },
 ];
-
+const FARM_PRODUCTS = [
+  { id: "fish",      img: null, label: "Fish (Aquaculture)", count: "60+",  emoji: "🐟" },
+  { id: "bees",      img: null, label: "Bees & Honey",       count: "45+",  emoji: "🐝" },
+  { id: "eggs",      img: null, label: "Eggs (by tray)",     count: "130+", emoji: "🥚" },
+  { id: "wool",      img: null, label: "Wool & Fleece",      count: "55+",  emoji: "🧶" },
+  { id: "compost",   img: null, label: "Manure & Compost",   count: "30+",  emoji: "🌱" },
+  { id: "honey",     img: null, label: "Raw Honey",          count: "70+",  emoji: "🍯" },
+];
 const PRICE_TICKER = [
   { label: "Brahman Bull", price: "USD 1,200", trend: "up" },
   { label: "Nguni Cow", price: "USD 850", trend: "up" },
@@ -60,7 +69,74 @@ const PRICE_TICKER = [
   { label: "Bronze Turkey", price: "USD 45", trend: "up" },
   { label: "Ankole Bull", price: "USD 1,500", trend: "up" },
 ];
-
+const TOP_FARMERS = [
+  {
+    initials: "TM",
+    name: "Takudzwa Moyo",
+    farm: "Moyo Cattle Farm",
+    location: "Marondera",
+    sells: "Brahman Bulls, Nguni Cows",
+    rating: 4.9,
+    sales: 47,
+    color: "#2D5A27",
+    verified: true,
+  },
+  {
+    initials: "SN",
+    name: "Sithembile Ndlovu",
+    farm: "Ndlovu Poultry",
+    location: "Bulawayo",
+    sells: "Road Runners, Guinea Fowl",
+    rating: 4.8,
+    sales: 132,
+    color: "#C85A2A",
+    verified: true,
+  },
+  {
+    initials: "FC",
+    name: "Farai Chikwanda",
+    farm: "Chikwanda Goats",
+    location: "Mutare",
+    sells: "Boer Goats, Sheep",
+    rating: 4.7,
+    sales: 61,
+    color: "#7A5C1E",
+    verified: true,
+  },
+  {
+    initials: "BM",
+    name: "Blessing Mutasa",
+    farm: "Mutasa Mixed Farm",
+    location: "Gweru",
+    sells: "Pigs, Cattle, Goats",
+    rating: 4.9,
+    sales: 89,
+    color: "#1A5C6B",
+    verified: true,
+  },
+  {
+    initials: "RZ",
+    name: "Rudo Zvobgo",
+    farm: "Zvobgo Piggery",
+    location: "Chinhoyi",
+    sells: "Duroc Pigs, Landrace",
+    rating: 4.6,
+    sales: 38,
+    color: "#5C1A6B",
+    verified: true,
+  },
+  {
+    initials: "JM",
+    name: "Joseph Mhuri",
+    farm: "Mhuri Horse Stud",
+    location: "Harare",
+    sells: "Thoroughbreds, Warmbloods",
+    rating: 5.0,
+    sales: 14,
+    color: "#1A3A6B",
+    verified: true,
+  },
+];
 const FEATURED_LISTINGS = [
   {
     id: 1,
@@ -192,7 +268,16 @@ const TRUST_ITEMS = [
     desc: "Buyers from Zimbabwe, Zambia, Mozambique, SA, and Botswana on one platform.",
   },
 ];
-
+const RECENTLY_SOLD = [
+  { time: "2h ago",  qty: "15",  animal: "Boer Goats",      location: "Gweru"      },
+  { time: "4h ago",  qty: "3",   animal: "Brahman Bulls",   location: "Marondera"  },
+  { time: "5h ago",  qty: "200", animal: "Road Runners",    location: "Mutare"     },
+  { time: "6h ago",  qty: "8",   animal: "Duroc Piglets",   location: "Chinhoyi"   },
+  { time: "9h ago",  qty: "12",  animal: "Merino Ewes",     location: "Bulawayo"   },
+  { time: "11h ago", qty: "1",   animal: "Thoroughbred Mare", location: "Harare"   },
+  { time: "1d ago",  qty: "50",  animal: "Guinea Fowl",     location: "Masvingo"   },
+  { time: "1d ago",  qty: "6",   animal: "Nguni Cows",      location: "Bindura"    },
+];
 const REGIONS = [
   "Harare",
   "Bulawayo",
@@ -207,14 +292,17 @@ const REGIONS = [
 ];
 
 export default function Home() {
+  const location = useLocation();
   const [featuredListings, setFeaturedListings] = useState([]);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertEmail, setAlertEmail] = useState("");
+  const [topFarmers, setTopFarmers] = useState([]);
   const [alertSubmitted, setAlertSubmitted] = useState(false);
   const [visibleSections, setVisibleSections] = useState(new Set());
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
   const observerRef = useRef(null);
   const [fetchError, setFetchError] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -226,6 +314,61 @@ export default function Home() {
     );
     return () => clearInterval(t);
   }, []);
+  useEffect(() => {
+  const fetchTopFarmers = async () => {
+    try {
+      const q = query(
+        collection(db, "listings"),
+        where("status", "==", "active"),
+        orderBy("createdAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+
+      // Group listings by seller
+      const sellerMap = {};
+      snapshot.docs.forEach((doc) => {
+        const d = doc.data();
+        const key = d.sellerId || d.sellerName || d.seller;
+        if (!key) return;
+
+        if (!sellerMap[key]) {
+          sellerMap[key] = {
+            id: key,
+            name: d.sellerName || d.seller || "Unknown Farmer",
+            farm: d.farmName || d.farm || "",
+            location: d.city || d.province || d.location || "Zimbabwe",
+            sells: new Set(),
+            listingCount: 0,
+            rating: d.sellerRating || null,
+            verified: d.sellerVerified || false,
+            avatar: d.sellerAvatar || null,
+          };
+        }
+
+        sellerMap[key].listingCount += 1;
+        if (d.categoryId) sellerMap[key].sells.add(d.categoryId);
+      });
+
+      // Sort by listing count, take top 8
+      const sorted = Object.values(sellerMap)
+        .sort((a, b) => b.listingCount - a.listingCount)
+        .slice(0, 8)
+        .map((s) => ({
+          ...s,
+          sells: [...s.sells].join(", "),
+          // Generate initials and color from name
+          initials: s.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase(),
+          color: nameToColor(s.name),
+        }));
+
+      setTopFarmers(sorted);
+    } catch (err) {
+      console.error("Failed to fetch top farmers:", err);
+    }
+  };
+
+  fetchTopFarmers();
+}, []);
 const fetchFeatured = useCallback(async () => {
     try {
       const q = query(
@@ -311,7 +454,25 @@ useEffect(() => {
           </div>
         </div>
       </div>
-
+{/* ── RECENTLY SOLD TICKER ── */}
+<div className="sold-ticker-band" aria-label="Recently sold animals">
+  <div className="sold-ticker-label">🟢 Recently Sold</div>
+  <div className="sold-ticker-scroll">
+    <div className="sold-ticker-track">
+      {[...RECENTLY_SOLD, ...RECENTLY_SOLD].map((item, i) => (
+        <span key={i} className="sold-ticker-item">
+          <span className="st-dot" />
+          <span className="st-time">{item.time}</span>
+          <span className="st-text">
+            <strong>{item.qty}× {item.animal}</strong>
+            {" "}sold in {item.location}
+          </span>
+          <span className="st-sep">·</span>
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
       {/* ── NAV ── */}
       <nav className="home-nav">
         <div className="nav-inner">
@@ -466,40 +627,74 @@ useEffect(() => {
       </section>
 
       {/* ── CATEGORIES ── */}
-      <section className="categories-section" id="categories" data-observe>
-        <div className="section-inner">
-          <div className="section-header">
-            <div>
-              <p className="section-eyebrow">What are you looking for?</p>
-              <h2 className="section-title">Browse by Animal</h2>
-            </div>
-           <Link to="/marketplace" className="section-link">
-              View all listings →
-            </Link>
+     {/* ── CATEGORIES ── */}
+<section className="categories-section" id="categories" data-observe>
+  <div className="section-inner">
+
+    {/* --- Livestock --- */}
+    <div className="section-header">
+      <div>
+        <p className="section-eyebrow">What are you looking for?</p>
+        <h2 className="section-title">Browse by Animal</h2>
+      </div>
+      <Link to="/marketplace" className="section-link">View all listings →</Link>
+    </div>
+    <div className="categories-grid">
+      {CATEGORIES.map((cat, i) => (
+        <button
+          key={cat.id}
+          className="cat-card"
+          style={{ animationDelay: `${i * 0.06}s` }}
+          onClick={() => navigate(`/marketplace?category=${cat.id}`)}
+        >
+          <div className="cat-img-wrap">
+            {cat.img ? (
+              <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
+            ) : (
+              <span className="cat-emoji">{cat.emoji}</span>
+            )}
           </div>
-          <div className="categories-grid">
-            {CATEGORIES.map((cat, i) => (
-              <button
-  key={cat.id}
-  className="cat-card"
-  style={{ animationDelay: `${i * 0.06}s` }}
-  onClick={() => navigate(`/marketplace?category=${cat.id}`)}
->
-  <div className="cat-img-wrap">
-    {cat.img ? (
-      <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
-    ) : (
-      <span className="cat-emoji">{cat.emoji}</span>
-    )}
+          <span className="cat-label">{cat.label}</span>
+          <span className="cat-count">{cat.count} listings</span>
+          <span className="cat-arrow">→</span>
+        </button>
+      ))}
+    </div>
+
+    {/* --- Farm Products divider --- */}
+    <div className="farm-products-divider">
+      <span className="fp-divider-line" />
+      <span className="fp-divider-badge">🌾 Aquaculture & Farm Products</span>
+      <span className="fp-divider-line" />
+    </div>
+    <p className="fp-sub">
+      Beyond livestock — fish ponds, beehives, eggs, wool and more from Zimbabwean farms.
+    </p>
+
+    <div className="categories-grid farm-products-grid">
+      {FARM_PRODUCTS.map((cat, i) => (
+        <button
+          key={cat.id}
+          className="cat-card farm-product-card"
+          style={{ animationDelay: `${i * 0.06}s` }}
+          onClick={() => navigate(`/marketplace?category=${cat.id}`)}
+        >
+          <div className="cat-img-wrap">
+            {cat.img ? (
+              <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
+            ) : (
+              <span className="cat-emoji">{cat.emoji}</span>
+            )}
+          </div>
+          <span className="cat-label">{cat.label}</span>
+          <span className="cat-count">{cat.count} listings</span>
+          <span className="cat-arrow">→</span>
+        </button>
+      ))}
+    </div>
+
   </div>
-  <span className="cat-label">{cat.label}</span>
-  <span className="cat-count">{cat.count} listings</span>
-  <span className="cat-arrow">→</span>
-</button>
-            ))}
-          </div>
-        </div>
-      </section>
+</section>
 
       {/* ── FEATURED LISTINGS ── */}
     <section className="featured-section" id="featured" data-observe>
@@ -603,6 +798,81 @@ useEffect(() => {
         })
       )}
     </div>
+  </div>
+</section>
+{/* ── TOP FARMERS ── */}
+<section className="spotlight-section">
+  <div className="section-inner">
+    <div className="section-header">
+      <div>
+        <p className="section-eyebrow">Community</p>
+        <h2 className="section-title">Top Farmers on Kraal</h2>
+      </div>
+      <Link to="/marketplace" className="section-link">
+        Browse all sellers →
+      </Link>
+    </div>
+
+    {topFarmers.length === 0 ? (
+      // Skeleton while loading
+      <div className="spotlight-track">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="spotlight-card skeleton">
+            <div className="sp-skeleton-avatar" />
+            <div className="skeleton-line" />
+            <div className="skeleton-line short" />
+            <div className="skeleton-line short" />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="spotlight-track-wrap">
+        <div className="spotlight-track">
+          {topFarmers.map((farmer, i) => (
+            <div key={farmer.id} className="spotlight-card">
+              <div className="sp-header">
+                <div className="sp-avatar" style={{ background: farmer.color }}>
+                  {farmer.avatar
+                    ? <img src={farmer.avatar} alt={farmer.name} style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+                    : farmer.initials
+                  }
+                </div>
+                <div className="sp-meta">
+                  <strong className="sp-name">{farmer.name}</strong>
+                  <span className="sp-farm">{farmer.farm || "Independent Farmer"}</span>
+                </div>
+                {farmer.verified && (
+                  <span className="sp-verified" title="Verified seller">✅</span>
+                )}
+              </div>
+
+              <div className="sp-location">📍 {farmer.location}</div>
+              <div className="sp-sells">🐾 {farmer.sells || "Various animals"}</div>
+
+              <div className="sp-stats">
+                <span className="sp-listing-count">
+                  📋 {farmer.listingCount} listing{farmer.listingCount !== 1 ? "s" : ""}
+                </span>
+                {farmer.rating && (
+                  <span className="sp-rating">★ {farmer.rating}</span>
+                )}
+              </div>
+
+              <button
+                className="sp-cta"
+                onClick={() => {
+                  // Home.jsx — use navigate
+                  // Marketplace.jsx — use setSearch
+                  navigate(`/marketplace?seller=${encodeURIComponent(farmer.name)}`);
+                }}
+              >
+                View Listings →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
 </section>
       {/* ── TRUST STRIP ── */}
@@ -799,9 +1069,9 @@ useEffect(() => {
             </ul>
           </div>
           <div className="cta-actions">
-          <Link to="/register" className="btn-cta-primary">
+          <button onClick={() => setJoinModalOpen(true)} className="btn-cta-primary">
               Create Free Account
-            </Link>
+            </button>
            <Link to="/marketplace" className="btn-cta-ghost">
               Browse Listings
             </Link>
@@ -895,26 +1165,70 @@ useEffect(() => {
         </div>
       </footer>
       <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
-      {/* ── BOTTOM NAV (mobile) ── */}
+{/* ── BOTTOM NAV (mobile) ── */}
 <nav className="home-bottom-nav">
   <div className="home-bottom-nav-inner">
-    <Link to="/" className="home-bottom-nav-item active">
+    <Link
+      to="/"
+      className={`home-bottom-nav-item ${location.pathname === "/" ? "active" : ""}`}
+    >
       🏠<span>Home</span>
     </Link>
-    <Link to="/marketplace" className="home-bottom-nav-item">
+    <Link
+      to="/marketplace"
+      className={`home-bottom-nav-item ${location.pathname === "/marketplace" ? "active" : ""}`}
+    >
       🏪<span>Browse</span>
     </Link>
     <Link to="/sell" className="home-bottom-nav-post">
       +
     </Link>
-    <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
+    <Link
+      to="/marketplace?saved=1"
+      className={`home-bottom-nav-item ${location.pathname === "/marketplace" && location.search.includes("saved=1") ? "active" : ""}`}
+    >
       🤍<span>Saved</span>
     </Link>
-   <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
-  👤<span>Profile</span>
-</Link>
+    <button
+      className={`home-bottom-nav-item ${profileOpen ? "active" : ""}`}
+      onClick={() => setProfileOpen(true)}
+    >
+      👤<span>Profile</span>
+    </button>
   </div>
 </nav>
+{joinModalOpen && (
+  <div className="kraal-modal-backdrop" onClick={() => setJoinModalOpen(false)}>
+    <div className="kraal-modal-box" onClick={(e) => e.stopPropagation()}>
+      <button
+        className="kraal-modal-close"
+        onClick={() => setJoinModalOpen(false)}
+        aria-label="Close"
+      >
+        ✕
+      </button>
+      <KraalOnboardingForm
+        onComplete={({ role, profile }) => {
+          setJoinModalOpen(false);
+          navigate("/dashboard");
+        }}
+      />
+    </div>
+  </div>
+)}
+<a
+  href="https://wa.me/27676056777?text=Hi%20Kraal%2C%20I%20need%20help%20with%20a%20listing"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="whatsapp-float"
+  aria-label="Chat with Kraal on WhatsApp"
+>
+  <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.86L.057 23.428a.75.75 0 0 0 .916.916l5.569-1.474A11.943 11.943 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.693 9.693 0 0 1-4.964-1.365l-.355-.212-3.668.971.982-3.584-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+  </svg>
+  <span className="wa-label">Need help?</span>
+</a>
     </div>
   );
 }
@@ -941,6 +1255,17 @@ function getCategoryEmoji(categoryId) {
     other:     "🐾",
   };
   return map[categoryId] || "🐾";
+}
+function nameToColor(name = "") {
+  const colors = [
+    "#2D5A27", "#C85A2A", "#7A5C1E", "#1A5C6B",
+    "#5C1A6B", "#1A3A6B", "#6B1A1A", "#2A5C4A",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
 }
 function SearchIcon() {
   return (

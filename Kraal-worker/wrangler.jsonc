@@ -6,17 +6,29 @@
   "vars": {
     "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com,http://localhost:5173",
     "FIREBASE_PROJECT_ID": "kraal-ea0b0",
-    "R2_PUBLIC_URL": "https://media.kraalmarket.com"
-    // FACEPP_API_KEY    → set via: wrangler secret put FACEPP_API_KEY
-    // FACEPP_API_SECRET → set via: wrangler secret put FACEPP_API_SECRET
-    // FIREBASE_CLIENT_EMAIL  → set via: wrangler secret put FIREBASE_CLIENT_EMAIL
-    // FIREBASE_PRIVATE_KEY   → set via: wrangler secret put FIREBASE_PRIVATE_KEY
+    "R2_PUBLIC_URL": "https://media.kraalmarket.com",
+    "WHATSAPP_VERIFY_TOKEN": "your_verify_token_here"
+    // Secrets — set via wrangler secret put:
+    // FACEPP_API_KEY
+    // FACEPP_API_SECRET
+    // FIREBASE_CLIENT_EMAIL
+    // FIREBASE_PRIVATE_KEY
+    // WHATSAPP_TOKEN
+    // WHATSAPP_PHONE_ID
   },
 
   "r2_buckets": [
     {
       "binding": "BUCKET",
       "bucket_name": "kraal-media"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "f51f730abd254063a9db1e42cabe3e13",
+      "preview_id": "29889aab1d9848abaee53477bfd4248d"
     }
   ],
 
@@ -31,17 +43,29 @@
       "vars": {
         "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com",
         "FIREBASE_PROJECT_ID": "kraal-ea0b0",
-        "R2_PUBLIC_URL": "https://media.kraalmarket.com"
-        // FACEPP_API_KEY    → set via: wrangler secret put FACEPP_API_KEY --env production
-        // FACEPP_API_SECRET → set via: wrangler secret put FACEPP_API_SECRET --env production
-        // FIREBASE_CLIENT_EMAIL  → set via: wrangler secret put FIREBASE_CLIENT_EMAIL --env production
-        // FIREBASE_PRIVATE_KEY   → set via: wrangler secret put FIREBASE_PRIVATE_KEY --env production
+        "R2_PUBLIC_URL": "https://media.kraalmarket.com",
+        "WHATSAPP_VERIFY_TOKEN": "your_verify_token_here"
+        // Secrets — set via wrangler secret put ... --env production:
+        // FACEPP_API_KEY
+        // FACEPP_API_SECRET
+        // FIREBASE_CLIENT_EMAIL
+        // FIREBASE_PRIVATE_KEY
+        // WHATSAPP_TOKEN
+        // WHATSAPP_PHONE_ID
       },
 
       "r2_buckets": [
         {
           "binding": "BUCKET",
           "bucket_name": "kraal-media-prod"
+        }
+      ],
+
+      "kv_namespaces": [
+        {
+          "binding": "SESSIONS",
+          "id": "f51f730abd254063a9db1e42cabe3e13",
+          "preview_id": "3b6593e157d645c0bf10460ceeb26ec8"
         }
       ],
 

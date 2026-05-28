@@ -1,0 +1,497 @@
+/* KraalOnboardingForm.css */
+/* Earthy, agricultural aesthetic — warm greens, cream, honest typography */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap");
+
+.kof-wrap {
+  font-family: "DM Sans", sans-serif;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  color: #1a1a18;
+}
+
+/* ── Header ── */
+.kof-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e8e2d6;
+}
+
+.kof-logo {
+  width: 44px;
+  height: 44px;
+  background: #1a5c35;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.kof-title {
+  font-family: "DM Serif Display", serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #1a1a18;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.kof-sub {
+  font-size: 13px;
+  color: #6b6459;
+  margin: 2px 0 0;
+}
+
+/* ── Role selector ── */
+.kof-roles {
+  margin-bottom: 1.5rem;
+}
+
+.kof-roles-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b6459;
+  margin-bottom: 10px;
+}
+
+.kof-role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.kof-role-card {
+  background: #faf8f4;
+  border: 1px solid #e8e2d6;
+  border-radius: 12px;
+  padding: 14px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  text-align: center;
+}
+
+.kof-role-card:hover {
+  border-color: #2d7a4f;
+  background: #f0f7f3;
+}
+
+.kof-role-card--active {
+  border: 2px solid #1a5c35;
+  background: #f0f7f3;
+}
+
+.kof-role-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.kof-role-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a18;
+}
+
+.kof-role-sub {
+  font-size: 11px;
+  color: #6b6459;
+  line-height: 1.3;
+}
+
+/* ── Progress ── */
+.kof-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.kof-progress-track {
+  flex: 1;
+  height: 4px;
+  background: #e8e2d6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.kof-progress-bar {
+  height: 100%;
+  background: #1a5c35;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.kof-progress-pct {
+  font-size: 12px;
+  color: #6b6459;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ── Step bar ── */
+.kof-stepbar {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.75rem;
+  gap: 0;
+}
+
+.kof-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  gap: 6px;
+  font-size: 11px;
+  color: #9b9488;
+  text-align: center;
+}
+
+.kof-step--active {
+  color: #1a5c35;
+  font-weight: 600;
+}
+
+.kof-step--done {
+  color: #2d7a4f;
+}
+
+.kof-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8e2d6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9b9488;
+  position: relative;
+  z-index: 1;
+}
+
+.kof-step--active .kof-step-dot {
+  background: #1a5c35;
+  color: #fff;
+}
+
+.kof-step--done .kof-step-dot {
+  background: #2d7a4f;
+  color: #fff;
+}
+
+.kof-step-line {
+  position: absolute;
+  top: 14px;
+  left: calc(50% + 14px);
+  right: calc(-50% + 14px);
+  height: 2px;
+  background: #e8e2d6;
+  z-index: 0;
+}
+
+.kof-step--done .kof-step-line {
+  background: #2d7a4f;
+}
+
+/* ── Section ── */
+.kof-section {
+  margin-bottom: 0.5rem;
+}
+
+.kof-section-title {
+  font-family: "DM Serif Display", serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #1a1a18;
+  margin-bottom: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kof-section-icon {
+  font-size: 18px;
+}
+
+.kof-divider {
+  height: 1px;
+  background: #e8e2d6;
+  margin: 1.5rem 0;
+}
+
+/* ── Grid layouts ── */
+.kof-grid {
+  margin-bottom: 1rem;
+}
+
+.kof-grid--2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.kof-grid--1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* ── Fields ── */
+.kof-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 1rem;
+}
+
+.kof-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a4438;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kof-req {
+  color: #c0392b;
+}
+
+.kof-hint {
+  font-size: 11px;
+  color: #9b9488;
+  margin: 0;
+}
+
+.kof-field input[type="text"],
+.kof-field input[type="email"],
+.kof-field input[type="tel"],
+.kof-field input[type="number"],
+.kof-field select,
+.kof-field textarea {
+  width: 100%;
+  border: 1px solid #d8d0c4;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  background: #faf8f4;
+  color: #1a1a18;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.kof-field input[type="file"] {
+  width: 100%;
+  border: 1px dashed #d8d0c4;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 13px;
+  font-family: "DM Sans", sans-serif;
+  background: #faf8f4;
+  color: #6b6459;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.kof-field input:focus,
+.kof-field select:focus,
+.kof-field textarea:focus {
+  border-color: #1a5c35;
+  background: #fff;
+}
+
+.kof-field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6459' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.kof-field textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+/* ── Pill checkboxes ── */
+.kof-pills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-top: 2px;
+}
+
+.kof-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #d8d0c4;
+  border-radius: 20px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-family: "DM Sans", sans-serif;
+  color: #4a4438;
+  background: #faf8f4;
+  cursor: pointer;
+  transition: all 0.12s;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.kof-pill:hover {
+  border-color: #2d7a4f;
+  background: #f0f7f3;
+}
+
+.kof-pill--on {
+  background: #e6f2ec;
+  border-color: #1a5c35;
+  color: #1a3d26;
+  font-weight: 500;
+}
+
+.kof-pill-tick {
+  font-size: 11px;
+  color: #1a5c35;
+  font-weight: 700;
+}
+
+/* ── Note box ── */
+.kof-note {
+  background: #f3f9f5;
+  border-left: 3px solid #1a5c35;
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #2d5a3d;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+/* ── Actions ── */
+.kof-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e8e2d6;
+}
+
+.kof-btn {
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #d8d0c4;
+  background: #faf8f4;
+  color: #4a4438;
+  transition: all 0.12s;
+}
+
+.kof-btn--back:hover {
+  background: #f0ece4;
+}
+
+.kof-btn--primary {
+  background: #1a5c35;
+  color: #fff;
+  border-color: #1a5c35;
+  margin-left: auto;
+}
+
+.kof-btn--primary:hover:not(.kof-btn--disabled) {
+  background: #155030;
+}
+
+.kof-btn--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Error ── */
+.kof-error {
+  margin-top: 1rem;
+  padding: 10px 14px;
+  background: #fdf0ef;
+  border: 1px solid #f5c0bb;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #8b2222;
+}
+
+/* ── Success ── */
+.kof-success {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.kof-success-icon {
+  font-size: 56px;
+  margin-bottom: 1rem;
+}
+
+.kof-success h2 {
+  font-family: "DM Serif Display", serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: #1a1a18;
+  margin-bottom: 0.75rem;
+}
+
+.kof-success p {
+  font-size: 15px;
+  color: #4a4438;
+  max-width: 400px;
+  margin: 0 auto 0.5rem;
+  line-height: 1.6;
+}
+
+.kof-success-sub {
+  font-size: 13px !important;
+  color: #9b9488 !important;
+  font-style: italic;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .kof-grid--2 {
+    grid-template-columns: 1fr;
+  }
+  .kof-role-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+  }
+  .kof-role-card {
+    padding: 11px 6px;
+  }
+  .kof-role-icon {
+    font-size: 20px;
+  }
+  .kof-role-label {
+    font-size: 12px;
+  }
+  .kof-role-sub {
+    display: none;
+  }
+  .kof-wrap {
+    padding: 1rem 1rem 2.5rem;
+  }
+}
