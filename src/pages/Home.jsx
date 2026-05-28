@@ -29,7 +29,7 @@ import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
 import "./Home.css";
 import "./Marketplace.css";
-import KraalOnboardingForm from "../components/KraalOnboardingForm";
+import KraalOnboardingForm from "../components/Kraalonboardingform";
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
   { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import "./KraalOnboardingForm.css";
+import "./Kraalonboardingform.css";
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
