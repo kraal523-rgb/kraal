@@ -13,7 +13,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Home from "./pages/Home";
 import Marketplace from "./pages/Marketplace";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/Admindashboard";
 import ListingDetail from "./pages/ListingDetail";
 import Login from "./pages/Login";
 import Register from "./pages/auth/Register";
