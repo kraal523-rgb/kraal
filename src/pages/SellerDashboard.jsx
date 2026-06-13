@@ -7,7 +7,9 @@ import useAuthStore from "../store/useAuthStore";
 import "./SellerDashboard.css";
 import UserMenu from "../components/UserMenu";
 import RequestTransportButton from "../components/RequestTransportButton";
-
+import StockManager from "./StockManager";
+import DocumentsPanel from "./DocumentsPanel";
+import "./StockManager.css";  
 // eslint-disable-next-line no-unused-vars
 const SELLER = {
   name: "Takudzwa M.",
@@ -88,7 +90,7 @@ const STATUS_META = {
 };
 
 // eslint-disable-next-line no-unused-vars
-const TABS = ["Overview", "My Listings", "Orders"];
+const TABS = ["Overview", "My Listings", "Orders", "Stock", "Documents"];
 function getCategoryEmoji(categoryId) {
   const map = {
     cattle: "🐄", goats: "🐐", sheep: "🐑", chicken: "🐓",
@@ -706,6 +708,19 @@ async function loadAIOrders() {
             </div>
           </div>
         )}
+        {/* ══ STOCK ══ */}
+{activeTab === "Stock" && (
+  <div className="sd-stock-panel">
+    <StockManager />
+  </div>
+)}
+
+{/* ══ DOCUMENTS ══ */}
+{activeTab === "Documents" && (
+  <div className="sd-docs-panel">
+    <DocumentsPanel />
+  </div>
+)}
       </div>
 
       {/* ── ADD LISTING MODAL ── */}
@@ -889,6 +904,18 @@ async function loadAIOrders() {
     >
       📦<span>Orders</span>
     </button>
+    <button
+  className={`sd-bottom-nav-item ${activeTab === "Stock" ? "active" : ""}`}
+  onClick={() => setActiveTab("Stock")}
+>
+  🐾<span>Stock</span>
+</button>
+<button
+  className={`sd-bottom-nav-item ${activeTab === "Documents" ? "active" : ""}`}
+  onClick={() => setActiveTab("Documents")}
+>
+  🗂<span>Docs</span>
+</button>
     <button
       className="sd-bottom-nav-item"
       onClick={() => navigate("/marketplace")}

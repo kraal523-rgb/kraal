@@ -454,25 +454,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
-{/* ── RECENTLY SOLD TICKER ── */}
-<div className="sold-ticker-band" aria-label="Recently sold animals">
-  <div className="sold-ticker-label">🟢 Recently Sold</div>
-  <div className="sold-ticker-scroll">
-    <div className="sold-ticker-track">
-      {[...RECENTLY_SOLD, ...RECENTLY_SOLD].map((item, i) => (
-        <span key={i} className="sold-ticker-item">
-          <span className="st-dot" />
-          <span className="st-time">{item.time}</span>
-          <span className="st-text">
-            <strong>{item.qty}× {item.animal}</strong>
-            {" "}sold in {item.location}
-          </span>
-          <span className="st-sep">·</span>
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
+
       {/* ── NAV ── */}
       <nav className="home-nav">
         <div className="nav-inner">
@@ -506,116 +488,128 @@ useEffect(() => {
       </nav>
 
       {/* ── HERO ── */}
-     <section className="hero">
-  {/* Video background */}
-  <video
-    className="hero-video"
-    src={videoCattle}
-    autoPlay
-    muted
-    loop
-    playsInline
-  />
-  <div className="hero-video-overlay" aria-hidden="true" />
+    <section className="hero">
+  {/* Texture layers */}
 
-  <div className="hero-grain" aria-hidden="true" />
-        <div className="hero-grain" aria-hidden="true" />
-        <div className="hero-pattern" aria-hidden="true" />
-
-        <div className="hero-inner">
-          <div className="hero-left">
-            <div className="hero-eyebrow">
-              <span className="eyebrow-dot" />
-              Zimbabwe's #1 Livestock Marketplace
-            </div>
-            <h1 className="hero-title">
-              Your livestock,
-              <br />
-              <em>found by buyers</em>
-              <br />
-              across Africa.
-            </h1>
-            <p className="hero-sub">
-              List cattle, goats, chickens and more in minutes. Reach thousands
-              of verified buyers from Zimbabwe and beyond — no middlemen, no
-              commission.
-            </p>
-
-            <form className="hero-search" onSubmit={handleSearch}>
-              <span className="search-icon">
-                <SearchIcon />
-              </span>
-              <input
-                type="text"
-                placeholder="Search cattle, goats, road runners…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button type="submit">Search</button>
-            </form>
-
-            <div className="hero-actions">
-           <Link to="/register" className="btn-hero-primary">
-                🐄 Post a Listing — Free
-              </Link>
-             <Link to="/marketplace" className="btn-hero-ghost">
-                Browse Animals →
-              </Link>
-            </div>
-
-            <div className="hero-social-proof">
-              <div className="proof-avatars">
-                {["TM", "SN", "FC", "JM", "BN"].map((i, idx) => (
-                  <span
-                    key={idx}
-                    className="proof-avatar"
-                    style={{ zIndex: 5 - idx }}
-                  >
-                    {i}
-                  </span>
-                ))}
-              </div>
-              <span className="proof-text">
-                Joined by <strong>12,000+</strong> farmers this season
-              </span>
-            </div>
-          </div>
-
-          <div className="hero-right">
-            <div className="hero-card-stack">
-              {FEATURED_LISTINGS.slice(0, 3).map((listing, i) => (
-                <div
-                  key={listing.id}
-                  className="hero-mini-card"
-                  style={{ "--card-i": i }}
-                  onClick={() =>
-                    navigate(`/marketplace?category=${listing.tag}`)
-                  }
-                >
-                  <span className="hmc-emoji">{listing.emoji}</span>
-                  <div className="hmc-info">
-                    <strong>{listing.title}</strong>
-                    <span>{listing.location}</span>
-                  </div>
-                  <div className="hmc-price">
-                    <strong>{listing.price}</strong>
-                    <span>{listing.unit}</span>
-                  </div>
-                  <span className="hmc-badge">{listing.badge}</span>
-                </div>
-              ))}
-              <div className="hero-card-glow" aria-hidden="true" />
-            </div>
-          </div>
+  <div className="hero-inner">
+ 
+    {/* ── LEFT — copy + search + CTAs ── */}
+    <div className="hero-left">
+ 
+      <div className="hero-eyebrow">
+        <span className="eyebrow-dot" />
+        Zimbabwe's #1 Livestock Marketplace
+      </div>
+ 
+      <h1 className="hero-title">
+        Your livestock,
+        <br />
+        <em>found by buyers</em>
+        <br />
+        across Africa.
+      </h1>
+ 
+      <p className="hero-sub">
+        List cattle, goats, chickens and more in minutes. Reach thousands
+        of verified buyers from Zimbabwe and beyond — no middlemen, no
+        commission.
+      </p>
+ 
+      <form className="hero-search" onSubmit={handleSearch}>
+        <span className="search-icon">
+          <SearchIcon />
+        </span>
+        <input
+          type="text"
+          placeholder="Search cattle, goats, road runners…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button type="submit">Search</button>
+      </form>
+ 
+      <div className="hero-actions">
+        <Link to="/register" className="btn-hero-primary">
+          🐄 Post a Listing — Free
+        </Link>
+        <Link to="/marketplace" className="btn-hero-ghost">
+          Browse Animals →
+        </Link>
+      </div>
+ 
+      <div className="hero-social-proof">
+        <div className="proof-avatars">
+          {["TM", "SN", "FC", "JM", "BN"].map((initials, idx) => (
+            <span
+              key={idx}
+              className="proof-avatar"
+              style={{ zIndex: 5 - idx }}
+            >
+              {initials}
+            </span>
+          ))}
         </div>
-
-        {/* Decorative orbs */}
-        <div className="hero-orb hero-orb-1" aria-hidden="true" />
-        <div className="hero-orb hero-orb-2" aria-hidden="true" />
-        <div className="hero-orb hero-orb-3" aria-hidden="true" />
-      </section>
-
-      {/* ── STATS ── */}
+        <span className="proof-text">
+          Joined by <strong>12,000+</strong> farmers this season
+        </span>
+      </div>
+    </div>
+ 
+    {/* ── RIGHT — contained video frame + mini listings ── */}
+    <div className="hero-right">
+ 
+      {/* Farm-window video frame */}
+      <div className="hero-video-frame">
+        <video
+          src={videoCattle}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+ 
+        {/* Live badge */}
+        <div className="hero-video-live-badge" aria-hidden="true">
+          <span className="live-dot" />
+          Live on Farm
+        </div>
+ 
+        {/* Bottom caption inside frame */}
+        <div className="hero-video-caption">
+          <div className="hero-video-caption-text">
+            <strong>Brahman Herd · Marondera</strong>
+            Zimbabwe's finest beef cattle
+          </div>
+          <Link to="/marketplace?category=cattle" className="hero-video-view-btn">
+            View Cattle →
+          </Link>
+        </div>
+ 
+        {/* Floating category pills around the frame */}
+        <div className="hero-float-pills" aria-hidden="true">
+          <Link to="/marketplace?category=cattle" className="hero-pill hero-pill-tl">
+            <span className="hero-pill-emoji">🐄</span>
+            Cattle
+            <span className="hero-pill-count">1,240+</span>
+          </Link>
+          <Link to="/marketplace?category=goats" className="hero-pill hero-pill-tr">
+            <span className="hero-pill-emoji">🐐</span>
+            Goats
+            <span className="hero-pill-count">890+</span>
+          </Link>
+          <Link to="/marketplace?category=chicken" className="hero-pill hero-pill-bl">
+            <span className="hero-pill-emoji">🐓</span>
+            Road Runners
+            <span className="hero-pill-count">2,100+</span>
+          </Link>
+          <Link to="/marketplace?category=pigs" className="hero-pill hero-pill-br">
+            <span className="hero-pill-emoji">🐖</span>
+            Pigs
+            <span className="hero-pill-count">320+</span>
+          </Link>
+        </div>
+      </div>
+ 
       <section className="stats-band">
         {STATS.map((s) => (
           <div key={s.label} className="stat-item">
@@ -625,6 +619,14 @@ useEffect(() => {
           </div>
         ))}
       </section>
+    </div>
+  </div>
+ 
+ 
+</section>
+
+      {/* ── STATS ── */}
+      
 
       {/* ── CATEGORIES ── */}
      {/* ── CATEGORIES ── */}
@@ -800,7 +802,7 @@ useEffect(() => {
     </div>
   </div>
 </section>
-{/* ── TOP FARMERS ── */}
+{/* ── TOP FARMERS 
 <section className="spotlight-section">
   <div className="section-inner">
     <div className="section-header">
@@ -875,6 +877,7 @@ useEffect(() => {
     )}
   </div>
 </section>
+── */}
       {/* ── TRUST STRIP ── */}
       <section className="trust-section">
         <div className="section-inner">
