@@ -1108,13 +1108,13 @@ useEffect(() => {
               going pan-African.
             </p>
             <div className="footer-socials">
-             <Link to="#" aria-label="Facebook">
+             <Link to="https://www.facebook.com/profile.php?id=61589812884808" aria-label="Facebook">
                 f
               </Link>
-             <Link to="#" aria-label="Twitter">
+             <Link to="https://www.x.com/@Kraalmarketzim" aria-label="Twitter">
                 𝕏
               </Link>
-             <Link to="#" aria-label="WhatsApp">
+             <Link to="https://wa.me/27676056777" aria-label="WhatsApp">
                 W
               </Link>
             </div>
