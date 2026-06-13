@@ -18,6 +18,11 @@ import imgHorse from "../assets/pngegg__20.png";
 import imgTurkey from "../assets/pngegg__16.png"; 
 import imgPig from "../assets/pngegg__18.png"; 
 import imgDog from "../assets/pngegg__4.png";
+import fish from "../assets/fish.png";
+import manure from "../assets/manure.jpg";
+import bees from "../assets/bee.jpg";
+import honey from "../assets/honey.png"
+import eggs from "../assets/eggs.jpg";
 import imgDonkey from "../assets/pngegg__3.png"
 import videoCattle from "../assets/videos/cattle-1.mp4";
 import imgGeese from "../assets/geese.png";
@@ -51,12 +56,12 @@ const CATEGORIES = [
   { id: "ostrich",    img: imgOstrich,   label: "Ostrich",       count: "40+"    },
 ];
 const FARM_PRODUCTS = [
-  { id: "fish",      img: null, label: "Fish (Aquaculture)", count: "60+",  emoji: "🐟" },
-  { id: "bees",      img: null, label: "Bees & Honey",       count: "45+",  emoji: "🐝" },
-  { id: "eggs",      img: null, label: "Eggs (by tray)",     count: "130+", emoji: "🥚" },
+  { id: "fish",      img: fish, label: "Fish (Aquaculture)", count: "60+",  emoji: "🐟" },
+  { id: "bees",      img: bees, label: "Bees & Honey",       count: "45+",  emoji: "🐝" },
+  { id: "eggs",      img: eggs, label: "Eggs (by tray)",     count: "130+", emoji: "🥚" },
   { id: "wool",      img: null, label: "Wool & Fleece",      count: "55+",  emoji: "🧶" },
-  { id: "compost",   img: null, label: "Manure & Compost",   count: "30+",  emoji: "🌱" },
-  { id: "honey",     img: null, label: "Raw Honey",          count: "70+",  emoji: "🍯" },
+  { id: "compost",   img: manure, label: "Manure & Compost",   count: "30+",  emoji: "🌱" },
+  { id: "honey",     img: honey, label: "Raw Honey",          count: "70+",  emoji: "🍯" },
 ];
 const PRICE_TICKER = [
   { label: "Brahman Bull", price: "USD 1,200", trend: "up" },
