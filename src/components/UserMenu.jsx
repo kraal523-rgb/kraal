@@ -34,8 +34,11 @@ export default function UserMenu() {
       navigate("/driver");
     } else if (role === "buyer") {
       navigate("/buyer");
-    } else {
-      // Default: seller dashboard (covers "seller" role or any unrecognised role)
+    }  else if (role === "vet") {
+      navigate("/vet");
+    }    
+   else {
+     
       navigate("/seller/dashboard");
     }
   };

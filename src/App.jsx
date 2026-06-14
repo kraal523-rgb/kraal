@@ -25,7 +25,7 @@ import Terms from "./pages/Terms";
 import VerifyIdentity, { VerificationGuard } from "./pages/VerifyIdentity";
 import DriverDashboard from "./pages/DriverDashboard";
 import BuyerDashboard from "./pages/Buyerdashboard";
-import VetDashboard from "./pages/VetDashboard"; // ← NEW
+import VetDashboard from "./pages/VetDashboard"; 
 
 // ─── Shared spinner ───────────────────────────────────────────────────────────
 function KraalSpinner() {
