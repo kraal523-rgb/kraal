@@ -750,13 +750,18 @@ body,
     max-width: 100%;
   }
 }
-
 /* Large mobile */
 @media (max-width: 768px) {
   .hero-video-frame {
     height: auto;
-   width: 100%;
+    width: 100%;
     aspect-ratio: 4/3;
+    clip-path: polygon(
+      2% 5%, 5% 2%, 95% 0%,
+      99% 3%, 100% 97%,
+      97% 100%, 5% 99%,
+      0% 95%, 2% 5%
+    );
   }
 }
 
@@ -766,6 +771,7 @@ body,
     height: 260px;
     max-width: 100%;
     aspect-ratio: 1/1;
+    clip-path: none;
     box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
   }
 }
