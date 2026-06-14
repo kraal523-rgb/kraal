@@ -153,8 +153,6 @@ export default function CookieConsent() {
           alignItems: "center",
           gap: "8px",
           padding: "10px 16px",
-          borderRadius: "999px",
-          border: isConsented ? "0px solid #0F6E56" : "1.5px solid #ccc",
           background: "transparent",
           cursor: "pointer",
           fontSize: "13px",

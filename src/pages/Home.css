@@ -3185,3 +3185,321 @@ button.home-bottom-nav-item {
   background: #e8e4dc;
   animation: shimmer 1.5s infinite;
 }
+/* ============================================
+   Kraal — Mobile Responsive Fix
+   Hero + Categories
+   Drop this AFTER your main stylesheet
+   ============================================ */
+
+/* ═══════════════════════════════════════
+   HERO — CORE FIXES
+═══════════════════════════════════════ */
+
+/* Remove fixed min-height on mobile so content isn't stretched */
+@media (max-width: 768px) {
+  .hero {
+    min-height: unset;
+    padding: 0;
+  }
+
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 20px 20px 48px;
+  }
+
+  /* Video above text */
+  .hero-right {
+    order: -1;
+    width: 100%;
+  }
+
+  /* Fix video frame on mobile — drop the complex clip-path, use simple rounded rect */
+  .hero-video-frame {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    clip-path: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Pill positioning relative to the video frame */
+  .hero-float-pills {
+    display: none; /* too cramped on mobile */
+  }
+
+  /* Card stack below video */
+  .hero-card-stack {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .hero-mini-card {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  /* Left column */
+  .hero-left {
+    gap: 18px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.85rem, 8vw, 2.6rem);
+    letter-spacing: -0.02em;
+  }
+
+  .hero-sub {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+
+  /* Search bar stacks vertically */
+  .hero-search {
+    flex-direction: column;
+    height: auto;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .hero-search input {
+    width: 100%;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 1rem; /* prevents iOS zoom */
+  }
+
+  .hero-search button {
+    width: 100%;
+    height: 48px;
+    border-radius: 0;
+    font-size: 0.9rem;
+  }
+
+  .search-icon {
+    display: none;
+  }
+
+  /* CTA buttons full-width */
+  .hero-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-ghost {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 14px 20px;
+  }
+
+  .hero-social-proof {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .hero-inner {
+    padding: 16px 16px 40px;
+  }
+
+  .hero-video-frame {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.7rem, 9vw, 2.2rem);
+  }
+
+  .hero-eyebrow {
+    font-size: 0.68rem;
+    padding: 5px 12px;
+  }
+
+  .hmc-info strong,
+  .hmc-info span {
+    font-size: 0.8rem;
+  }
+
+  .hmc-price strong {
+    font-size: 0.82rem;
+  }
+}
+
+/* ═══════════════════════════════════════
+   CATEGORIES — CORE FIXES
+═══════════════════════════════════════ */
+
+/* Remove fixed width — let the grid drive sizing */
+.cat-card {
+  width: 100%;
+  height: auto;
+  min-height: 180px;
+}
+
+/* Fix ::before pseudo clip-path — it must match parent size */
+.cat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  /* Keep clip-path only on desktop where card is square */
+}
+
+/* Image area scales with card */
+.cat-img-wrap {
+  height: 120px;
+  width: 100%;
+}
+
+.cat-cell {
+  width: 100%;
+}
+
+/* Mobile grid: 2 columns */
+@media (max-width: 768px) {
+  .categories-section {
+    padding: 52px 0;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .cat-card {
+    min-height: 140px;
+    border-radius: 12px;
+  }
+
+  /* Simplify clip-path on small screens — it causes sizing bugs */
+  .cat-card::before {
+    clip-path: none;
+    border-radius: 12px;
+    background: var(--hero-cream);
+  }
+
+  .cat-img-wrap {
+    height: 100px;
+  }
+
+  .cat-img-wrap .cat-emoji {
+    font-size: 48px;
+  }
+
+  .cat-animal-img {
+    width: 85%;
+    height: 85%;
+  }
+
+  .cat-label {
+    font-size: 0.85rem;
+  }
+
+  .cat-count {
+    font-size: 0.72rem;
+  }
+
+  .cat-info {
+    margin-top: 6px;
+    gap: 1px;
+  }
+}
+
+/* Very small: stay 2 columns but tighten */
+@media (max-width: 400px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .cat-card {
+    min-height: 120px;
+  }
+
+  .cat-img-wrap {
+    height: 80px;
+  }
+
+  .cat-img-wrap .cat-emoji {
+    font-size: 36px;
+  }
+
+  .cat-label {
+    font-size: 0.78rem;
+  }
+
+  .cat-count {
+    display: none; /* too tight at this width */
+  }
+}
+
+/* Tablet: 3 columns */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .cat-card {
+    width: 100%;
+    height: auto;
+    min-height: 180px;
+  }
+
+  .cat-card::before {
+    clip-path: none;
+    border-radius: 16px;
+  }
+}
+
+/* Desktop restore */
+@media (min-width: 1101px) {
+  .categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 32px;
+  }
+
+  .cat-card {
+    width: 100%;
+    height: 220px;
+  }
+}
+
+/* ═══════════════════════════════════════
+   HERO VIDEO CAPTION — mobile polish
+═══════════════════════════════════════ */
+@media (max-width: 480px) {
+  .hero-video-caption {
+    padding: 12px 12px 10px;
+  }
+
+  .hero-video-caption-text strong {
+    font-size: 0.82rem;
+  }
+
+  .hero-video-caption-text {
+    font-size: 0.72rem;
+  }
+
+  .hero-video-view-btn {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+
+  .hero-video-live-badge {
+    font-size: 10px;
+    padding: 4px 9px;
+    top: 10px;
+    left: 10px;
+  }
+}
