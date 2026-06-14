@@ -24,6 +24,7 @@ export default function Register() {
   const handleDone = () => {
     if (form.role === 'transporter') navigate('/driver', { replace: true });
     else if (form.role === 'buyer')  navigate('/buyer', { replace: true });
+    else if (form.role === 'vet')  navigate('/vet', { replace: true });
     else if (form.role === 'seller')  navigate('/seller/dashboard', { replace: true });
     else                              navigate('/marketplace', { replace: true });
   };
