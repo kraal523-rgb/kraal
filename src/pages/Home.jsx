@@ -6,7 +6,7 @@ import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimest
 import { db } from "../lib/firebase";
 import UserMenu from "../components/UserMenu";
 import { useNavigate, Link } from "react-router-dom";
-import logo from "../assets/kraal-logo.svg";
+import logo from "../assets/kraal-logo-black.svg";
 import imgCattle from "../assets/pngegg__5.png";   
 import imgGoats from "../assets/pngegg__6.png";    
 import imgSheep from "../assets/pngegg__7.png";    
@@ -32,9 +32,11 @@ import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
 import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
+import CookieConsent from "../components/CookieConsent";
 import "./Home.css";
 import "./Marketplace.css";
 import KraalOnboardingForm from "../components/Kraalonboardingform";
+import ProvinceMapFilter from "../components/ProvinceMapFilter";
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
   { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },
@@ -59,7 +61,6 @@ const FARM_PRODUCTS = [
   { id: "fish",      img: fish, label: "Fish (Aquaculture)", count: "60+",  emoji: "🐟" },
   { id: "bees",      img: bees, label: "Bees & Honey",       count: "45+",  emoji: "🐝" },
   { id: "eggs",      img: eggs, label: "Eggs (by tray)",     count: "130+", emoji: "🥚" },
-  { id: "wool",      img: null, label: "Wool & Fleece",      count: "55+",  emoji: "🧶" },
   { id: "compost",   img: manure, label: "Manure & Compost",   count: "30+",  emoji: "🌱" },
   { id: "honey",     img: honey, label: "Raw Honey",          count: "70+",  emoji: "🍯" },
 ];
@@ -311,6 +312,16 @@ export default function Home() {
   const observerRef = useRef(null);
   const [fetchError, setFetchError] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [cookieAccepted, setCookieAccepted] = useState(
+  () => localStorage.getItem("kraal_cookies") === "accepted"
+);
+const [cookieBannerOpen, setCookieBannerOpen] = useState(false);
+
+const acceptCookies = () => {
+  localStorage.setItem("kraal_cookies", "accepted");
+  setCookieAccepted(true);
+  setCookieBannerOpen(false);
+};
   // Rotate testimonials
   useEffect(() => {
     const t = setInterval(
@@ -439,26 +450,7 @@ useEffect(() => {
 
   return (
     <div className="home">
-      {/* ── PRICE TICKER BAND ── */}
-      <div className="price-ticker-band" aria-label="Live market prices">
-        <div className="price-ticker-label">📊 Live Prices</div>
-        <div className="price-ticker-scroll">
-          <div className="price-ticker-track">
-            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
-              <span key={i} className="price-ticker-item">
-                <span className="pt-label">{item.label}</span>
-                <span className={`pt-price ${item.trend}`}>
-                  {item.price}
-                  <span className="pt-arrow">
-                    {item.trend === "up" ? "↑" : "↓"}
-                  </span>
-                </span>
-                <span className="pt-sep">·</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+     
 
       {/* ── NAV ── */}
       <nav className="home-nav">
@@ -491,7 +483,26 @@ useEffect(() => {
           </div>
         </div>
       </nav>
-
+ {/* ── PRICE TICKER BAND ── */}
+      <div className="price-ticker-band" aria-label="Live market prices">
+        <div className="price-ticker-label">📊 Live Prices</div>
+        <div className="price-ticker-scroll">
+          <div className="price-ticker-track">
+            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
+              <span key={i} className="price-ticker-item">
+                <span className="pt-label">{item.label}</span>
+                <span className={`pt-price ${item.trend}`}>
+                  {item.price}
+                  <span className="pt-arrow">
+                    {item.trend === "up" ? "↑" : "↓"}
+                  </span>
+                </span>
+                <span className="pt-sep">·</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
       {/* ── HERO ── */}
     <section className="hero">
   {/* Texture layers */}
@@ -533,31 +544,7 @@ useEffect(() => {
         <button type="submit">Search</button>
       </form>
  
-      <div className="hero-actions">
-        <Link to="/register" className="btn-hero-primary">
-          🐄 Post a Listing — Free
-        </Link>
-        <Link to="/marketplace" className="btn-hero-ghost">
-          Browse Animals →
-        </Link>
-      </div>
- 
-      <div className="hero-social-proof">
-        <div className="proof-avatars">
-          {["TM", "SN", "FC", "JM", "BN"].map((initials, idx) => (
-            <span
-              key={idx}
-              className="proof-avatar"
-              style={{ zIndex: 5 - idx }}
-            >
-              {initials}
-            </span>
-          ))}
-        </div>
-        <span className="proof-text">
-          Joined by <strong>12,000+</strong> farmers this season
-        </span>
-      </div>
+     
     </div>
  
     {/* ── RIGHT — contained video frame + mini listings ── */}
@@ -614,22 +601,38 @@ useEffect(() => {
           </Link>
         </div>
       </div>
+  <div className="hero-actions">
+        <Link to="/register" className="btn-hero-primary">
+          🐄 Post a Listing — Free
+        </Link>
+        <Link to="/marketplace" className="btn-hero-ghost">
+          Browse Animals →
+        </Link>
+      </div>
  
-      <section className="stats-band">
-        {STATS.map((s) => (
-          <div key={s.label} className="stat-item">
-            <span className="stat-icon">{s.icon}</span>
-            <strong>{s.value}</strong>
-            <span>{s.label}</span>
-          </div>
-        ))}
-      </section>
+      <div className="hero-social-proof">
+        <div className="proof-avatars">
+          {["TM", "SN", "FC", "JM", "BN"].map((initials, idx) => (
+            <span
+              key={idx}
+              className="proof-avatar"
+              style={{ zIndex: 5 - idx }}
+            >
+              {initials}
+            </span>
+          ))}
+        </div>
+        <span className="proof-text">
+          Joined by <strong>12,000+</strong> farmers this season
+        </span>
+      </div>
+     
     </div>
   </div>
  
  
 </section>
-
+<ProvinceMapFilter />
       {/* ── STATS ── */}
       
 
@@ -646,27 +649,32 @@ useEffect(() => {
       </div>
       <Link to="/marketplace" className="section-link">View all listings →</Link>
     </div>
-    <div className="categories-grid">
-      {CATEGORIES.map((cat, i) => (
-        <button
-          key={cat.id}
-          className="cat-card"
-          style={{ animationDelay: `${i * 0.06}s` }}
-          onClick={() => navigate(`/marketplace?category=${cat.id}`)}
-        >
-          <div className="cat-img-wrap">
-            {cat.img ? (
-              <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
-            ) : (
-              <span className="cat-emoji">{cat.emoji}</span>
-            )}
-          </div>
-          <span className="cat-label">{cat.label}</span>
-          <span className="cat-count">{cat.count} listings</span>
-          <span className="cat-arrow">→</span>
-        </button>
-      ))}
+   <div className="categories-grid">
+  {CATEGORIES.map((cat, i) => (
+    <div key={cat.id} className="cat-cell">
+      <button
+        className="cat-card"
+        style={{ animationDelay: `${i * 0.06}s` }}
+        onClick={() => navigate(`/marketplace?category=${cat.id}`)}
+      >
+        <div className="cat-img-wrap">
+          {cat.img ? (
+            <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
+          ) : (
+            <span className="cat-emoji">{cat.emoji}</span>
+          )}
+        </div>
+      </button>
+
+      {/* Now outside the card, below it */}
+      <div className="cat-info">
+        <span className="cat-label">{cat.label}</span>
+        <span className="cat-count">{cat.count} listings</span>
+        <span className="cat-arrow">→</span>
+      </div>
     </div>
+  ))}
+</div>
 
     {/* --- Farm Products divider --- */}
     <div className="farm-products-divider">
@@ -1105,7 +1113,7 @@ useEffect(() => {
             <div className="footer-logo">
               <img
                 src={logo}
-                style={{ width: "120px", filter: "brightness(0) invert(1)" }}
+                style={{ width: "120px", filter: "brightness(0) invert(0)" }}
                 alt="Kraal"
               />
               <span>Market</span>
@@ -1237,6 +1245,7 @@ useEffect(() => {
   </svg>
   <span className="wa-label">Need help?</span>
 </a>
+ <CookieConsent />
     </div>
   );
 }

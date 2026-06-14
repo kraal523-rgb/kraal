@@ -541,25 +541,7 @@ export default function Marketplace() {
           </div>
         </div>
       </div>
-{/* ── RECENTLY SOLD TICKER ── */}
-<div className="sold-ticker-band" aria-label="Recently sold animals">
-  <div className="sold-ticker-label">🟢 Recently Sold</div>
-  <div className="sold-ticker-scroll">
-    <div className="sold-ticker-track">
-      {[...RECENTLY_SOLD, ...RECENTLY_SOLD].map((item, i) => (
-        <span key={i} className="sold-ticker-item">
-          <span className="st-dot" />
-          <span className="st-time">{item.time}</span>
-          <span className="st-text">
-            <strong>{item.qty}× {item.animal}</strong>
-            {" "}sold in {item.location}
-          </span>
-          <span className="st-sep">·</span>
-        </span>
-      ))}
-    </div>
-  </div>
-</div>
+
       {/* ── NAV ── */}
       <nav className="mp-nav">
         <div className="mp-nav-inner">
@@ -638,101 +620,7 @@ export default function Marketplace() {
           </span>
         ))}
       </div>
-      {/* ── PAGE HEADER ── */}
-      {/* ── HEADER BANNER CAROUSEL ── */}
-      <div className="mp-header">
-        <div className="mp-banner-carousel">
-          {BANNER_SLIDES.map((slide, i) => (
-            <div
-              key={i}
-              className={`mp-banner-slide ${i === activeBanner ? "active" : ""} ${
-                i === prevBanner ? "exit" : ""
-              }`}
-              style={{ "--slide-bg": slide.bg }}
-            >
-              <img
-                src={slide.img}
-                alt={slide.headline}
-                className="mp-banner-bg"
-              />
-              <div
-                className="mp-banner-overlay"
-                style={{ background: slide.overlay }}
-              />
-              <div className="mp-banner-content" style={{ padding: "2rem 1rem", boxSizing: "border-box" }}>
-                <div className="mp-banner-text">
-                  <span className="mp-banner-tag">{slide.tag}</span>
-                  <h1 className="mp-banner-headline">{slide.headline}</h1>
-                  <p className="mp-banner-sub">{slide.sub}</p>
-                  <button
-                    className="mp-banner-cta"
-                    onClick={() => {
-                      setCategory(slide.categoryId);
-                      setPage(1);
-                    }}
-                  >
-                    {slide.cta} →
-                  </button>
-                </div>
-                <div className="mp-banner-search-wrap">
-                  <form
-                    className="mp-searchbar"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setPage(1);
-                    }}
-                  >
-                    <span className="mp-search-icon">
-                      <SearchIcon />
-                    </span>
-                    <input
-                      type="text"
-                      placeholder={t("search_placeholder")}
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                    {search && (
-                      <button
-                        type="button"
-                        className="mp-search-clear"
-                        onClick={() => setSearch("")}
-                      >
-                        ✕
-                      </button>
-                    )}
-                   <button style={{ border: "none", background: "var(--primary-color)", paddingLeft: "10px", paddingRight: "10px" }}>{t("search.button")}</button>
-                  </form>
-                  <p className="mp-banner-count">
-                    <strong>{filtered.length}</strong> listing
-                    {filtered.length !== 1 ? "s" : ""} found
-                    {location !== "All Locations"
-                      ? ` in ${location}`
-                      : " across Zimbabwe & Southern Africa"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Slide dots */}
-              <div className="mp-banner-dots">
-                {BANNER_SLIDES.map((_, di) => (
-                  <button
-                    key={di}
-                    className={`mp-banner-dot ${di === activeBanner ? "active" : ""}`}
-                    onClick={() => goToSlide(di)}
-                  />
-                ))}
-              </div>
-
-              {/* Progress bar */}
-              <div className="mp-banner-progress">
-                <div
-                  className={`mp-banner-progress-bar ${i === activeBanner ? "running" : ""}`}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+     
 
       {/* ── CATEGORY PILLS CAROUSEL ── */}
       <div className="mp-cats-wrap">
@@ -1333,8 +1221,103 @@ export default function Marketplace() {
             </div>
           )}
         </main>
+        
       </div>
+ {/* ── PAGE HEADER ── */}
+      {/* ── HEADER BANNER CAROUSEL ── */}
+      <div className="mp-header">
+        <div className="mp-banner-carousel">
+          {BANNER_SLIDES.map((slide, i) => (
+            <div
+              key={i}
+              className={`mp-banner-slide ${i === activeBanner ? "active" : ""} ${
+                i === prevBanner ? "exit" : ""
+              }`}
+              style={{ "--slide-bg": slide.bg }}
+            >
+              <img
+                src={slide.img}
+                alt={slide.headline}
+                className="mp-banner-bg"
+              />
+              <div
+                className="mp-banner-overlay"
+                style={{ background: slide.overlay }}
+              />
+              <div className="mp-banner-content" style={{ padding: "2rem 1rem", boxSizing: "border-box" }}>
+                <div className="mp-banner-text">
+                  <span className="mp-banner-tag">{slide.tag}</span>
+                  <h1 className="mp-banner-headline">{slide.headline}</h1>
+                  <p className="mp-banner-sub">{slide.sub}</p>
+                  <button
+                    className="mp-banner-cta"
+                    onClick={() => {
+                      setCategory(slide.categoryId);
+                      setPage(1);
+                    }}
+                  >
+                    {slide.cta} →
+                  </button>
+                </div>
+                <div className="mp-banner-search-wrap">
+                  <form
+                    className="mp-searchbar"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setPage(1);
+                    }}
+                  >
+                    <span className="mp-search-icon">
+                      <SearchIcon />
+                    </span>
+                    <input
+                      type="text"
+                      placeholder={t("search_placeholder")}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    {search && (
+                      <button
+                        type="button"
+                        className="mp-search-clear"
+                        onClick={() => setSearch("")}
+                      >
+                        ✕
+                      </button>
+                    )}
+                   <button style={{ border: "none", background: "var(--primary-color)", paddingLeft: "10px", paddingRight: "10px" }}>{t("search.button")}</button>
+                  </form>
+                  <p className="mp-banner-count">
+                    <strong>{filtered.length}</strong> listing
+                    {filtered.length !== 1 ? "s" : ""} found
+                    {location !== "All Locations"
+                      ? ` in ${location}`
+                      : " across Zimbabwe & Southern Africa"}
+                  </p>
+                </div>
+              </div>
 
+              {/* Slide dots */}
+              <div className="mp-banner-dots">
+                {BANNER_SLIDES.map((_, di) => (
+                  <button
+                    key={di}
+                    className={`mp-banner-dot ${di === activeBanner ? "active" : ""}`}
+                    onClick={() => goToSlide(di)}
+                  />
+                ))}
+              </div>
+
+              {/* Progress bar */}
+              <div className="mp-banner-progress">
+                <div
+                  className={`mp-banner-progress-bar ${i === activeBanner ? "running" : ""}`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
      {activeListing && (
   <ListingGalleryModal
     listing={activeListing}

@@ -55,7 +55,7 @@ const isTransporter = userProfile?.role === "transporter";
   if (!user) {
     // Not signed in — show the standard Sign In link
     return (
-      <Link to="/login" className="um-signin" style={{ color: 'white' }}>
+      <Link to="/login" className="um-signin">
         Sign in
       </Link>
     );
