@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import CookieIcon from "../assets/cookie-icon.svg";
+
 const STORAGE_KEY = "kraal_cookie_consent";
 
 const CATEGORIES = [
@@ -68,12 +69,20 @@ function saveConsent(prefs) {
 export default function CookieConsent() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [saved, setSaved] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [toggles, setToggles] = useState({
     necessary: true,
     analytics: true,
     marketing: false,
     preferences: true,
   });
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     const existing = loadSavedConsent();
@@ -86,10 +95,19 @@ export default function CookieConsent() {
         preferences: existing.preferences ?? true,
       });
     } else {
-      // Auto-open banner if no consent recorded yet
       setPanelOpen(true);
     }
   }, []);
+
+  // Lock body scroll when panel is open on mobile
+  useEffect(() => {
+    if (panelOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [panelOpen, isMobile]);
 
   function handleToggle(id) {
     setToggles((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -139,47 +157,54 @@ export default function CookieConsent() {
 
   return (
     <>
-      {/* Floating trigger button */}
+      {/* Floating trigger */}
       <button
         onClick={() => setPanelOpen((o) => !o)}
-        aria-label="Cookies"
-        title="Cookies"
+        aria-label="Cookie preferences"
+        title="Cookie preferences"
         style={{
           position: "fixed",
-          bottom: "24px",
-          left: "24px",
+          bottom: isMobile ? "72px" : "24px", // above bottom nav on mobile
+          left: "16px",
           zIndex: 1000,
           display: "flex",
           alignItems: "center",
-          gap: "8px",
-          padding: "10px 16px",
-          background: "transparent",
+          gap: "6px",
+          padding: "8px 14px 8px 10px",
+          background: "#fff",
+          border: "1px solid #e0e0e0",
+          borderRadius: "999px",
           cursor: "pointer",
           fontSize: "13px",
           fontWeight: 500,
           color: isConsented ? "#0F6E56" : "#444",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
           transition: "all 0.2s",
         }}
       >
-      
- <img src={CookieIcon} alt="" width={80} height={80} style={{ display: "block" }} />
-<span>Cookies</span>
-      
-        
+        <img
+          src={CookieIcon}
+          alt=""
+          width={22}
+          height={22}
+          style={{ display: "block" }}
+        />
+        <span>Cookies</span>
       </button>
 
-      {/* Panel overlay */}
+      {/* Overlay + panel */}
       {panelOpen && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            zIndex: 999,
-            background: "rgba(0,0,0,0.35)",
+            zIndex: 1001,
+            background: "rgba(0,0,0,0.4)",
             display: "flex",
-            alignItems: "flex-end",
+            // On mobile: sheet slides up from bottom; on desktop: centred
+            alignItems: isMobile ? "flex-end" : "center",
             justifyContent: "center",
-            padding: "0 0 80px",
+            padding: isMobile ? 0 : "16px",
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setPanelOpen(false);
@@ -191,43 +216,69 @@ export default function CookieConsent() {
             aria-label="Cookie consent preferences"
             style={{
               background: "#fff",
-              borderRadius: "16px",
+              // Mobile: full-width bottom sheet with rounded top corners
+              borderRadius: isMobile ? "20px 20px 0 0" : "16px",
               width: "100%",
-              maxWidth: "640px",
-              maxHeight: "90vh",
+              maxWidth: isMobile ? "100%" : "640px",
+              // Mobile: up to 92% of screen height; desktop: 90vh
+              maxHeight: isMobile ? "92svh" : "90vh",
               overflowY: "auto",
-              boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
+              boxShadow: "0 -4px 40px rgba(0,0,0,0.18)",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
+            {/* Drag handle — mobile only */}
+            {isMobile && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "12px 0 4px",
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 4,
+                    borderRadius: "999px",
+                    background: "#ddd",
+                  }}
+                />
+              </div>
+            )}
+
             {/* Header */}
             <div
               style={{
-                padding: "20px 24px 16px",
+                padding: isMobile ? "12px 16px 14px" : "20px 24px 16px",
                 borderBottom: "1px solid #f0f0f0",
                 display: "flex",
-                gap: "14px",
+                gap: "12px",
                 alignItems: "flex-start",
+                flexShrink: 0,
               }}
             >
               <div
                 style={{
-                  width: 44,
-                  height: 44,
-                  minWidth: 44,
+                  width: 40,
+                  height: 40,
+                  minWidth: 40,
                   borderRadius: "10px",
                   background: "#E1F5EE",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "22px",
+                  fontSize: "20px",
                 }}
               >
                 🔐
               </div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <h2
                   style={{
-                    fontSize: "16px",
+                    fontSize: isMobile ? "15px" : "16px",
                     fontWeight: 600,
                     color: "#111",
                     margin: "0 0 4px",
@@ -243,15 +294,15 @@ export default function CookieConsent() {
                     margin: "0 0 8px",
                   }}
                 >
-                  We use cookies and similar tracking technologies to improve
-                  your experience, analyse site traffic, and personalise
-                  content. You can choose which categories to allow below.
+                  We use cookies and similar technologies to improve your
+                  experience, analyse traffic, and personalise content. Choose
+                  which categories to allow below.
                 </p>
-                <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                   {[
                     { label: "Privacy policy", href: "/privacy" },
                     { label: "Cookie policy", href: "/cookies" },
-                    { label: "Terms of service", href: "/terms" },
+                    { label: "Terms", href: "/terms" },
                   ].map(({ label, href }) => (
                     <a
                       key={href}
@@ -283,26 +334,35 @@ export default function CookieConsent() {
                 onClick={() => setPanelOpen(false)}
                 aria-label="Close cookie panel"
                 style={{
-                  background: "none",
+                  background: "#f5f5f5",
                   border: "none",
-                  fontSize: "20px",
+                  width: 28,
+                  height: 28,
+                  minWidth: 28,
+                  borderRadius: "50%",
+                  fontSize: "16px",
                   cursor: "pointer",
-                  color: "#aaa",
+                  color: "#888",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   lineHeight: 1,
-                  padding: "2px 4px",
+                  marginTop: "2px",
                 }}
               >
                 ×
               </button>
             </div>
 
-            {/* Category list */}
+            {/* Category list — scrollable middle */}
             <div
               style={{
-                padding: "12px 24px",
+                padding: isMobile ? "10px 12px" : "12px 24px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "10px",
+                gap: "8px",
+                overflowY: "auto",
+                flex: 1,
               }}
             >
               <p
@@ -312,6 +372,7 @@ export default function CookieConsent() {
                   color: "#999",
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
+                  margin: "2px 0 4px",
                 }}
               >
                 Cookie categories
@@ -322,35 +383,36 @@ export default function CookieConsent() {
                   style={{
                     border: "1px solid #eee",
                     borderRadius: "10px",
-                    padding: "14px",
+                    padding: isMobile ? "12px" : "14px",
                     display: "flex",
-                    gap: "12px",
+                    gap: "10px",
                     alignItems: "flex-start",
                     background: cat.required ? "#fafafa" : "#fff",
                   }}
                 >
                   <div
                     style={{
-                      width: 34,
-                      height: 34,
-                      minWidth: 34,
+                      width: 32,
+                      height: 32,
+                      minWidth: 32,
                       borderRadius: "8px",
                       background: cat.required ? "#E1F5EE" : "#f4f4f4",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: "16px",
+                      fontSize: "15px",
                     }}
                   >
                     {cat.icon}
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "4px",
+                        gap: "6px",
+                        marginBottom: "3px",
+                        flexWrap: "wrap",
                       }}
                     >
                       <span
@@ -378,15 +440,18 @@ export default function CookieConsent() {
                       style={{
                         fontSize: "12px",
                         color: "#555",
-                        lineHeight: 1.55,
-                        margin: "0 0 4px",
+                        lineHeight: 1.5,
+                        margin: "0 0 3px",
                       }}
                     >
                       {cat.description}
                     </p>
-                    <p style={{ fontSize: "11px", color: "#aaa", margin: 0 }}>
-                      Includes: {cat.examples}
-                    </p>
+                    {/* Hide examples on mobile to save space */}
+                    {!isMobile && (
+                      <p style={{ fontSize: "11px", color: "#aaa", margin: 0 }}>
+                        Includes: {cat.examples}
+                      </p>
+                    )}
                   </div>
                   {/* Toggle */}
                   <label
@@ -439,19 +504,105 @@ export default function CookieConsent() {
               ))}
             </div>
 
-            {/* Footer */}
+            {/* Footer — pinned at bottom */}
             <div
               style={{
-                padding: "14px 24px 20px",
+                padding: isMobile ? "12px 12px 20px" : "14px 24px 20px",
                 borderTop: "1px solid #f0f0f0",
+                flexShrink: 0,
+                // Stack vertically on mobile
                 display: "flex",
-                flexWrap: "wrap",
+                flexDirection: isMobile ? "column" : "row",
                 gap: "10px",
-                alignItems: "center",
-                justifyContent: "space-between",
+                alignItems: isMobile ? "stretch" : "center",
+                justifyContent: isMobile ? "flex-start" : "space-between",
               }}
             >
-              <div>
+              {/* Accept all — primary action first on mobile */}
+              {isMobile && (
+                <button
+                  onClick={handleAcceptAll}
+                  style={{
+                    padding: "13px 14px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: "#1D9E75",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    width: "100%",
+                  }}
+                >
+                  Accept all
+                </button>
+              )}
+
+              {/* Secondary actions */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  width: isMobile ? "100%" : "auto",
+                }}
+              >
+                <button
+                  onClick={handleRejectAll}
+                  style={{
+                    flex: isMobile ? 1 : "unset",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid #f0997b",
+                    background: "#fff",
+                    color: "#993C1D",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Reject non-essential
+                </button>
+                <button
+                  onClick={handleSaveSelected}
+                  style={{
+                    flex: isMobile ? 1 : "unset",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid #ddd",
+                    background: "#fff",
+                    color: "#333",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Save preferences
+                </button>
+                {/* Desktop: accept all lives here */}
+                {!isMobile && (
+                  <button
+                    onClick={handleAcceptAll}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background: "#1D9E75",
+                      color: "#fff",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Accept all
+                  </button>
+                )}
+              </div>
+
+              {/* Withdraw / hint */}
+              <div style={{ marginTop: isMobile ? "2px" : 0 }}>
                 {saved ? (
                   <button
                     onClick={handleWithdraw}
@@ -472,53 +623,6 @@ export default function CookieConsent() {
                     You can change these at any time.
                   </span>
                 )}
-              </div>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                <button
-                  onClick={handleRejectAll}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid #f0997b",
-                    background: "#fff",
-                    color: "#993C1D",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
-                >
-                  Reject non-essential
-                </button>
-                <button
-                  onClick={handleSaveSelected}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid #ddd",
-                    background: "#fff",
-                    color: "#333",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
-                >
-                  Save preferences
-                </button>
-                <button
-                  onClick={handleAcceptAll}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: "#1D9E75",
-                    color: "#fff",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
-                >
-                  Accept all
-                </button>
               </div>
             </div>
           </div>
