@@ -16,7 +16,7 @@ import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
 import UserMenu from "../components/UserMenu";
 import ProfileSheet from "../components/ProfileSheet";
-
+import "./VetDashboard.css";
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 
 const PROVINCES = [
