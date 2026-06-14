@@ -1,407 +1,865 @@
-/* ── DriverDashboard.css ── mirrors SellerDashboard structure ── */
+/* ─────────────────────────────────────────────────────────────
+   KRAAL — Driver Dashboard
+   Matches the Zoho-style design system (SellerDashboard / BuyerDashboard)
+───────────────────────────────────────────────────────────── */
 
-/* ─── ROOT / LAYOUT ───────────────────────────────────────────────────────── */
-.dd {
-  min-height: 100vh;
-  background: #f7f4ef;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  color: #1a1a1a;
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap");
+
+:root {
+  --z-sidebar-bg: #1e2d40;
+  --z-sidebar-accent: #2ecc71;
+  --z-sidebar-border: rgba(255, 255, 255, 0.07);
+
+  --z-blue: #0059b3;
+  --z-blue-mid: #1a73d9;
+  --z-blue-light: #e8f1fb;
+  --z-blue-text: #1e40af;
+
+  --z-green: #217245;
+  --z-green-light: #eaf5ef;
+  --z-green-text: #14532d;
+
+  --z-amber: #d97706;
+  --z-amber-light: #fef3c7;
+  --z-amber-text: #92400e;
+
+  --z-red: #c0392b;
+  --z-red-light: #fdecea;
+  --z-red-text: #991b1b;
+
+  --z-gray-100: #f4f6f8;
+  --z-gray-200: #eaecef;
+  --z-gray-300: #dde2e8;
+  --z-gray-500: #9ca3af;
+  --z-gray-700: #6b7280;
+  --z-ink: #1f2937;
+  --z-ink-mid: #374151;
+  --z-white: #fff;
+
+  --z-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --z-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --r: 6px;
 }
 
-/* ─── NAV ──────────────────────────────────────────────────────────────────── */
+/* ── RESET ── */
+.dd * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.dd {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--z-gray-100);
+  font-family: "Lato", sans-serif;
+  color: var(--z-ink);
+  font-size: 13px;
+}
+.dd button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.dd a {
+  text-decoration: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TOP NAV
+───────────────────────────────────────────────────────────── */
 .dd-nav {
+  height: 50px;
+  background: var(--z-white);
+  border-bottom: 1px solid var(--z-gray-300);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
-  height: 64px;
-  background: #fff;
-  border-bottom: 1px solid #e8e2d9;
+  padding: 0 20px;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 300;
+  box-shadow: var(--z-shadow-sm);
+  flex-shrink: 0;
+  gap: 12px;
 }
 
 .dd-nav-back {
   background: none;
-  border: 1px solid #d6cfc4;
-  color: #5c5247;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s;
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--z-gray-700);
+  transition: all 0.14s;
+  white-space: nowrap;
 }
-.dd-nav-back:hover { background: #f7f4ef; }
+.dd-nav-back:hover {
+  background: var(--z-gray-100);
+  color: var(--z-ink);
+}
 
 .dd-nav-brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 .dd-nav-sub {
-  font-size: 11px;
-  color: #8a7e72;
-  letter-spacing: 0.06em;
+  font-size: 9.5px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--z-gray-500);
 }
 
 .dd-nav-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Availability toggle */
+/* ── Availability toggle ── */
 .dd-availability-btn {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
+  gap: 6px;
+  border: 1px solid var(--z-gray-300);
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s;
-}
-.dd-avail-on  { background: #d4f5e2; color: #166534; }
-.dd-avail-off { background: #fee2e2; color: #991b1b; }
-.dd-avail-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: pulse-dot 2s infinite;
-}
-.dd-avail-off .dd-avail-dot { animation: none; }
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
-}
-
-.dd-nav-driver {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.dd-driver-avatar-sm {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #c8a97a, #a07850);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.dd-driver-meta-sm { display: flex; flex-direction: column; }
-.dd-driver-name-sm { font-size: 13px; font-weight: 600; color: #2d2520; }
-.dd-verified-badge {
-  font-size: 11px;
-  color: #7c6f5e;
-}
-.dd-logout-btn {
-  background: none;
-  border: 1px solid #d6cfc4;
-  color: #7c6f5e;
-  padding: 5px 12px;
-  border-radius: 6px;
+  padding: 5px 13px;
   font-size: 12px;
-  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.15s;
+  background: var(--z-white);
 }
-.dd-logout-btn:hover { background: #f7f4ef; }
+.dd-avail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dd-avail-on {
+  border-color: var(--z-sidebar-accent);
+  color: var(--z-green-text);
+}
+.dd-avail-on .dd-avail-dot {
+  background: var(--z-sidebar-accent);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+}
+.dd-avail-off {
+  border-color: var(--z-gray-300);
+  color: var(--z-gray-500);
+}
+.dd-avail-off .dd-avail-dot {
+  background: var(--z-gray-500);
+}
 
-/* ─── PAGE HEADER ──────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   PAGE HEADER (hero strip with tabs)
+───────────────────────────────────────────────────────────── */
 .dd-page-header {
-  background: #fff;
-  border-bottom: 1px solid #e8e2d9;
-  padding: 0 2rem;
+  background: var(--z-sidebar-bg);
+  padding: 20px 22px 0;
+  flex-shrink: 0;
 }
 .dd-page-header-inner {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 1.5rem 0 1rem;
+  gap: 12px;
+  margin-bottom: 16px;
 }
-.dd-page-header-inner h1 {
-  font-size: 22px;
+.dd-page-header h1 {
+  font-size: 18px;
   font-weight: 700;
-  color: #2d2520;
-  margin: 0 0 4px;
+  color: var(--z-white);
+  margin-bottom: 3px;
 }
-.dd-page-header-inner p {
-  font-size: 13px;
-  color: #8a7e72;
-  margin: 0;
+.dd-page-header p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .dd-header-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #f7f4ef;
-  border: 1px solid #e0d9cf;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #4a3f35;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .dd-pulse-dot {
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #d6d0c8;
+  background: var(--z-gray-500);
+  flex-shrink: 0;
 }
 .dd-pulse-dot.active {
-  background: #22c55e;
-  animation: pulse-dot 1.5s infinite;
+  background: var(--z-sidebar-accent);
+  animation: dd-pulse 1.8s ease-in-out infinite;
+}
+@keyframes dd-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(46, 204, 113, 0);
+  }
 }
 
-/* ─── TABS ─────────────────────────────────────────────────────────────────── */
+/* ── TABS (inside dark header) ── */
 .dd-tabs {
   display: flex;
-  gap: 4px;
-  padding: 0.5rem 0 0;
+  gap: 0;
+  overflow-x: auto;
 }
 .dd-tab {
   background: none;
   border: none;
-  padding: 10px 18px;
-  font-size: 14px;
-  color: #8a7e72;
-  cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 0.15s;
+  padding: 9px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.52);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.14s;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
 }
-.dd-tab:hover { color: #4a3f35; }
+.dd-tab:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
 .dd-tab.active {
-  color: #a07850;
-  border-bottom-color: #a07850;
-  font-weight: 600;
+  color: var(--z-white);
+  border-bottom-color: var(--z-sidebar-accent);
 }
 .dd-tab-badge {
-  background: #a07850;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 7px;
+  background: var(--z-sidebar-accent);
+  color: var(--z-white);
   border-radius: 10px;
-  animation: tab-pulse 2s infinite;
-}
-@keyframes tab-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.7; }
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  line-height: 1.4;
 }
 
-/* ─── BODY ─────────────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   BODY
+───────────────────────────────────────────────────────────── */
 .dd-body {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  flex: 1;
+  padding: 20px 22px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: dd-fadein 0.2s ease;
+}
+@keyframes dd-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* ─── EMPTY STATE ──────────────────────────────────────────────────────────── */
-.dd-empty {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #8a7e72;
+/* ─────────────────────────────────────────────────────────────
+   AVAILABLE JOBS
+───────────────────────────────────────────────────────────── */
+.dd-jobs-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-.dd-empty-emoji { font-size: 48px; display: block; margin-bottom: 1rem; }
-.dd-empty p { font-size: 15px; margin: 0 0 8px; }
-.dd-empty-sub { font-size: 13px; color: #a09284; }
-
-/* ─── JOB CARDS ────────────────────────────────────────────────────────────── */
 .dd-jobs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
 }
 
 .dd-job-card {
-  background: #fff;
-  border: 1px solid #e8e2d9;
-  border-radius: 14px;
-  padding: 1.25rem;
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  transition: box-shadow 0.2s, transform 0.2s;
-  animation: slide-up 0.3s ease both;
+  gap: 12px;
+  transition: all 0.15s;
 }
 .dd-job-card:hover {
-  box-shadow: 0 4px 20px rgba(160, 120, 80, 0.12);
-  transform: translateY(-2px);
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  border-color: var(--z-blue-mid);
+  box-shadow: var(--z-shadow-md);
 }
 
 .dd-job-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 .dd-job-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-.dd-job-emoji { font-size: 28px; }
+.dd-job-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+}
 .dd-job-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #2d2520;
-  margin: 0 0 3px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--z-ink);
+  line-height: 1.2;
 }
-.dd-job-time { font-size: 12px; color: #a09284; }
+.dd-job-time {
+  font-size: 11px;
+  color: var(--z-gray-500);
+  margin-top: 2px;
+  display: block;
+}
 
-/* Route */
+/* ── Route display ── */
 .dd-job-route {
   display: flex;
   align-items: center;
-  gap: 0;
-  background: #f7f4ef;
-  border-radius: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  background: var(--z-gray-100);
+  border: 1px solid var(--z-gray-200);
+  border-radius: var(--r);
+  padding: 10px 12px;
 }
 .dd-route-point {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 6px;
   flex: 1;
+  min-width: 0;
 }
-.dd-route-icon { font-size: 16px; }
+.dd-route-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
 .dd-route-label {
-  font-size: 10px;
-  color: #a09284;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   display: block;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--z-gray-500);
+  font-weight: 700;
+  margin-bottom: 2px;
 }
 .dd-route-loc {
-  font-size: 13px;
-  font-weight: 600;
-  color: #2d2520;
   display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--z-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.dd-route-line { padding: 0 8px; }
-.dd-route-arrow { font-size: 18px; color: #c8a97a; }
+.dd-route-line {
+  flex-shrink: 0;
+}
+.dd-route-arrow {
+  font-size: 16px;
+  color: var(--z-amber);
+  font-weight: 700;
+}
 
-/* Detail pills */
+/* ── Detail pills ── */
 .dd-job-details {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 .dd-job-detail-pill {
-  font-size: 12px;
-  background: #f0ece6;
-  color: #5c5247;
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-.dd-fee-pill {
-  background: #d4f5e2;
-  color: #166534;
+  background: var(--z-gray-100);
+  border: 1px solid var(--z-gray-200);
+  border-radius: 10px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  color: var(--z-gray-700);
 }
 
-/* Job footer */
+.dd-job-notes {
+  font-size: 12px;
+  color: var(--z-gray-700);
+  font-style: italic;
+  background: var(--z-amber-light);
+  border-left: 3px solid var(--z-amber);
+  padding: 7px 10px;
+  border-radius: 0 var(--r) var(--r) 0;
+}
+
 .dd-job-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--z-gray-200);
 }
-.dd-job-id {
-  font-size: 12px;
-  color: #a09284;
-  font-family: monospace;
+.dd-job-buyer {
+  font-size: 11.5px;
+  color: var(--z-gray-500);
 }
 .dd-job-unavail {
-  font-size: 12px;
-  color: #ef4444;
+  font-size: 11.5px;
+  color: var(--z-amber-text);
+  background: var(--z-amber-light);
+  padding: 6px 10px;
+  border-radius: var(--r);
   text-align: center;
-  padding: 6px;
-  background: #fee2e2;
-  border-radius: 6px;
 }
 
 /* Accept button */
 .dd-accept-btn {
-  background: #a07850;
-  color: #fff;
+  background: var(--z-blue);
+  color: var(--z-white);
   border: none;
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-}
-.dd-accept-btn:hover:not(:disabled) { background: #8a6440; transform: scale(1.02); }
-.dd-accept-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ─── STATUS PILLS ─────────────────────────────────────────────────────────── */
-.dd-status-pill {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: var(--r);
+  padding: 7px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  transition: all 0.14s;
   white-space: nowrap;
 }
-.dd-status-open      { background: #dbeafe; color: #1e40af; }
-.dd-status-accepted  { background: #fef9c3; color: #713f12; }
-.dd-status-transit   { background: #fed7aa; color: #7c2d12; }
-.dd-status-delivered { background: #d4f5e2; color: #14532d; }
-.dd-status-cancelled { background: #fee2e2; color: #7f1d1d; }
+.dd-accept-btn:hover:not(:disabled) {
+  background: #004c99;
+}
+.dd-accept-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-/* ─── DELIVERY CARDS ───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   MY DELIVERIES
+───────────────────────────────────────────────────────────── */
+.dd-deliveries-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Filter tabs */
+.dd-order-filters {
+  display: flex;
+  gap: 0;
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  overflow-x: auto;
+  padding: 0 12px;
+}
+.dd-filter-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--z-gray-700);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.14s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dd-filter-btn.active {
+  color: var(--z-blue);
+  border-bottom-color: var(--z-blue);
+}
+.dd-filter-btn:hover:not(.active) {
+  color: var(--z-ink);
+}
+.dd-filter-count {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.dd-filter-btn.active .dd-filter-count {
+  background: rgba(0, 89, 179, 0.12);
+  color: var(--z-blue);
+}
+
+/* Delivery list */
 .dd-delivery-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
 }
 .dd-delivery-card {
-  background: #fff;
-  border: 1px solid #e8e2d9;
-  border-radius: 14px;
-  padding: 1.25rem;
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
+  transition: box-shadow 0.14s;
+}
+.dd-delivery-card:hover {
+  box-shadow: var(--z-shadow-sm);
 }
 .dd-delivery-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 .dd-delivery-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
+
+/* Delivery action buttons */
 .dd-delivery-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--z-gray-200);
 }
-/* ── BOTTOM NAV (mobile only) ── */
+.dd-action-btn {
+  border: none;
+  border-radius: var(--r);
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  transition: all 0.14s;
+}
+.dd-action-transit {
+  background: var(--z-amber-light);
+  color: var(--z-amber-text);
+}
+.dd-action-transit:hover {
+  background: var(--z-amber);
+  color: var(--z-white);
+}
+.dd-action-deliver {
+  background: var(--z-green-light);
+  color: var(--z-green-text);
+}
+.dd-action-deliver:hover {
+  background: var(--z-green);
+  color: var(--z-white);
+}
+.dd-delivered-badge {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--z-green-text);
+  background: var(--z-green-light);
+  padding: 6px 12px;
+  border-radius: var(--r);
+}
+.dd-cancelled-text {
+  font-size: 12px;
+  color: var(--z-red-text);
+}
+
+/* WhatsApp button */
+.dd-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #25d366;
+  color: var(--z-white);
+  border-radius: var(--r);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.14s;
+}
+.dd-wa-btn:hover {
+  background: #1da851;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   OVERVIEW — Stats grid
+───────────────────────────────────────────────────────────── */
+.dd-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 900px) {
+  .dd-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .dd-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dd-stat-card {
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: box-shadow 0.14s;
+}
+.dd-stat-card:hover {
+  box-shadow: var(--z-shadow-sm);
+}
+.dd-stat-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  background: var(--z-gray-100);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dd-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dd-stat-label {
+  font-size: 11.5px;
+  color: var(--z-gray-700);
+}
+.dd-stat-value {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--z-ink);
+  line-height: 1.15;
+}
+.dd-stat-sub {
+  font-size: 11px;
+  margin-top: 3px;
+}
+.dd-sub-up {
+  color: var(--z-green);
+  font-weight: 600;
+}
+.dd-sub-warn {
+  color: var(--z-amber);
+  font-weight: 600;
+}
+.dd-sub-neutral {
+  color: var(--z-gray-500);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   OVERVIEW — Section cards
+───────────────────────────────────────────────────────────── */
+.dd-section {
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.dd-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--z-gray-200);
+  background: #fafbfc;
+}
+.dd-section-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--z-ink);
+}
+.dd-section-link {
+  background: none;
+  border: none;
+  color: var(--z-blue);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dd-section-link:hover {
+  text-decoration: underline;
+}
+
+/* Mini list rows */
+.dd-mini-list {
+  display: flex;
+  flex-direction: column;
+}
+.dd-mini-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f2f4f6;
+  transition: background 0.12s;
+}
+.dd-mini-card:last-child {
+  border-bottom: none;
+}
+.dd-mini-card:hover {
+  background: #f8fafc;
+}
+.dd-mini-emoji {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.dd-mini-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dd-mini-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--z-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dd-mini-route {
+  font-size: 11px;
+  color: var(--z-gray-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dd-mini-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.dd-mini-time {
+  font-size: 10.5px;
+  color: var(--z-gray-500);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   STATUS PILLS
+───────────────────────────────────────────────────────────── */
+.dd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dd-status-open {
+  background: var(--z-blue-light);
+  color: var(--z-blue-text);
+}
+.dd-status-accepted {
+  background: var(--z-amber-light);
+  color: var(--z-amber-text);
+}
+.dd-status-transit {
+  background: #ede9fe;
+  color: #4c1d95;
+}
+.dd-status-delivered {
+  background: var(--z-green-light);
+  color: var(--z-green-text);
+}
+.dd-status-cancelled {
+  background: var(--z-red-light);
+  color: var(--z-red-text);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   EMPTY STATE
+───────────────────────────────────────────────────────────── */
+.dd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--z-gray-500);
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+}
+.dd-empty-emoji {
+  font-size: 40px;
+}
+.dd-empty p {
+  font-size: 13px;
+  color: var(--z-gray-700);
+}
+.dd-empty-sub {
+  font-size: 12px;
+  color: var(--z-gray-500);
+  max-width: 320px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE BOTTOM NAV (sd- prefix — shared with SellerDashboard)
+───────────────────────────────────────────────────────────── */
 .sd-bottom-nav {
   display: none;
 }
-
 @media (max-width: 768px) {
+  .dd-body {
+    padding: 14px 12px 80px;
+  }
+  .dd-jobs-grid {
+    grid-template-columns: 1fr;
+  }
+  .dd-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dd-page-header {
+    padding: 16px 14px 0;
+  }
+  .dd-page-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .dd-header-badge {
+    align-self: flex-start;
+  }
+  .dd-nav-back span {
+    display: none;
+  }
+
   .sd-bottom-nav {
     display: block;
     position: fixed;
@@ -409,19 +867,17 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: #fff;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background: var(--z-white);
+    border-top: 1px solid var(--z-gray-300);
     padding-bottom: env(safe-area-inset-bottom);
   }
-
   .sd-bottom-nav-inner {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    height: 56px;
-    padding: 0 8px;
+    height: 54px;
+    padding: 0 6px;
   }
-
   .sd-bottom-nav-item {
     display: flex;
     flex-direction: column;
@@ -430,205 +886,252 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #888;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 4px 12px;
-    border-radius: 8px;
-    transition: color 0.2s;
-    min-width: 48px;
+    color: var(--z-gray-500);
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--r);
+    transition: color 0.15s;
+    min-width: 44px;
   }
-
-  .sd-bottom-nav-item span {
-    font-size: 10px;
-  }
-
   .sd-bottom-nav-item.active {
-    color: #2D5A27;
+    color: var(--z-blue);
   }
-
-  .sd-bottom-nav-item:hover {
-    color: #2D5A27;
-    background: rgba(45, 90, 39, 0.06);
-  }
-
   .sd-bottom-nav-post {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: #2D5A27;
-    color: #fff;
+    width: 44px;
+    height: 44px;
+    background: var(--z-blue);
+    color: var(--z-white);
     border: none;
     border-radius: 50%;
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 1;
+    font-size: 22px;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background 0.2s, transform 0.15s;
+    transition: background 0.15s;
     margin-bottom: 4px;
   }
-
   .sd-bottom-nav-post:hover {
-    background: #234820;
-    transform: scale(1.07);
-  }
-
-  /* Push page content above the nav bar */
-  .sd-body {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom));
-  }
-
-  /* Hide the existing desktop tab bar on mobile if you have one */
-  .sd-tabs {
-    display: none;
+    background: #004c99;
   }
 }
-.dd-action-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.15s, transform 0.1s;
-}
-.dd-action-btn:hover { opacity: 0.9; transform: scale(1.02); }
-.dd-action-transit { background: #fed7aa; color: #7c2d12; }
-.dd-action-deliver { background: #d4f5e2; color: #14532d; }
+/* ─────────────────────────────────────────────────────────────
+   ADDITIONS — driver-useful info blocks
+───────────────────────────────────────────────────────────── */
 
-.dd-delivered-badge {
-  font-size: 13px;
-  color: #166534;
-  background: #d4f5e2;
-  padding: 7px 14px;
-  border-radius: 8px;
+/* Urgent job card highlight */
+.dd-job-card-urgent {
+  border-color: var(--z-red);
+  box-shadow: 0 0 0 1px var(--z-red);
 }
-.dd-cancelled-text { font-size: 13px; color: #a09284; }
+.dd-urgent-ribbon {
+  background: var(--z-red-light);
+  color: var(--z-red-text);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  margin: -16px -16px 0;
+  border-bottom: 1px solid #f5c5c5;
+  letter-spacing: 0.02em;
+}
 
-/* WhatsApp button */
-.dd-wa-btn {
-  display: inline-flex;
+/* Haul label between route arrows */
+.dd-route-haul {
+  display: block;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--z-gray-500);
+  font-weight: 700;
+  margin-top: 2px;
+  text-align: center;
+}
+.dd-route-line {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: #25d366;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  flex-shrink: 0;
+  gap: 1px;
+}
+
+/* Vehicle + fee info row */
+.dd-job-info-row {
+  display: flex;
+  gap: 10px;
+  background: var(--z-gray-100);
+  border: 1px solid var(--z-gray-200);
+  border-radius: var(--r);
+  padding: 9px 12px;
+}
+.dd-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.dd-info-block-right {
+  text-align: right;
+  align-items: flex-end;
+}
+.dd-info-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--z-gray-500);
+  font-weight: 700;
+}
+.dd-info-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--z-ink);
+}
+.dd-info-fee {
+  color: var(--z-green);
+}
+
+/* Clickable phone pill */
+.dd-pill-contact {
+  background: var(--z-green-light) !important;
+  color: var(--z-green-text) !important;
+  border-color: #b7dfc8 !important;
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+  transition: background 0.13s;
 }
-.dd-wa-btn:hover { background: #1fba58; }
+.dd-pill-contact:hover {
+  background: var(--z-green) !important;
+  color: #fff !important;
+}
 
-/* ─── FILTER TABS ──────────────────────────────────────────────────────────── */
-.dd-order-filters {
+/* In-transit timer badge */
+.dd-transit-timer {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #4c1d95;
+  background: #ede9fe;
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Delivery header right side (status + timer stacked) */
+.dd-delivery-header-right {
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* Buyer contact block inside delivery card */
+.dd-buyer-contact {
+  background: var(--z-blue-light);
+  border: 1px solid #c5dff5;
+  border-radius: var(--r);
+  padding: 9px 12px;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  margin-bottom: 1.5rem;
+}
+.dd-buyer-contact-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--z-blue-text);
+  font-weight: 700;
+}
+.dd-buyer-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
-.dd-filter-btn {
-  background: #fff;
-  border: 1px solid #e0d9cf;
-  color: #5c5247;
-  padding: 7px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
+.dd-buyer-contact-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--z-ink);
+  flex: 1;
+  min-width: 0;
+}
+.dd-call-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  transition: all 0.15s;
+  gap: 4px;
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--z-ink);
+  text-decoration: none;
+  transition: all 0.14s;
 }
-.dd-filter-btn:hover { border-color: #a07850; color: #a07850; }
-.dd-filter-btn.active {
-  background: #a07850;
-  border-color: #a07850;
-  color: #fff;
+.dd-call-btn:hover {
+  background: var(--z-green-light);
+  border-color: #b7dfc8;
+  color: var(--z-green-text);
 }
-.dd-filter-count {
-  background: rgba(0,0,0,0.12);
-  padding: 1px 7px;
-  border-radius: 10px;
-  font-size: 11px;
-}
-.dd-filter-btn.active .dd-filter-count { background: rgba(255,255,255,0.3); }
 
-/* ─── OVERVIEW STATS ───────────────────────────────────────────────────────── */
-.dd-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-.dd-stat-card {
-  background: #fff;
-  border: 1px solid #e8e2d9;
-  border-radius: 12px;
-  padding: 1.25rem;
+/* Earnings strip above delivery filter */
+.dd-deliveries-header {
   display: flex;
-  gap: 14px;
-  align-items: flex-start;
+  align-items: stretch;
+  gap: 0;
+  background: var(--z-white);
+  border: 1px solid var(--z-gray-300);
+  border-radius: var(--r);
+  overflow: hidden;
 }
-.dd-stat-icon { font-size: 28px; }
-.dd-stat-info { display: flex; flex-direction: column; gap: 3px; }
-.dd-stat-label { font-size: 12px; color: #8a7e72; text-transform: uppercase; letter-spacing: 0.05em; }
-.dd-stat-value { font-size: 22px; font-weight: 700; color: #2d2520; }
-.dd-stat-sub   { font-size: 12px; }
-.dd-sub-up      { color: #16a34a; }
-.dd-sub-warn    { color: #d97706; }
-.dd-sub-neutral { color: #8a7e72; }
-
-/* ─── SECTION ──────────────────────────────────────────────────────────────── */
-.dd-section { margin-bottom: 2rem; }
-.dd-section-header {
+.dd-order-filters {
+  flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-.dd-section-title { font-size: 16px; font-weight: 600; color: #2d2520; margin: 0; }
-.dd-section-link {
-  background: none;
+  overflow-x: auto;
+  padding: 0 12px;
   border: none;
-  color: #a07850;
-  font-size: 13px;
-  cursor: pointer;
-  font-weight: 500;
+  background: none;
+  border-radius: 0;
 }
-.dd-section-link:hover { text-decoration: underline; }
-
-/* ─── MINI CARDS ───────────────────────────────────────────────────────────── */
-.dd-mini-list { display: flex; flex-direction: column; gap: 8px; }
-.dd-mini-card {
-  background: #fff;
-  border: 1px solid #e8e2d9;
-  border-radius: 10px;
-  padding: 12px 14px;
+.dd-earnings-strip {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px 16px;
+  border-left: 1px solid var(--z-gray-200);
+  background: var(--z-green-light);
+  gap: 1px;
+  flex-shrink: 0;
 }
-.dd-mini-emoji { font-size: 22px; }
-.dd-mini-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.dd-mini-title { font-size: 14px; font-weight: 600; color: #2d2520; }
-.dd-mini-route { font-size: 12px; color: #8a7e72; }
-.dd-mini-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.dd-mini-time  { font-size: 11px; color: #a09284; }
+.dd-earnings-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--z-green-text);
+  font-weight: 700;
+}
+.dd-earnings-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--z-green);
+}
 
-/* ─── RESPONSIVE ───────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .dd-nav { padding: 0 1rem; }
-  .dd-body { padding: 1rem; }
-  .dd-page-header { padding: 0 1rem; }
-  .dd-page-header-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .dd-nav-right { gap: 8px; }
-  .dd-driver-meta-sm { display: none; }
-  .dd-jobs-grid { grid-template-columns: 1fr; }
-  .dd-stats-grid { grid-template-columns: 1fr 1fr; }
+/* Fee in mini overview cards */
+.dd-mini-fee {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--z-green);
+}
+
+/* Urgent highlight in overview mini list */
+.dd-mini-urgent {
+  border-left: 3px solid var(--z-red);
+}
+
+/* Tab badge — amber variant for in-transit */
+.dd-tab-badge-amber {
+  background: var(--z-amber) !important;
 }

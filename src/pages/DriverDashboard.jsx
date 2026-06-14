@@ -15,6 +15,7 @@ import useAuthStore from "../store/useAuthStore";
 import "./DriverDashboard.css";
 import UserMenu from "../components/UserMenu";
 import ProfileSheet from "../components/ProfileSheet";
+
 // ─── STATUS META ──────────────────────────────────────────────────────────────
 const STATUS_META = {
   open: { label: "Open", cls: "dd-status-open" },
@@ -27,6 +28,7 @@ const STATUS_META = {
 
 const TABS = ["Available Jobs", "My Deliveries", "Overview"];
 
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 function getCategoryEmoji(cat) {
   const map = {
     cattle: "🐄",
@@ -54,9 +56,79 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+/** How long since transit started, shown on in-transit cards */
+function transitDuration(ts) {
+  if (!ts) return null;
+  const diff = (Date.now() - ts.toMillis()) / 1000;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m in transit`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h in transit`;
+  return `${Math.floor(diff / 86400)}d in transit`;
+}
+
 function formatLocation(town, province) {
   if (town && province) return `${town}, ${province}`;
   return town || province || "TBC";
+}
+
+/**
+ * Suggest a vehicle type based on animal category + quantity.
+ * Returns { label, icon } — purely indicative, no external API needed.
+ */
+function suggestVehicle(animalType, quantity) {
+  const type = animalType?.toLowerCase() || "";
+  const qty = Number(quantity) || 1;
+
+  if (["cattle", "horses", "donkeys"].includes(type)) {
+    return qty <= 4
+      ? { label: "Livestock trailer (small)", icon: "🚛" }
+      : { label: "Livestock truck (large)", icon: "🚚" };
+  }
+  if (["pigs"].includes(type)) {
+    return qty <= 10
+      ? { label: "Enclosed bakkie / van", icon: "🚐" }
+      : { label: "Livestock truck (medium)", icon: "🚚" };
+  }
+  if (["goats", "sheep"].includes(type)) {
+    return qty <= 20
+      ? { label: "Livestock trailer (small)", icon: "🚛" }
+      : { label: "Livestock truck (medium)", icon: "🚚" };
+  }
+  // Poultry / small animals
+  return qty <= 100
+    ? { label: "Bakkie / van", icon: "🚐" }
+    : { label: "Enclosed truck (large)", icon: "🚚" };
+}
+
+/**
+ * Estimate a transport fee range based on distance category embedded in
+ * province names. Real implementations would call a maps API; here we give a
+ * sensible ballpark drivers can use as a floor when quoting.
+ *
+ * pickup/drop province names are already stored by the buyer.
+ * Same province = short haul, different = long haul.
+ */
+function estimateFee(pickupProvince, dropProvince, animalType, quantity) {
+  const qty = Number(quantity) || 1;
+  const sameRoute =
+    (pickupProvince || "").toLowerCase() === (dropProvince || "").toLowerCase();
+  const isLarge = ["cattle", "horses", "donkeys"].includes(
+    animalType?.toLowerCase(),
+  );
+
+  const baseShort = isLarge ? 80 : 40;
+  const baseLong = isLarge ? 220 : 110;
+  const perHead = isLarge ? 18 : 4;
+
+  const base = sameRoute ? baseShort : baseLong;
+  const low = base + Math.floor(qty * perHead * 0.8);
+  const high = base + Math.floor(qty * perHead * 1.3);
+  return { low, high, haul: sameRoute ? "Short haul" : "Long haul" };
+}
+
+/** Jobs posted < 2 h ago are "urgent" — highlight them */
+function isUrgent(ts) {
+  if (!ts) return false;
+  return (Date.now() - ts.toMillis()) / 1000 < 7200;
 }
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
@@ -72,14 +144,12 @@ export default function DriverDashboard() {
   const [deliveryFilter, setDeliveryFilter] = useState("all");
   const [accepting, setAccepting] = useState(null);
   const [isAvailable, setIsAvailable] = useState(true);
-const [profileOpen, setProfileOpen] = useState(false);
-  // ── Live feed of OPEN jobs in the driver's province ───────────────────────
-  // Read the driver's province from their user profile
+  const [profileOpen, setProfileOpen] = useState(false);
   const [driverProvince, setDriverProvince] = useState(null);
 
+  // ── Load driver profile ───────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
-    // Load driver's province from their profile once
     import("firebase/firestore").then(({ getDoc, doc: firestoreDoc }) => {
       getDoc(firestoreDoc(db, "transporters", user.uid)).then((snap) => {
         if (snap.exists()) {
@@ -90,16 +160,15 @@ const [profileOpen, setProfileOpen] = useState(false);
     });
   }, [user?.uid]);
 
+  // ── Live open jobs ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!driverProvince) return;
-    // ✅ Correct collection: transport_requests
-    // ✅ Filter by province so drivers only see relevant jobs
     const q = query(
       collection(db, "transport_requests"),
       where("status", "==", "open"),
       where("pickupProvince", "==", driverProvince),
     );
-    const unsub = onSnapshot(q, (snap) => {
+    return onSnapshot(q, (snap) => {
       setOpenJobs(
         snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
@@ -110,18 +179,16 @@ const [profileOpen, setProfileOpen] = useState(false);
       );
       setLoadingOpen(false);
     });
-    return () => unsub();
   }, [driverProvince]);
 
-  // ── This driver's own accepted/in-transit/delivered jobs ──────────────────
+  // ── My deliveries ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
-    // ✅ Correct collection + correct field name "driverUid" (matches buyer dashboard)
     const q = query(
       collection(db, "transport_requests"),
       where("driverUid", "==", user.uid),
     );
-    const unsub = onSnapshot(q, (snap) => {
+    return onSnapshot(q, (snap) => {
       setMyDeliveries(
         snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
@@ -133,16 +200,13 @@ const [profileOpen, setProfileOpen] = useState(false);
       );
       setLoadingMine(false);
     });
-    return () => unsub();
   }, [user?.uid]);
 
-  // ── Accept a job ──────────────────────────────────────────────────────────
+  // ── Accept job ────────────────────────────────────────────────────────────
   const acceptJob = async (job) => {
     if (accepting) return;
     setAccepting(job.id);
     try {
-      // ✅ Write driverUid + driverName so buyer dashboard can read them
-      // ✅ Set status to "quoted" to match buyer's STATUS_META
       await updateDoc(doc(db, "transport_requests", job.id), {
         status: "quoted",
         driverUid: user.uid,
@@ -158,7 +222,6 @@ const [profileOpen, setProfileOpen] = useState(false);
     }
   };
 
-  // ── Update delivery status ────────────────────────────────────────────────
   const updateStatus = async (jobId, newStatus) => {
     await updateDoc(doc(db, "transport_requests", jobId), {
       status: newStatus,
@@ -166,7 +229,6 @@ const [profileOpen, setProfileOpen] = useState(false);
     });
   };
 
-  // ── Toggle driver availability ────────────────────────────────────────────
   const toggleAvailability = async () => {
     const next = !isAvailable;
     setIsAvailable(next);
@@ -185,7 +247,7 @@ const [profileOpen, setProfileOpen] = useState(false);
         icon: "💰",
         label: "Total Earnings",
         value: earnings > 0 ? `USD ${earnings.toLocaleString()}` : "USD 0",
-        sub: `${delivered.length} completed runs`,
+        sub: `${delivered.length} completed run${delivered.length !== 1 ? "s" : ""}`,
         subType: earnings > 0 ? "up" : "neutral",
       },
       {
@@ -212,6 +274,13 @@ const [profileOpen, setProfileOpen] = useState(false);
     ];
   }, [myDeliveries, openJobs]);
 
+  // Earnings from filtered deliveries — shown in the My Deliveries filter bar
+  const deliveryEarnings = useMemo(() => {
+    return myDeliveries
+      .filter((d) => d.status === "delivered")
+      .reduce((s, d) => s + (d.transportFee || 0), 0);
+  }, [myDeliveries]);
+
   const filteredDeliveries = useMemo(
     () =>
       deliveryFilter === "all"
@@ -220,7 +289,6 @@ const [profileOpen, setProfileOpen] = useState(false);
     [myDeliveries, deliveryFilter],
   );
 
-  // eslint-disable-next-line no-unused-vars
   const initials = user?.displayName
     ? user.displayName
         .split(" ")
@@ -230,6 +298,7 @@ const [profileOpen, setProfileOpen] = useState(false);
         .toUpperCase()
     : (user?.email?.[0] || "?").toUpperCase();
 
+  // ── RENDER ────────────────────────────────────────────────────────────────
   return (
     <div className="dd">
       {/* ── TOP NAV ── */}
@@ -284,6 +353,16 @@ const [profileOpen, setProfileOpen] = useState(false);
               {tab === "Available Jobs" && openJobs.length > 0 && (
                 <span className="dd-tab-badge">{openJobs.length}</span>
               )}
+              {tab === "My Deliveries" &&
+                myDeliveries.filter((d) => d.status === "in_transit").length >
+                  0 && (
+                  <span className="dd-tab-badge dd-tab-badge-amber">
+                    {
+                      myDeliveries.filter((d) => d.status === "in_transit")
+                        .length
+                    }
+                  </span>
+                )}
             </button>
           ))}
         </div>
@@ -291,274 +370,387 @@ const [profileOpen, setProfileOpen] = useState(false);
 
       {/* ── BODY ── */}
       <div className="dd-body">
-        {/* ══ AVAILABLE JOBS ══ */}
+        {/* ══ AVAILABLE JOBS ══════════════════════════════════════════════ */}
         {activeTab === "Available Jobs" && (
           <div className="dd-jobs-panel">
             {loadingOpen ? (
-              <div className="dd-empty">
-                <span className="dd-empty-emoji">⏳</span>
-                <p>Loading available jobs…</p>
-              </div>
+              <EmptyState emoji="⏳" text="Loading available jobs…" />
             ) : openJobs.length === 0 ? (
-              <div className="dd-empty">
-                <span className="dd-empty-emoji">📡</span>
-                <p>
-                  No transport jobs in {driverProvince || "your area"} right
-                  now.
-                </p>
-                <span className="dd-empty-sub">
-                  New jobs appear here instantly when buyers request transport.
-                </span>
-              </div>
+              <EmptyState
+                emoji="📡"
+                text={`No transport jobs in ${driverProvince || "your area"} right now.`}
+                sub="New jobs appear here instantly when buyers request transport."
+              />
             ) : (
               <div className="dd-jobs-grid">
-                {openJobs.map((job) => (
-                  <div key={job.id} className="dd-job-card">
-                    <div className="dd-job-card-header">
-                      <div className="dd-job-meta">
-                        {/* ✅ Use animalType (field buyer saves) not categoryId */}
-                        <span className="dd-job-emoji">
-                          {getCategoryEmoji(job.animalType)}
+                {openJobs.map((job) => {
+                  const vehicle = suggestVehicle(job.animalType, job.quantity);
+                  const fee = estimateFee(
+                    job.pickupProvince,
+                    job.dropProvince,
+                    job.animalType,
+                    job.quantity,
+                  );
+                  const urgent = isUrgent(job.createdAt);
+
+                  return (
+                    <div
+                      key={job.id}
+                      className={`dd-job-card ${urgent ? "dd-job-card-urgent" : ""}`}
+                    >
+                      {/* Urgency ribbon */}
+                      {urgent && (
+                        <div className="dd-urgent-ribbon">
+                          🔴 New — just posted
+                        </div>
+                      )}
+
+                      <div className="dd-job-card-header">
+                        <div className="dd-job-meta">
+                          <span className="dd-job-emoji">
+                            {getCategoryEmoji(job.animalType)}
+                          </span>
+                          <div>
+                            <h3 className="dd-job-title">
+                              {job.quantity}× {job.animalType}
+                            </h3>
+                            <span className="dd-job-time">
+                              {timeAgo(job.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <span
+                          className={`dd-status-pill ${STATUS_META.open.cls}`}
+                        >
+                          {STATUS_META.open.label}
                         </span>
-                        <div>
-                          <h3 className="dd-job-title">
-                            {job.quantity}× {job.animalType}
-                          </h3>
-                          <span className="dd-job-time">
-                            {timeAgo(job.createdAt)}
+                      </div>
+
+                      {/* Route */}
+                      <div className="dd-job-route">
+                        <div className="dd-route-point">
+                          <span className="dd-route-icon">📍</span>
+                          <div>
+                            <span className="dd-route-label">Pickup</span>
+                            <span className="dd-route-loc">
+                              {formatLocation(
+                                job.pickupTown,
+                                job.pickupProvince,
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="dd-route-line">
+                          <span className="dd-route-arrow">→</span>
+                          <span className="dd-route-haul">{fee.haul}</span>
+                        </div>
+                        <div className="dd-route-point">
+                          <span className="dd-route-icon">🏁</span>
+                          <div>
+                            <span className="dd-route-label">Dropoff</span>
+                            <span className="dd-route-loc">
+                              {formatLocation(job.dropTown, job.dropProvince) ||
+                                "TBD"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Key info row: vehicle + estimated fee */}
+                      <div className="dd-job-info-row">
+                        <div className="dd-info-block">
+                          <span className="dd-info-label">Vehicle needed</span>
+                          <span className="dd-info-value">
+                            {vehicle.icon} {vehicle.label}
+                          </span>
+                        </div>
+                        <div className="dd-info-block dd-info-block-right">
+                          <span className="dd-info-label">Suggested fee</span>
+                          <span className="dd-info-value dd-info-fee">
+                            USD {fee.low}–{fee.high}
                           </span>
                         </div>
                       </div>
-                      <span
-                        className={`dd-status-pill ${STATUS_META.open.cls}`}
-                      >
-                        {STATUS_META.open.label}
-                      </span>
-                    </div>
 
-                    <div className="dd-job-route">
-                      <div className="dd-route-point dd-route-pickup">
-                        <span className="dd-route-icon">📍</span>
-                        <div>
-                          <span className="dd-route-label">Pickup</span>
-                          {/* ✅ Use pickupTown/pickupProvince (fields buyer saves) */}
-                          <span className="dd-route-loc">
-                            {formatLocation(job.pickupTown, job.pickupProvince)}
+                      {/* Detail pills */}
+                      <div className="dd-job-details">
+                        {job.preferredDate && (
+                          <span className="dd-job-detail-pill">
+                            📅 {job.preferredDate}
                           </span>
-                        </div>
-                      </div>
-                      <div className="dd-route-line">
-                        <span className="dd-route-arrow">→</span>
-                      </div>
-                      <div className="dd-route-point dd-route-dropoff">
-                        <span className="dd-route-icon">🏁</span>
-                        <div>
-                          <span className="dd-route-label">Dropoff</span>
-                          {/* ✅ Use dropTown/dropProvince (fields buyer saves) */}
-                          <span className="dd-route-loc">
-                            {formatLocation(job.dropTown, job.dropProvince) ||
-                              "TBD"}
+                        )}
+                        {job.quantity && (
+                          <span className="dd-job-detail-pill">
+                            📦 Qty: {job.quantity}
                           </span>
+                        )}
+                        {job.contactPhone && (
+                          <a
+                            href={`tel:${job.contactPhone}`}
+                            className="dd-job-detail-pill dd-pill-contact"
+                          >
+                            📞 {job.contactPhone}
+                          </a>
+                        )}
+                        {job.buyerName && (
+                          <span className="dd-job-detail-pill">
+                            👤 {job.buyerName}
+                          </span>
+                        )}
+                      </div>
+
+                      {job.notes && (
+                        <div className="dd-job-notes">"{job.notes}"</div>
+                      )}
+
+                      <div className="dd-job-footer">
+                        <span className="dd-job-buyer">
+                          Posted by {job.buyerName || "Buyer"}
+                        </span>
+                        <button
+                          className="dd-accept-btn"
+                          disabled={accepting === job.id || !isAvailable}
+                          onClick={() => acceptJob(job)}
+                        >
+                          {accepting === job.id
+                            ? "Accepting…"
+                            : "✅ Accept Job"}
+                        </button>
+                      </div>
+
+                      {!isAvailable && (
+                        <div className="dd-job-unavail">
+                          Set yourself as Available to accept jobs
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="dd-job-details">
-                      {job.preferredDate && (
-                        <span className="dd-job-detail-pill">
-                          📅 {job.preferredDate}
-                        </span>
-                      )}
-                      {job.quantity && (
-                        <span className="dd-job-detail-pill">
-                          📦 Qty: {job.quantity}
-                        </span>
-                      )}
-                      {job.contactPhone && (
-                        <span className="dd-job-detail-pill">
-                          📞 {job.contactPhone}
-                        </span>
                       )}
                     </div>
-
-                    {job.notes && (
-                      <div className="dd-job-notes">"{job.notes}"</div>
-                    )}
-
-                    <div className="dd-job-footer">
-                      <span className="dd-job-buyer">
-                        Posted by {job.buyerName || "Buyer"}
-                      </span>
-                      <button
-                        className="dd-accept-btn"
-                        disabled={accepting === job.id || !isAvailable}
-                        onClick={() => acceptJob(job)}
-                      >
-                        {accepting === job.id ? "Accepting…" : "✅ Accept Job"}
-                      </button>
-                    </div>
-
-                    {!isAvailable && (
-                      <div className="dd-job-unavail">
-                        Set yourself as Available to accept jobs
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         )}
 
-        {/* ══ MY DELIVERIES ══ */}
+        {/* ══ MY DELIVERIES ═══════════════════════════════════════════════ */}
         {activeTab === "My Deliveries" && (
           <div className="dd-deliveries-panel">
-            <div className="dd-order-filters">
-              {["all", "quoted", "in_transit", "delivered", "cancelled"].map(
-                (f) => (
-                  <button
-                    key={f}
-                    className={`dd-filter-btn ${deliveryFilter === f ? "active" : ""}`}
-                    onClick={() => setDeliveryFilter(f)}
-                  >
-                    {f === "in_transit"
-                      ? "In Transit"
-                      : f.charAt(0).toUpperCase() + f.slice(1)}
-                    <span className="dd-filter-count">
-                      {f === "all"
-                        ? myDeliveries.length
-                        : myDeliveries.filter((d) => d.status === f).length}
-                    </span>
-                  </button>
-                ),
+            {/* Filter bar + earnings strip */}
+            <div className="dd-deliveries-header">
+              <div className="dd-order-filters">
+                {["all", "quoted", "in_transit", "delivered", "cancelled"].map(
+                  (f) => (
+                    <button
+                      key={f}
+                      className={`dd-filter-btn ${deliveryFilter === f ? "active" : ""}`}
+                      onClick={() => setDeliveryFilter(f)}
+                    >
+                      {f === "in_transit"
+                        ? "In Transit"
+                        : f.charAt(0).toUpperCase() + f.slice(1)}
+                      <span className="dd-filter-count">
+                        {f === "all"
+                          ? myDeliveries.length
+                          : myDeliveries.filter((d) => d.status === f).length}
+                      </span>
+                    </button>
+                  ),
+                )}
+              </div>
+              {deliveryEarnings > 0 && (
+                <div className="dd-earnings-strip">
+                  <span className="dd-earnings-label">💰 Total earned</span>
+                  <span className="dd-earnings-value">
+                    USD {deliveryEarnings.toLocaleString()}
+                  </span>
+                </div>
               )}
             </div>
 
             {loadingMine ? (
-              <div className="dd-empty">
-                <span className="dd-empty-emoji">⏳</span>
-                <p>Loading your deliveries…</p>
-              </div>
+              <EmptyState emoji="⏳" text="Loading your deliveries…" />
             ) : filteredDeliveries.length === 0 ? (
-              <div className="dd-empty">
-                <span className="dd-empty-emoji">📦</span>
-                <p>
-                  No {deliveryFilter === "all" ? "" : deliveryFilter} deliveries
-                  yet.
-                </p>
-                <span className="dd-empty-sub">
-                  Accept a job from Available Jobs to get started.
-                </span>
-              </div>
+              <EmptyState
+                emoji="📦"
+                text={`No ${deliveryFilter === "all" ? "" : deliveryFilter} deliveries yet.`}
+                sub="Accept a job from Available Jobs to get started."
+              />
             ) : (
               <div className="dd-delivery-list">
-                {filteredDeliveries.map((job) => (
-                  <div key={job.id} className="dd-delivery-card">
-                    <div className="dd-delivery-header">
-                      <div className="dd-delivery-title-row">
-                        <span className="dd-job-emoji">
-                          {getCategoryEmoji(job.animalType)}
-                        </span>
-                        <div>
-                          <h3 className="dd-job-title">
-                            {job.quantity}× {job.animalType}
-                          </h3>
-                          <span className="dd-job-time">
-                            Updated {timeAgo(job.updatedAt)}
-                          </span>
-                        </div>
-                      </div>
-                      <span
-                        className={`dd-status-pill ${STATUS_META[job.status]?.cls}`}
-                      >
-                        {STATUS_META[job.status]?.label}
-                      </span>
-                    </div>
+                {filteredDeliveries.map((job) => {
+                  const vehicle = suggestVehicle(job.animalType, job.quantity);
+                  const duration =
+                    job.status === "in_transit"
+                      ? transitDuration(job.updatedAt)
+                      : null;
 
-                    <div className="dd-job-route">
-                      <div className="dd-route-point dd-route-pickup">
-                        <span className="dd-route-icon">📍</span>
-                        <div>
-                          <span className="dd-route-label">Pickup</span>
-                          <span className="dd-route-loc">
-                            {formatLocation(job.pickupTown, job.pickupProvince)}
+                  return (
+                    <div key={job.id} className="dd-delivery-card">
+                      <div className="dd-delivery-header">
+                        <div className="dd-delivery-title-row">
+                          <span className="dd-job-emoji">
+                            {getCategoryEmoji(job.animalType)}
                           </span>
+                          <div>
+                            <h3 className="dd-job-title">
+                              {job.quantity}× {job.animalType}
+                            </h3>
+                            <span className="dd-job-time">
+                              Updated {timeAgo(job.updatedAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="dd-delivery-header-right">
+                          <span
+                            className={`dd-status-pill ${STATUS_META[job.status]?.cls}`}
+                          >
+                            {STATUS_META[job.status]?.label}
+                          </span>
+                          {duration && (
+                            <span className="dd-transit-timer">
+                              ⏱ {duration}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="dd-route-line">
-                        <span className="dd-route-arrow">→</span>
-                      </div>
-                      <div className="dd-route-point dd-route-dropoff">
-                        <span className="dd-route-icon">🏁</span>
-                        <div>
-                          <span className="dd-route-label">Dropoff</span>
-                          <span className="dd-route-loc">
-                            {formatLocation(job.dropTown, job.dropProvince) ||
-                              "TBD"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="dd-delivery-actions">
-                      {job.status === "quoted" && (
-                        <>
-                          <button
-                            className="dd-action-btn dd-action-transit"
-                            onClick={() => updateStatus(job.id, "in_transit")}
-                          >
-                            🚚 Start Transit
-                          </button>
-                          <a
-                            href={`https://wa.me/?text=Hi, I'm your driver for ${job.quantity}× ${job.animalType} from ${job.pickupTown || job.pickupProvince}. I'll be picking up shortly.`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="dd-wa-btn"
-                          >
-                            <WhatsAppIcon /> Contact Buyer
-                          </a>
-                        </>
+                      {/* Route */}
+                      <div className="dd-job-route">
+                        <div className="dd-route-point">
+                          <span className="dd-route-icon">📍</span>
+                          <div>
+                            <span className="dd-route-label">Pickup</span>
+                            <span className="dd-route-loc">
+                              {formatLocation(
+                                job.pickupTown,
+                                job.pickupProvince,
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="dd-route-line">
+                          <span className="dd-route-arrow">→</span>
+                        </div>
+                        <div className="dd-route-point">
+                          <span className="dd-route-icon">🏁</span>
+                          <div>
+                            <span className="dd-route-label">Dropoff</span>
+                            <span className="dd-route-loc">
+                              {formatLocation(job.dropTown, job.dropProvince) ||
+                                "TBD"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Vehicle + fee info */}
+                      <div className="dd-job-info-row">
+                        <div className="dd-info-block">
+                          <span className="dd-info-label">Vehicle</span>
+                          <span className="dd-info-value">
+                            {vehicle.icon} {vehicle.label}
+                          </span>
+                        </div>
+                        {job.transportFee ? (
+                          <div className="dd-info-block dd-info-block-right">
+                            <span className="dd-info-label">Fee agreed</span>
+                            <span className="dd-info-value dd-info-fee">
+                              USD {job.transportFee.toLocaleString()}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      {/* Buyer contact — always visible once accepted */}
+                      {job.contactPhone && (
+                        <div className="dd-buyer-contact">
+                          <span className="dd-buyer-contact-label">
+                            Buyer contact
+                          </span>
+                          <div className="dd-buyer-contact-row">
+                            {job.buyerName && (
+                              <span className="dd-buyer-contact-name">
+                                👤 {job.buyerName}
+                              </span>
+                            )}
+                            <a
+                              href={`tel:${job.contactPhone}`}
+                              className="dd-call-btn"
+                            >
+                              📞 {job.contactPhone}
+                            </a>
+                            <a
+                              href={`https://wa.me/${job.contactPhone.replace(/\D/g, "")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="dd-wa-btn"
+                            >
+                              <WhatsAppIcon /> WhatsApp
+                            </a>
+                          </div>
+                        </div>
                       )}
-                      {job.status === "in_transit" && (
-                        <>
-                          <button
-                            className="dd-action-btn dd-action-deliver"
-                            onClick={() => updateStatus(job.id, "delivered")}
-                          >
-                            ✅ Mark Delivered
-                          </button>
-                          <a
-                            href={`https://wa.me/?text=Hi, your ${job.quantity}× ${job.animalType} is on the way! ETA soon.`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="dd-wa-btn"
-                          >
-                            <WhatsAppIcon /> Update Buyer
-                          </a>
-                        </>
-                      )}
-                      {job.status === "delivered" && (
-                        <span className="dd-delivered-badge">
-                          🎉 Delivery complete
-                          {job.transportFee
-                            ? ` · USD ${job.transportFee.toLocaleString()} earned`
-                            : ""}
-                        </span>
-                      )}
-                      {job.status === "cancelled" && (
-                        <span className="dd-cancelled-text">
-                          This job was cancelled.
-                        </span>
-                      )}
+
+                      {/* Actions */}
+                      <div className="dd-delivery-actions">
+                        {job.status === "quoted" && (
+                          <>
+                            <button
+                              className="dd-action-btn dd-action-transit"
+                              onClick={() => updateStatus(job.id, "in_transit")}
+                            >
+                              🚚 Start Transit
+                            </button>
+                            <a
+                              href={`https://wa.me/?text=Hi, I'm your driver for ${job.quantity}× ${job.animalType} from ${job.pickupTown || job.pickupProvince}. I'll be picking up shortly.`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="dd-wa-btn"
+                            >
+                              <WhatsAppIcon /> Contact Buyer
+                            </a>
+                          </>
+                        )}
+                        {job.status === "in_transit" && (
+                          <>
+                            <button
+                              className="dd-action-btn dd-action-deliver"
+                              onClick={() => updateStatus(job.id, "delivered")}
+                            >
+                              ✅ Mark Delivered
+                            </button>
+                            <a
+                              href={`https://wa.me/?text=Hi, your ${job.quantity}× ${job.animalType} is on the way! ETA soon.`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="dd-wa-btn"
+                            >
+                              <WhatsAppIcon /> Update Buyer
+                            </a>
+                          </>
+                        )}
+                        {job.status === "delivered" && (
+                          <span className="dd-delivered-badge">
+                            🎉 Delivery complete
+                            {job.transportFee
+                              ? ` · USD ${job.transportFee.toLocaleString()} earned`
+                              : ""}
+                          </span>
+                        )}
+                        {job.status === "cancelled" && (
+                          <span className="dd-cancelled-text">
+                            This job was cancelled.
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         )}
 
-        {/* ══ OVERVIEW ══ */}
+        {/* ══ OVERVIEW ════════════════════════════════════════════════════ */}
         {activeTab === "Overview" && (
           <div className="dd-overview">
             <div className="dd-stats-grid">
@@ -576,7 +768,7 @@ const [profileOpen, setProfileOpen] = useState(false);
               ))}
             </div>
 
-            {/* Recent deliveries preview */}
+            {/* Recent deliveries */}
             <div className="dd-section">
               <div className="dd-section-header">
                 <h2 className="dd-section-title">🚚 Recent Deliveries</h2>
@@ -615,18 +807,25 @@ const [profileOpen, setProfileOpen] = useState(false);
                             "TBD"}
                         </span>
                       </div>
-                      <span
-                        className={`dd-status-pill ${STATUS_META[job.status]?.cls}`}
-                      >
-                        {STATUS_META[job.status]?.label}
-                      </span>
+                      <div className="dd-mini-right">
+                        <span
+                          className={`dd-status-pill ${STATUS_META[job.status]?.cls}`}
+                        >
+                          {STATUS_META[job.status]?.label}
+                        </span>
+                        {job.transportFee ? (
+                          <span className="dd-mini-fee">
+                            USD {job.transportFee.toLocaleString()}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Open jobs preview */}
+            {/* Open jobs near you */}
             <div className="dd-section">
               <div className="dd-section-header">
                 <h2 className="dd-section-title">📡 Open Jobs Near You</h2>
@@ -644,77 +843,117 @@ const [profileOpen, setProfileOpen] = useState(false);
                 </div>
               ) : (
                 <div className="dd-mini-list">
-                  {openJobs.slice(0, 3).map((job) => (
-                    <div key={job.id} className="dd-mini-card">
-                      <span className="dd-mini-emoji">
-                        {getCategoryEmoji(job.animalType)}
-                      </span>
-                      <div className="dd-mini-info">
-                        <span className="dd-mini-title">
-                          {job.quantity}× {job.animalType}
+                  {openJobs.slice(0, 3).map((job) => {
+                    const fee = estimateFee(
+                      job.pickupProvince,
+                      job.dropProvince,
+                      job.animalType,
+                      job.quantity,
+                    );
+                    const urgent = isUrgent(job.createdAt);
+                    return (
+                      <div
+                        key={job.id}
+                        className={`dd-mini-card ${urgent ? "dd-mini-urgent" : ""}`}
+                      >
+                        <span className="dd-mini-emoji">
+                          {getCategoryEmoji(job.animalType)}
                         </span>
-                        <span className="dd-mini-route">
-                          {formatLocation(job.pickupTown, job.pickupProvince)} →{" "}
-                          {formatLocation(job.dropTown, job.dropProvince) ||
-                            "TBD"}
-                        </span>
+                        <div className="dd-mini-info">
+                          <span className="dd-mini-title">
+                            {job.quantity}× {job.animalType}
+                            {urgent && (
+                              <span className="dd-mini-urgent-dot"> 🔴</span>
+                            )}
+                          </span>
+                          <span className="dd-mini-route">
+                            {formatLocation(job.pickupTown, job.pickupProvince)}{" "}
+                            →{" "}
+                            {formatLocation(job.dropTown, job.dropProvince) ||
+                              "TBD"}
+                          </span>
+                        </div>
+                        <div className="dd-mini-right">
+                          <span
+                            className={`dd-status-pill ${STATUS_META.open.cls}`}
+                          >
+                            Open
+                          </span>
+                          <span className="dd-mini-fee">
+                            ~USD {fee.low}–{fee.high}
+                          </span>
+                          <span className="dd-mini-time">
+                            {timeAgo(job.createdAt)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="dd-mini-right">
-                        <span
-                          className={`dd-status-pill ${STATUS_META.open.cls}`}
-                        >
-                          Open
-                        </span>
-                        <span className="dd-mini-time">
-                          {timeAgo(job.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
           </div>
         )}
       </div>
-      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+
+      <ProfileSheet
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
+
       {/* ── BOTTOM NAV (mobile) ── */}
-<nav className="sd-bottom-nav">
-  <div className="sd-bottom-nav-inner">
-    <button
-      className={`sd-bottom-nav-item ${activeTab === "Overview" ? "active" : ""}`}
-      onClick={() => setActiveTab("Overview")}
-    >
-      📊<span>Overview</span>
-    </button>
-    <button
-      className={`sd-bottom-nav-item ${activeTab === "My Listings" ? "active" : ""}`}
-      onClick={() => setActiveTab("My Listings")}
-    >
-      📋<span>Listings</span>
-    </button>
-    <button
-      className="sd-bottom-nav-post"
-      onClick={() => navigate("/sell")}
-    >
-      +
-    </button>
-    <button
-      className={`sd-bottom-nav-item ${activeTab === "Orders" ? "active" : ""}`}
-      onClick={() => setActiveTab("Orders")}
-    >
-      📦<span>Orders</span>
-    </button>
-   <button className="sd-bottom-nav-item" onClick={() => setProfileOpen(true)}>
-  👤<span>Profile</span>
-</button>
-  </div>
-</nav>
+      <nav className="sd-bottom-nav">
+        <div className="sd-bottom-nav-inner">
+          <button
+            className={`sd-bottom-nav-item ${activeTab === "Overview" ? "active" : ""}`}
+            onClick={() => setActiveTab("Overview")}
+          >
+            📊<span>Overview</span>
+          </button>
+          <button
+            className={`sd-bottom-nav-item ${activeTab === "Available Jobs" ? "active" : ""}`}
+            onClick={() => setActiveTab("Available Jobs")}
+          >
+            📡<span>Jobs</span>
+          </button>
+          <button
+            className={`sd-bottom-nav-item ${activeTab === "My Deliveries" ? "active" : ""}`}
+            onClick={() => setActiveTab("My Deliveries")}
+          >
+            🚚<span>Deliveries</span>
+          </button>
+          <button
+            className="sd-bottom-nav-item"
+            onClick={() => setProfileOpen(true)}
+          >
+            👤<span>Profile</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
 
-// ─── ICONS ────────────────────────────────────────────────────────────────────
+// ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
+function EmptyState({ emoji, text, sub, cta, onCta }) {
+  return (
+    <div className="dd-empty">
+      <span className="dd-empty-emoji">{emoji}</span>
+      <p>{text}</p>
+      {sub && <span className="dd-empty-sub">{sub}</span>}
+      {cta && (
+        <button
+          className="dd-accept-btn"
+          onClick={onCta}
+          style={{ marginTop: 8 }}
+        >
+          {cta}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function WhatsAppIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
