@@ -16,6 +16,7 @@ import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
 import UserMenu from "../components/UserMenu";
 import ProfileSheet from "../components/ProfileSheet";
+import { TemplateSelector, CertificateViewerModal } from "../components/CertificateTemplates";
 import "./VetDashboard.css";
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 
@@ -135,7 +136,7 @@ export default function VetDashboard() {
   const [schedDate, setSchedDate] = useState("");
   const [schedTime, setSchedTime] = useState("");
   const [schedSubmitting, setSchedSubmitting] = useState(false);
-
+const [viewingCert, setViewingCert] = useState(null);
   // ── Firestore subscriptions ───────────────────────────────────────────────
 
   // Cert requests assigned to this vet (or all if admin-vet)
@@ -1026,6 +1027,7 @@ export default function VetDashboard() {
                           <th>Issued</th>
                           <th>Valid Until</th>
                           <th>Status</th>
+                           <th>Actions</th> 
                         </tr>
                       </thead>
                       <tbody>
@@ -1067,6 +1069,11 @@ export default function VetDashboard() {
                                   {isExpired ? "⚠ Expired" : "✅ Valid"}
                                 </span>
                               </td>
+                              <td>
+  <button className="vd-btn-sm vd-btn-sm-primary" onClick={() => setViewingCert(c)}>
+    📜 View
+  </button>
+</td>
                             </tr>
                           );
                         })}
@@ -1471,7 +1478,16 @@ export default function VetDashboard() {
                 </strong>
               </div>
             </div>
-
+{/* After </div> closing vd-cert-summary */}
+<div>
+  <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#2C2A26", display: "block", marginBottom: 8 }}>
+    Certificate Template
+  </label>
+  <TemplateSelector
+    selectedId={issueModal.certType}
+    onSelect={(id) => setIssueModal((m) => ({ ...m, certType: id }))}
+  />
+</div>
             <div className="vd-form-row">
               <div className="vd-form-group">
                 <label>Certificate Number</label>
@@ -1525,7 +1541,10 @@ export default function VetDashboard() {
           </div>
         </div>
       )}
-
+<CertificateViewerModal
+  cert={viewingCert}
+  onClose={() => setViewingCert(null)}
+/>
       <ProfileSheet
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
