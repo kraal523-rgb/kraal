@@ -72,6 +72,7 @@
 .um-name {
   font-size: 13px;
   font-weight: 500;
+  color: #162613;
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -82,9 +83,11 @@
   transition: transform 0.2s ease;
   opacity: 0.6;
   flex-shrink: 0;
+  color: #162613;
 }
 .um-chevron.open {
   transform: rotate(180deg);
+  color: #162613;
 }
 
 /* Dropdown */

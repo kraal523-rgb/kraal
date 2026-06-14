@@ -25,6 +25,7 @@ import Terms from "./pages/Terms";
 import VerifyIdentity, { VerificationGuard } from "./pages/VerifyIdentity";
 import DriverDashboard from "./pages/DriverDashboard";
 import BuyerDashboard from "./pages/Buyerdashboard";
+import VetDashboard from "./pages/VetDashboard"; // ← NEW
 
 // ─── Shared spinner ───────────────────────────────────────────────────────────
 function KraalSpinner() {
@@ -58,7 +59,6 @@ function KraalSpinner() {
 }
 
 // ─── ProtectedRoute ───────────────────────────────────────────────────────────
-// Redirects unauthenticated users to /login.
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuthStore();
   const location = useLocation();
@@ -73,28 +73,21 @@ function ProtectedRoute({ children }) {
 }
 
 // ─── RoleGuard ────────────────────────────────────────────────────────────────
-// Sits INSIDE ProtectedRoute — user is already authenticated at this point.
-// Checks the user's role against allowedRoles.
-// Uses the Zustand store first (no extra Firestore read if profile is loaded).
-// Falls back to a Firestore read if the store doesn't have the role yet.
 function RoleGuard({ allowedRoles, redirectTo = "/marketplace", children }) {
   const { user, userProfile } = useAuthStore();
-  const [status, setStatus] = useState("loading"); // loading | allowed | denied
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     if (!user?.uid) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("denied");
       return;
     }
 
-    // Use cached profile from store — avoids an extra Firestore read
     if (userProfile?.role) {
       setStatus(allowedRoles.includes(userProfile.role) ? "allowed" : "denied");
       return;
     }
 
-    // Fall back to Firestore if store doesn't have the role yet
     getDoc(doc(db, "users", user.uid))
       .then((snap) => {
         const role = snap.data()?.role;
@@ -109,7 +102,6 @@ function RoleGuard({ allowedRoles, redirectTo = "/marketplace", children }) {
 }
 
 // ─── AuthInit ─────────────────────────────────────────────────────────────────
-// Starts the Firebase Auth listener once on mount.
 function AuthInit() {
   const init = useAuthStore((s) => s.init);
   useEffect(() => {
@@ -188,7 +180,7 @@ function App() {
           }
         />
 
-        {/* ── Seller dashboard (sellers only) ───────────────────────────── */}
+        {/* ── Seller dashboard ──────────────────────────────────────────── */}
         <Route
           path="/seller/dashboard"
           element={
@@ -213,6 +205,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* ── Admin dashboard ───────────────────────────────────────────── */}
         <Route
           path="/admin"
           element={
@@ -223,7 +217,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* ── Buyer dashboard (buyers only) ─────────────────────────────── */}
+
+        {/* ── Buyer dashboard ───────────────────────────────────────────── */}
         <Route
           path="/buyer"
           element={
@@ -235,7 +230,7 @@ function App() {
           }
         />
 
-        {/* ── Driver dashboard (transporters only) ──────────────────────── */}
+        {/* ── Driver dashboard ──────────────────────────────────────────── */}
         <Route
           path="/driver"
           element={
@@ -245,6 +240,18 @@ function App() {
                 redirectTo="/marketplace"
               >
                 <DriverDashboard />
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ── Veterinarian dashboard ────────────────────────────────────── */}
+        <Route
+          path="/vet"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["vet"]} redirectTo="/marketplace">
+                <VetDashboard />
               </RoleGuard>
             </ProtectedRoute>
           }

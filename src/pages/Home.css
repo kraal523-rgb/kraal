@@ -277,7 +277,7 @@ body,
   z-index: 100;
   background: var(--hero-cream);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 0px solid rgba(0, 0, 0, 0.1);
 }
 
 .nav-inner {
@@ -418,10 +418,15 @@ body,
   display: block;
   width: 22px;
   height: 2px;
-  background: white;
+  background: var(--hero-soil);
   border-radius: 2px;
 }
-
+.price-ticker-icon {
+  height: 60px;
+  width: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 /* ═══════════════════════════════════════
    HERO
 ═══════════════════════════════════════ */
@@ -800,7 +805,40 @@ body,
     linear-gradient(to bottom, rgba(14, 22, 10, 0.25) 0%, transparent 30%);
   pointer-events: none;
 }
- 
+ .hero-video-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero-video-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+}
+
+.hero-video-slide.active {
+  transform: translateX(0);
+  opacity: 1;
+  z-index: 2;
+}
+
+.hero-video-slide.exit-left {
+  transform: translateX(-100%);
+  opacity: 0;
+  z-index: 1;
+}
+
+.hero-video-slide.enter-right {
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: 1;
+}
 /* Live badge inside video frame */
 .hero-video-live-badge {
   position: absolute;
@@ -1650,7 +1688,10 @@ body,
   padding: 72px 0;
   background: var(--hero-cream);
 }
-
+.kraal-section {
+  padding: 72px 0;
+  background: var(--hero-soil);
+}
 .trust-title {
   font-family: "Cormorant Garant", serif;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
@@ -2627,7 +2668,9 @@ background: var(--hero-cream);
     grid-template-columns: 1fr;
     gap: 14px;
   }
-
+  .kraal-section {
+    padding: 52px 0;
+  }
   /* ── Trust ── */
   .trust-section {
     padding: 52px 0;

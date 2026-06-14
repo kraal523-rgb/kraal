@@ -6,6 +6,7 @@ import {
   where,
   onSnapshot,
   doc,
+  getDoc,
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
@@ -18,7 +19,7 @@ import RequestTransportButton from "../components/RequestTransportButton";
 import StockManager from "./StockManager";
 import DocumentsPanel from "./DocumentsPanel";
 import "./StockManager.css";
-
+import { useVetRequest } from "../hooks/useVetRequest.jsx";
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const INITIAL_ORDERS = [
@@ -123,7 +124,8 @@ export default function SellerDashboard() {
   const WORKER_URL =
     import.meta.env.VITE_UPLOAD_WORKER_URL ||
     "https://kraal-upload.kraal523.workers.dev";
-
+    const [userProfile, setUserProfile] = useState(null);
+const { openVetRequest, vetRequestModal } = useVetRequest(user, userProfile)
   const [activeTab, setActiveTab] = useState("Overview");
   const [listings, setListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -219,7 +221,12 @@ export default function SellerDashboard() {
         : orders.filter((o) => o.status === orderFilter),
     [orders, orderFilter],
   );
-
+useEffect(() => {
+  if (!user?.uid) return;
+  getDoc(doc(db, "users", user.uid)).then((snap) => {
+    if (snap.exists()) setUserProfile(snap.data());
+  });
+}, [user?.uid]);
   const filteredListings = useMemo(
     () =>
       listingSearch.trim()
@@ -359,6 +366,7 @@ export default function SellerDashboard() {
           >
             + New Listing
           </button>
+           <button onClick={() => openVetRequest()}>🩺 Request Vet Certificate</button>
           {pendingCount > 0 && (
             <button
               className="sd-topbar-icon-btn"
@@ -975,7 +983,7 @@ export default function SellerDashboard() {
           )}
         </main>
       </div>
-
+ {vetRequestModal}
       {/* ══ EDIT LISTING MODAL ═════════════════════════════════════════════ */}
       {editListing && (
         <div className="sd-modal-overlay" onClick={() => setEditListing(null)}>

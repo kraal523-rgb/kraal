@@ -19,7 +19,7 @@ import useAuthStore from "../store/useAuthStore";
 import "./Buyerdashboard.css";
 import UserMenu from "../components/UserMenu";
 import ProfileSheet from "../components/ProfileSheet";
-
+import { useVetRequest } from "../hooks/useVetRequest.jsx";
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const PROVINCES = [
@@ -108,7 +108,8 @@ export default function BuyerDashboard() {
   const [orderFilter, setOrderFilter] = useState("all");
   const [savedSearch, setSavedSearch] = useState("");
   const [successArea, setSuccessArea] = useState("");
-
+  const [userProfile, setUserProfile] = useState(null);
+  const { openVetRequest, vetRequestModal } = useVetRequest(user, userProfile)
   // ── Data state ──────────────────────────────────────────────────────────
   const [savedListings, setSavedListings] = useState([]);
   const [savedLoading, setSavedLoading] = useState(true);
@@ -208,7 +209,12 @@ export default function BuyerDashboard() {
       finally { setSavedLoading(false); }
     })();
   }, [user?.uid]);
-
+useEffect(() => {
+  if (!user?.uid) return;
+  getDoc(doc(db, "users", user.uid)).then((snap) => {
+    if (snap.exists()) setUserProfile(snap.data());
+  });
+}, [user?.uid]);
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(collection(db, "invoices"), where("buyerId", "==", user.uid), orderBy("createdAt", "desc"));
@@ -520,6 +526,7 @@ export default function BuyerDashboard() {
         </div>
 
         <div className="bd-topbar-right">
+          <button onClick={() => openVetRequest()}>🩺 Request Vet Certificate</button>
           <button
             className="bd-topbar-btn bd-topbar-btn-ghost"
             onClick={() => navigate("/marketplace")}
@@ -1281,7 +1288,7 @@ export default function BuyerDashboard() {
 
         </main>
       </div>
-
+    {vetRequestModal}
       {/* ══ TRANSPORT MODAL ════════════════════════════════════════════════ */}
       {showTransportModal && (
         <div

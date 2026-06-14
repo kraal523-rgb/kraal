@@ -7,6 +7,7 @@ import { db } from "../lib/firebase";
 import UserMenu from "../components/UserMenu";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/kraal-logo-black.svg";
+import navIcon from "../assets/kraal-logo.svg"
 import imgCattle from "../assets/pngegg__5.png";   
 import imgGoats from "../assets/pngegg__6.png";    
 import imgSheep from "../assets/pngegg__7.png";    
@@ -37,6 +38,8 @@ import "./Home.css";
 import "./Marketplace.css";
 import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
+import videoGoats from "../assets/videos/cattle-1.mp4";
+import videoChicken from "../assets/videos/cattle-1.mp4";
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
   { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },
@@ -56,6 +59,32 @@ const CATEGORIES = [
   { id: "dogs",       img: imgDog,       label: "Dogs",          count: "150+"   },
   { id: "cats",       img: imgCats,      label: "Cats",          count: "85+"    },
   { id: "ostrich",    img: imgOstrich,   label: "Ostrich",       count: "40+"    },
+];
+const heroVideos = [
+  {
+    src: videoCattle,
+    badge: "Live on Farm",
+    title: "Brahman Herd · Marondera",
+    subtitle: "Zimbabwe's finest beef cattle",
+    link: "/marketplace?category=cattle",
+    linkText: "View Cattle →",
+  },
+  {
+    src: videoGoats,
+    badge: "Live on Farm",
+    title: "Boer Goats · Bulawayo",
+    subtitle: "Healthy, grass-fed goat herds",
+    link: "/marketplace?category=goats",
+    linkText: "View Goats →",
+  },
+  {
+    src: videoChicken,
+    badge: "Live on Farm",
+    title: "Road Runners · Harare",
+    subtitle: "Free-range indigenous chickens",
+    link: "/marketplace?category=chicken",
+    linkText: "View Poultry →",
+  },
 ];
 const FARM_PRODUCTS = [
   { id: "fish",      img: fish, label: "Fish (Aquaculture)", count: "60+",  emoji: "🐟" },
@@ -316,7 +345,17 @@ export default function Home() {
   () => localStorage.getItem("kraal_cookies") === "accepted"
 );
 const [cookieBannerOpen, setCookieBannerOpen] = useState(false);
+  const [current, setCurrent] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % heroVideos.length);
+    }, 6000); // change every 6s
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const active = heroVideos[current];
 const acceptCookies = () => {
   localStorage.setItem("kraal_cookies", "accepted");
   setCookieAccepted(true);
@@ -486,6 +525,7 @@ useEffect(() => {
  {/* ── PRICE TICKER BAND ── */}
       <div className="price-ticker-band" aria-label="Live market prices">
         <div className="price-ticker-label">📊 Live Prices</div>
+        <img src={navIcon} alt="" className="price-ticker-icon" />
         <div className="price-ticker-scroll">
           <div className="price-ticker-track">
             {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
@@ -551,32 +591,44 @@ useEffect(() => {
     <div className="hero-right">
  
       {/* Farm-window video frame */}
-      <div className="hero-video-frame">
-        <video
-          src={videoCattle}
-          autoPlay
-          muted
-          loop
-          playsInline
-        />
- 
+   <div className="hero-video-frame">
+        <div className="hero-video-track">
+          {heroVideos.map((video, index) => (
+            <video
+              key={index}
+              src={video.src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className={`hero-video-slide ${
+                index === current
+                  ? "active"
+                  : index < current
+                  ? "exit-left"
+                  : "enter-right"
+              }`}
+            />
+          ))}
+        </div>
+
         {/* Live badge */}
         <div className="hero-video-live-badge" aria-hidden="true">
           <span className="live-dot" />
-          Live on Farm
+          {active.badge}
         </div>
- 
+
         {/* Bottom caption inside frame */}
         <div className="hero-video-caption">
           <div className="hero-video-caption-text">
-            <strong>Brahman Herd · Marondera</strong>
-            Zimbabwe's finest beef cattle
+            <strong>{active.title}</strong>
+            {active.subtitle}
           </div>
-          <Link to="/marketplace?category=cattle" className="hero-video-view-btn">
-            View Cattle →
+          <Link to={active.link} className="hero-video-view-btn">
+            {active.linkText}
           </Link>
         </div>
- 
+
         {/* Floating category pills around the frame */}
         <div className="hero-float-pills" aria-hidden="true">
           <Link to="/marketplace?category=cattle" className="hero-pill hero-pill-tl">
@@ -600,6 +652,32 @@ useEffect(() => {
             <span className="hero-pill-count">320+</span>
           </Link>
         </div>
+      </div>
+
+      <div className="hero-actions">
+        <Link to="/register" className="btn-hero-primary">
+          🐄 Post a Listing — Free
+        </Link>
+        <Link to="/marketplace" className="btn-hero-ghost">
+          Browse Animals →
+        </Link>
+      </div>
+
+      <div className="hero-social-proof">
+        <div className="proof-avatars">
+          {["TM", "SN", "FC", "JM", "BN"].map((initials, idx) => (
+            <span
+              key={idx}
+              className="proof-avatar"
+              style={{ zIndex: 5 - idx }}
+            >
+              {initials}
+            </span>
+          ))}
+        </div>
+        <span className="proof-text">
+          Joined by <strong>12,000+</strong> farmers this season
+        </span>
       </div>
   <div className="hero-actions">
         <Link to="/register" className="btn-hero-primary">
@@ -1105,7 +1183,12 @@ useEffect(() => {
           ))}
         </div>
       </section>
-
+  <section className="kraal-section">
+        <div className="section-inner">
+          <img src={logo} alt="" className="kraal-section" />
+          
+        </div>
+      </section>
       {/* ── FOOTER ── */}
       <footer className="home-footer">
         <div className="footer-inner">
