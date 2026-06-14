@@ -60,11 +60,10 @@ createSellerProfile: async (uid, profileData) => {
   const now = serverTimestamp();
   const role = profileData.role || 'buyer';
 
-  const roleCollection = role === 'seller'
-    ? 'sellers'
-    : role === 'transporter'
-      ? 'transporters'
-      : 'buyers';
+  const roleCollection = role === 'seller'      ? 'sellers'
+  : role === 'transporter' ? 'transporters'
+  : role === 'vet'         ? 'vets'
+  : 'buyers';
 
   const userDoc = {
     uid,
@@ -115,11 +114,10 @@ createSellerProfile: async (uid, profileData) => {
         }
 
         const { role } = userSnap.data();
-        const roleCollection = role === 'seller'
-          ? 'sellers'
-          : role === 'transporter'
-            ? 'transporters'
-            : 'buyers';
+        const roleCollection = role === 'seller'      ? 'sellers'
+  : role === 'transporter' ? 'transporters'
+  : role === 'vet'         ? 'vets'
+  : 'buyers';
 
         const profileSnap = await getDoc(doc(db, roleCollection, uid));
         const profile = profileSnap.exists()

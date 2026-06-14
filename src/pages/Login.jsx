@@ -14,7 +14,8 @@ async function getRoleRedirect(uid, from) {
     if (role === "transporter") return "/driver";
     if (role === "seller" || role === "admin") return from || "/seller/dashboard";
     if (role === "buyer") return from || "/buyer";
-    return from || "/";  
+    if (role === "vet") return from || "/vet";   // ← add this
+    return from || "/";
   } catch {
     return from || "/";
   }

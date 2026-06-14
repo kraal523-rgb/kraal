@@ -34,6 +34,12 @@ export const ROLES = [
     emoji: "🚚",
     desc: "Deliver livestock between buyers and sellers",
   },
+  {
+  value: "vet",
+  label: "Veterinarian",
+  emoji: "🩺",
+  desc: "Provide health certificates and inspections for livestock",
+},
 ];
 
 const INITIAL_FORM = {
