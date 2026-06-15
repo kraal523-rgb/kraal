@@ -18,7 +18,7 @@ const PROVINCES_BASE = [
 ];
 const PROVINCE_TOWNS = {
   matnorth: [
-    { name: "Hwange", x: 290, y: 330 },
+    { name: "Hwange", x: 190, y: 380 },
     { name: "Victoria Falls", x: 120, y: 360 },
     { name: "Lupane", x: 410, y: 410 },
     { name: "Binga", x: 300, y: 300 },
@@ -26,9 +26,9 @@ const PROVINCE_TOWNS = {
     { name: "Nkayi", x: 440, y: 460 },
   ],
   matsouth: [
-    { name: "Gwanda", x: 460, y: 660 },
+    { name: "Gwanda", x: 540, y: 760 },
     { name: "Beitbridge", x: 590, y: 850 },
-    { name: "Plumtree", x: 330, y: 600 },
+    { name: "Plumtree", x: 330, y: 650 },
     { name: "Filabusi", x: 500, y: 620 },
     { name: "Esigodini", x: 480, y: 560 },
     { name: "Maphisa", x: 410, y: 670 },
