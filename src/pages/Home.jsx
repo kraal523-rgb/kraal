@@ -28,7 +28,7 @@ import imgDonkey from "../assets/pngegg__3.png"
 import videoCattle from "../assets/videos/cattle-1.mp4";
 import imgGeese from "../assets/geese.png";
 import imgCats from "../assets/cat.jpg";
-import imgPigeons from "../assets/pigeon.jpg";
+import imgPigeons from "../assets/pigeon.png";
 import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
 import ProfileSheet from "../components/ProfileSheet";
@@ -679,31 +679,7 @@ useEffect(() => {
           Joined by <strong>12,000+</strong> farmers this season
         </span>
       </div>
-  <div className="hero-actions">
-        <Link to="/register" className="btn-hero-primary">
-          🐄 Post a Listing — Free
-        </Link>
-        <Link to="/marketplace" className="btn-hero-ghost">
-          Browse Animals →
-        </Link>
-      </div>
  
-      <div className="hero-social-proof">
-        <div className="proof-avatars">
-          {["TM", "SN", "FC", "JM", "BN"].map((initials, idx) => (
-            <span
-              key={idx}
-              className="proof-avatar"
-              style={{ zIndex: 5 - idx }}
-            >
-              {initials}
-            </span>
-          ))}
-        </div>
-        <span className="proof-text">
-          Joined by <strong>12,000+</strong> farmers this season
-        </span>
-      </div>
      
     </div>
   </div>

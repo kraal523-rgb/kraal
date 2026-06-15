@@ -171,22 +171,21 @@ export default function CookieConsent() {
           alignItems: "center",
           gap: "6px",
           padding: "8px 14px 8px 10px",
-          background: "#fff",
-          border: "1px solid #e0e0e0",
+          background: "#ffffff00",
+          border: "0px solid #e0e0e0",
           borderRadius: "999px",
           cursor: "pointer",
           fontSize: "13px",
           fontWeight: 500,
           color: isConsented ? "#0F6E56" : "#444",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
           transition: "all 0.2s",
         }}
       >
         <img
           src={CookieIcon}
           alt=""
-          width={22}
-          height={22}
+          width={50}
+          height={50}
           style={{ display: "block" }}
         />
         <span>Cookies</span>

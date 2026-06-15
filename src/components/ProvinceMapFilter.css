@@ -69,7 +69,25 @@
   gap: 2rem;
   align-items: start;
 }
+.pmf-town-dot {
+  fill: #ffffff;
+  stroke: #059669;
+  stroke-width: 1.2px;
+  pointer-events: none;
+}
 
+.pmf-town-label {
+  font-size: 9px;
+  font-family: system-ui, sans-serif;
+  font-weight: 500;
+  fill: #1f2937;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
 @media (max-width: 680px) {
   .pmf-layout {
     grid-template-columns: 1fr;
