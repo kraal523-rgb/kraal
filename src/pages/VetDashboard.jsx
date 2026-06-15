@@ -16,8 +16,12 @@ import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
 import UserMenu from "../components/UserMenu";
 import ProfileSheet from "../components/ProfileSheet";
-import { TemplateSelector, CertificateViewerModal } from "../components/CertificateTemplates";
+import {
+  TemplateSelector,
+  CertificateViewerModal,
+} from "../components/CertificateTemplates";
 import "./VetDashboard.css";
+
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 
 const PROVINCES = [
@@ -59,13 +63,18 @@ const REQUEST_STATUS_META = {
   rejected: { label: "Rejected", cls: "vd-pill-rejected", icon: "✕" },
 };
 
+// ── Added "Analytics" tab to match business plan VFO Dashboard spec ──
 const TABS = [
   { id: "Overview", icon: "◈", label: "Overview" },
   { id: "Requests", icon: "📋", label: "Cert Requests" },
   { id: "Certificates", icon: "📜", label: "My Certs" },
   { id: "Schedule", icon: "📅", label: "Schedule" },
+  { id: "Analytics", icon: "📊", label: "Analytics" },
   { id: "Messages", icon: "💬", label: "Messages" },
 ];
+
+// Disease flags that trigger alerts on the analytics tab
+const DISEASE_FLAGS = ["FMD", "CBPP", "LSD", "Anthrax", "BVD", "Tick Fever"];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -123,7 +132,7 @@ export default function VetDashboard() {
   const msgUnsubRef = useRef(null);
 
   // ── Issue cert modal ──────────────────────────────────────────────────────
-  const [issueModal, setIssueModal] = useState(null); // holds the request object
+  const [issueModal, setIssueModal] = useState(null);
   const [issueForm, setIssueForm] = useState({
     notes: "",
     validUntil: "",
@@ -136,10 +145,16 @@ export default function VetDashboard() {
   const [schedDate, setSchedDate] = useState("");
   const [schedTime, setSchedTime] = useState("");
   const [schedSubmitting, setSchedSubmitting] = useState(false);
-const [viewingCert, setViewingCert] = useState(null);
+  const [viewingCert, setViewingCert] = useState(null);
+
+  // ── Analytics state ───────────────────────────────────────────────────────
+  const [analyticsRange, setAnalyticsRange] = useState("30"); // days
+  const [diseaseAlerts, setDiseaseAlerts] = useState([]);
+  const [diseaseLoading, setDiseaseLoading] = useState(true);
+  const [allProvinceRequests, setAllProvinceRequests] = useState([]);
+
   // ── Firestore subscriptions ───────────────────────────────────────────────
 
-  // Cert requests assigned to this vet (or all if admin-vet)
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(
@@ -157,7 +172,6 @@ const [viewingCert, setViewingCert] = useState(null);
     );
   }, [user?.uid]);
 
-  // Also pull unassigned requests in this vet's province
   const [openRequests, setOpenRequests] = useState([]);
   const [openLoading, setOpenLoading] = useState(true);
   const [vetProfile, setVetProfile] = useState(null);
@@ -193,7 +207,37 @@ const [viewingCert, setViewingCert] = useState(null);
     );
   }, [vetProfile?.province]);
 
-  // Issued certificates by this vet
+  // All province requests — used for analytics movement breakdown
+  useEffect(() => {
+    if (!vetProfile?.province) return;
+    const q = query(
+      collection(db, "vet_requests"),
+      where("province", "==", vetProfile.province),
+      orderBy("createdAt", "desc"),
+    );
+    return onSnapshot(q, (snap) => {
+      setAllProvinceRequests(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+  }, [vetProfile?.province]);
+
+  // Disease alerts from a dedicated collection (vet adds flagged notes)
+  useEffect(() => {
+    if (!user?.uid) return;
+    const q = query(
+      collection(db, "disease_alerts"),
+      where("vetId", "==", user.uid),
+      orderBy("flaggedAt", "desc"),
+    );
+    return onSnapshot(
+      q,
+      (snap) => {
+        setDiseaseAlerts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setDiseaseLoading(false);
+      },
+      () => setDiseaseLoading(false),
+    );
+  }, [user?.uid]);
+
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(
@@ -211,7 +255,6 @@ const [viewingCert, setViewingCert] = useState(null);
     );
   }, [user?.uid]);
 
-  // Conversations
   useEffect(() => {
     if (!user?.uid) return;
     const q = query(
@@ -229,7 +272,6 @@ const [viewingCert, setViewingCert] = useState(null);
     );
   }, [user?.uid]);
 
-  // Active conversation messages
   useEffect(() => {
     if (msgUnsubRef.current) {
       msgUnsubRef.current();
@@ -292,7 +334,7 @@ const [viewingCert, setViewingCert] = useState(null);
         icon: "📜",
         label: "Certs Issued",
         value: String(issuedCerts.length),
-        sub: `${completed.length} this month`,
+        sub: `${completed.length} completed`,
         type: "up",
         bg: "#eaf5ef",
       },
@@ -313,6 +355,106 @@ const [viewingCert, setViewingCert] = useState(null);
     [conversations, user?.uid],
   );
 
+  // ── Analytics computed values ─────────────────────────────────────────────
+  const analyticsData = useMemo(() => {
+    const days = parseInt(analyticsRange, 10);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    const inRange = (ts) => {
+      if (!ts) return false;
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d >= cutoff;
+    };
+
+    const recentCerts = issuedCerts.filter((c) => inRange(c.issuedAt));
+    const recentRequests = allProvinceRequests.filter((r) =>
+      inRange(r.createdAt),
+    );
+
+    // Breakdown by cert type
+    const byType = {};
+    CERT_TYPES.forEach((ct) => {
+      byType[ct.id] = 0;
+    });
+    recentCerts.forEach((c) => {
+      if (byType[c.certType] !== undefined) byType[c.certType]++;
+    });
+
+    // Breakdown by animal type
+    const byAnimal = {};
+    ANIMAL_TYPES.forEach((a) => {
+      byAnimal[a] = 0;
+    });
+    recentCerts.forEach((c) => {
+      if (byAnimal[c.animalType] !== undefined) byAnimal[c.animalType]++;
+    });
+
+    // Movement permit compliance rate (completed / total province requests in range)
+    const provinceTotal = recentRequests.length;
+    const provinceCompleted = recentRequests.filter(
+      (r) => r.status === "completed",
+    ).length;
+    const complianceRate =
+      provinceTotal > 0
+        ? Math.round((provinceCompleted / provinceTotal) * 100)
+        : 0;
+
+    // Town-level movement hotspots
+    const byTown = {};
+    recentRequests.forEach((r) => {
+      const key = r.town || "Unknown";
+      byTown[key] = (byTown[key] || 0) + 1;
+    });
+    const townList = Object.entries(byTown)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8);
+
+    return {
+      recentCerts,
+      recentRequests,
+      byType,
+      byAnimal,
+      complianceRate,
+      provinceTotal,
+      provinceCompleted,
+      townList,
+    };
+  }, [issuedCerts, allProvinceRequests, analyticsRange]);
+
+  // ── Disease flag action ───────────────────────────────────────────────────
+  const [flagModal, setFlagModal] = useState(null); // holds certRequest or cert
+  const [flagForm, setFlagForm] = useState({
+    disease: "",
+    notes: "",
+    severity: "low",
+  });
+  const [flagSubmitting, setFlagSubmitting] = useState(false);
+
+  const submitDiseaseFlag = async () => {
+    if (!flagModal || !flagForm.disease) return;
+    setFlagSubmitting(true);
+    try {
+      await addDoc(collection(db, "disease_alerts"), {
+        vetId: user.uid,
+        vetName: user.displayName || user.email,
+        province: vetProfile?.province || flagModal.province || "",
+        town: flagModal.town || "",
+        animalType: flagModal.animalType || "",
+        disease: flagForm.disease,
+        notes: flagForm.notes,
+        severity: flagForm.severity,
+        linkedRequestId: flagModal.id || null,
+        flaggedAt: serverTimestamp(),
+        status: "active",
+      });
+      setFlagModal(null);
+      setFlagForm({ disease: "", notes: "", severity: "low" });
+    } finally {
+      setFlagSubmitting(false);
+    }
+  };
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   const claimRequest = async (request) => {
@@ -322,7 +464,6 @@ const [viewingCert, setViewingCert] = useState(null);
       status: "scheduled",
       updatedAt: serverTimestamp(),
     });
-    // Notify the requester
     await addDoc(collection(db, "notifications"), {
       toUid: request.requesterId,
       type: "vet_assigned",
@@ -384,15 +525,11 @@ const [viewingCert, setViewingCert] = useState(null);
         issuedAt: serverTimestamp(),
         status: "valid",
       });
-
-      // Mark request as completed
       await updateDoc(doc(db, "vet_requests", issueModal.id), {
         status: "completed",
         certId: certRef.id,
         completedAt: serverTimestamp(),
       });
-
-      // Notify requester
       await addDoc(collection(db, "notifications"), {
         toUid: issueModal.requesterId,
         type: "cert_issued",
@@ -402,7 +539,6 @@ const [viewingCert, setViewingCert] = useState(null);
         createdAt: serverTimestamp(),
         read: false,
       });
-
       setIssueModal(null);
       setIssueForm({ notes: "", validUntil: "", certNumber: "" });
     } finally {
@@ -471,7 +607,6 @@ const [viewingCert, setViewingCert] = useState(null);
             <div className="vd-topbar-brand-sub">Vet Portal</div>
           </div>
         </div>
-
         <div className="vd-topbar-center">
           <span className="vd-topbar-greeting">
             Dr. {user?.displayName?.split(" ")[0] || "Veterinarian"} 👋
@@ -480,7 +615,6 @@ const [viewingCert, setViewingCert] = useState(null);
             <span className="vd-topbar-province">📍 {vetProfile.province}</span>
           )}
         </div>
-
         <div className="vd-topbar-right">
           {openRequests.length > 0 && (
             <button
@@ -491,13 +625,24 @@ const [viewingCert, setViewingCert] = useState(null);
               {openRequests.length === 1 ? "Request" : "Requests"}
             </button>
           )}
+          {diseaseAlerts.filter((a) => a.status === "active").length > 0 && (
+            <button
+              className="vd-topbar-btn vd-topbar-btn-danger"
+              onClick={() => setActiveTab("Analytics")}
+            >
+              🦠 {diseaseAlerts.filter((a) => a.status === "active").length}{" "}
+              Disease Alert
+              {diseaseAlerts.filter((a) => a.status === "active").length > 1
+                ? "s"
+                : ""}
+            </button>
+          )}
           {totalUnread > 0 && (
             <button
               className="vd-topbar-icon-btn"
               onClick={() => setActiveTab("Messages")}
             >
-              💬
-              <span className="vd-topbar-notif">{totalUnread}</span>
+              💬<span className="vd-topbar-notif">{totalUnread}</span>
             </button>
           )}
           <div
@@ -522,7 +667,9 @@ const [viewingCert, setViewingCert] = useState(null);
                 : t.id === "Requests"
                   ? openRequests.length +
                     certRequests.filter((r) => r.status === "pending").length
-                  : 0;
+                  : t.id === "Analytics"
+                    ? diseaseAlerts.filter((a) => a.status === "active").length
+                    : 0;
             return (
               <button
                 key={t.id}
@@ -531,11 +678,16 @@ const [viewingCert, setViewingCert] = useState(null);
               >
                 <i>{t.icon}</i>
                 {t.label}
-                {badge > 0 && <span className="vd-sidebar-badge">{badge}</span>}
+                {badge > 0 && (
+                  <span
+                    className={`vd-sidebar-badge ${t.id === "Analytics" ? "vd-sidebar-badge-danger" : ""}`}
+                  >
+                    {badge}
+                  </span>
+                )}
               </button>
             );
           })}
-
           <div className="vd-sidebar-divider" />
           <div className="vd-sidebar-section">Quick Actions</div>
           <button
@@ -544,7 +696,6 @@ const [viewingCert, setViewingCert] = useState(null);
           >
             <i>🏪</i> View Marketplace
           </button>
-
           <div className="vd-sidebar-bottom">
             <button
               className="vd-sidebar-item"
@@ -569,7 +720,6 @@ const [viewingCert, setViewingCert] = useState(null);
                 </div>
               </div>
               <div className="vd-content">
-                {/* KPIs */}
                 <div className="vd-kpi-row">
                   {kpis.map((k) => (
                     <div key={k.label} className="vd-kpi">
@@ -587,7 +737,6 @@ const [viewingCert, setViewingCert] = useState(null);
                   ))}
                 </div>
 
-                {/* Open / unassigned requests banner */}
                 {openRequests.length > 0 && (
                   <div className="vd-alert-banner">
                     <span className="vd-alert-icon">📋</span>
@@ -610,9 +759,38 @@ const [viewingCert, setViewingCert] = useState(null);
                   </div>
                 )}
 
-                {/* Two-col */}
+                {/* Disease alert banner */}
+                {diseaseAlerts.filter((a) => a.status === "active").length >
+                  0 && (
+                  <div className="vd-alert-banner vd-alert-banner-danger">
+                    <span className="vd-alert-icon">🦠</span>
+                    <div>
+                      <strong>
+                        {
+                          diseaseAlerts.filter((a) => a.status === "active")
+                            .length
+                        }{" "}
+                        active disease alert
+                        {diseaseAlerts.filter((a) => a.status === "active")
+                          .length > 1
+                          ? "s"
+                          : ""}{" "}
+                        flagged
+                      </strong>
+                      <p>
+                        Review disease surveillance data in the Analytics tab.
+                      </p>
+                    </div>
+                    <button
+                      className="vd-topbar-btn vd-topbar-btn-danger"
+                      onClick={() => setActiveTab("Analytics")}
+                    >
+                      View Alerts →
+                    </button>
+                  </div>
+                )}
+
                 <div className="vd-two-col">
-                  {/* Pending requests */}
                   <div className="vd-card">
                     <div className="vd-card-head">
                       <span className="vd-card-head-title">
@@ -661,7 +839,6 @@ const [viewingCert, setViewingCert] = useState(null);
                     )}
                   </div>
 
-                  {/* Recent certs */}
                   <div className="vd-card">
                     <div className="vd-card-head">
                       <span className="vd-card-head-title">
@@ -715,7 +892,6 @@ const [viewingCert, setViewingCert] = useState(null);
                   </div>
                 </div>
 
-                {/* Recent messages */}
                 {conversations.length > 0 && (
                   <div className="vd-card">
                     <div className="vd-card-head">
@@ -797,7 +973,6 @@ const [viewingCert, setViewingCert] = useState(null);
                 </div>
               </div>
               <div className="vd-content">
-                {/* Open / unassigned */}
                 {(openLoading || openRequests.length > 0) && (
                   <div className="vd-card">
                     <div className="vd-card-head">
@@ -872,7 +1047,6 @@ const [viewingCert, setViewingCert] = useState(null);
                   </div>
                 )}
 
-                {/* Assigned to me */}
                 <div className="vd-card">
                   <div className="vd-card-head">
                     <span className="vd-card-head-title">
@@ -976,11 +1150,19 @@ const [viewingCert, setViewingCert] = useState(null);
                                   r.status !== "rejected" && (
                                     <button
                                       className="vd-btn-sm vd-btn-sm-danger"
+                                      style={{ marginRight: 4 }}
                                       onClick={() => rejectRequest(r)}
                                     >
                                       ✕ Reject
                                     </button>
                                   )}
+                                {/* Flag disease directly from a request */}
+                                <button
+                                  className="vd-btn-sm vd-btn-sm-warn"
+                                  onClick={() => setFlagModal(r)}
+                                >
+                                  🦠 Flag
+                                </button>
                               </td>
                             </tr>
                           );
@@ -1027,7 +1209,7 @@ const [viewingCert, setViewingCert] = useState(null);
                           <th>Issued</th>
                           <th>Valid Until</th>
                           <th>Status</th>
-                           <th>Actions</th> 
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1069,11 +1251,21 @@ const [viewingCert, setViewingCert] = useState(null);
                                   {isExpired ? "⚠ Expired" : "✅ Valid"}
                                 </span>
                               </td>
-                              <td>
-  <button className="vd-btn-sm vd-btn-sm-primary" onClick={() => setViewingCert(c)}>
-    📜 View
-  </button>
-</td>
+                              <td style={{ whiteSpace: "nowrap" }}>
+                                <button
+                                  className="vd-btn-sm vd-btn-sm-primary"
+                                  style={{ marginRight: 4 }}
+                                  onClick={() => setViewingCert(c)}
+                                >
+                                  📜 View
+                                </button>
+                                <button
+                                  className="vd-btn-sm vd-btn-sm-warn"
+                                  onClick={() => setFlagModal(c)}
+                                >
+                                  🦠 Flag
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
@@ -1189,6 +1381,402 @@ const [viewingCert, setViewingCert] = useState(null);
             </>
           )}
 
+          {/* ══ ANALYTICS ═════════════════════════════════════════════════
+              Business plan spec: "District-level movement mapping and
+              compliance dashboards" + disease surveillance tracking       */}
+          {activeTab === "Analytics" && (
+            <>
+              <div className="vd-page-bar">
+                <div>
+                  <div className="vd-page-bar-title">
+                    📊 Analytics & Compliance
+                  </div>
+                  <div className="vd-page-bar-sub">
+                    {vetProfile?.province
+                      ? `${vetProfile.province} province`
+                      : "Your province"}{" "}
+                    · Movement tracking & disease surveillance
+                  </div>
+                </div>
+                {/* Date range selector */}
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[
+                    ["7", "7d"],
+                    ["30", "30d"],
+                    ["90", "90d"],
+                  ].map(([val, label]) => (
+                    <button
+                      key={val}
+                      className={`vd-btn-sm ${analyticsRange === val ? "vd-btn-sm-primary" : "vd-btn-sm-outline"}`}
+                      onClick={() => setAnalyticsRange(val)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="vd-content">
+                {/* ── Compliance KPI row ── */}
+                <div className="vd-kpi-row">
+                  <div className="vd-kpi">
+                    <div
+                      className="vd-kpi-icon"
+                      style={{ background: "#eaf5ef" }}
+                    >
+                      📜
+                    </div>
+                    <div>
+                      <div className="vd-kpi-val">
+                        {analyticsData.recentCerts.length}
+                      </div>
+                      <div className="vd-kpi-lbl">Certs Issued</div>
+                      <div className="vd-kpi-sub vd-kpi-sub-up">
+                        Last {analyticsRange} days
+                      </div>
+                    </div>
+                  </div>
+                  <div className="vd-kpi">
+                    <div
+                      className="vd-kpi-icon"
+                      style={{ background: "#e8f1fb" }}
+                    >
+                      🚚
+                    </div>
+                    <div>
+                      <div className="vd-kpi-val">
+                        {analyticsData.provinceTotal}
+                      </div>
+                      <div className="vd-kpi-lbl">Province Requests</div>
+                      <div className="vd-kpi-sub vd-kpi-sub-neutral">
+                        All vets in province
+                      </div>
+                    </div>
+                  </div>
+                  <div className="vd-kpi">
+                    <div
+                      className="vd-kpi-icon"
+                      style={{
+                        background:
+                          analyticsData.complianceRate >= 70
+                            ? "#eaf5ef"
+                            : "#fef3c7",
+                      }}
+                    >
+                      {analyticsData.complianceRate >= 70 ? "✅" : "⚠️"}
+                    </div>
+                    <div>
+                      <div className="vd-kpi-val">
+                        {analyticsData.complianceRate}%
+                      </div>
+                      <div className="vd-kpi-lbl">Compliance Rate</div>
+                      <div
+                        className={`vd-kpi-sub vd-kpi-sub-${analyticsData.complianceRate >= 70 ? "up" : "warn"}`}
+                      >
+                        {analyticsData.provinceCompleted} of{" "}
+                        {analyticsData.provinceTotal} processed
+                      </div>
+                    </div>
+                  </div>
+                  <div className="vd-kpi">
+                    <div
+                      className="vd-kpi-icon"
+                      style={{
+                        background:
+                          diseaseAlerts.filter((a) => a.status === "active")
+                            .length > 0
+                            ? "#fdecea"
+                            : "#eaf5ef",
+                      }}
+                    >
+                      🦠
+                    </div>
+                    <div>
+                      <div className="vd-kpi-val">
+                        {
+                          diseaseAlerts.filter((a) => a.status === "active")
+                            .length
+                        }
+                      </div>
+                      <div className="vd-kpi-lbl">Active Disease Flags</div>
+                      <div
+                        className={`vd-kpi-sub vd-kpi-sub-${diseaseAlerts.filter((a) => a.status === "active").length > 0 ? "warn" : "up"}`}
+                      >
+                        {diseaseAlerts.filter((a) => a.status === "active")
+                          .length > 0
+                          ? "Requires attention"
+                          : "All clear"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="vd-two-col">
+                  {/* ── Movement breakdown by cert type ── */}
+                  <div className="vd-card">
+                    <div className="vd-card-head">
+                      <span className="vd-card-head-title">
+                        <i>📋</i> Permits by Type
+                      </span>
+                    </div>
+                    {Object.entries(analyticsData.byType).every(
+                      ([, v]) => v === 0,
+                    ) ? (
+                      <EmptyState
+                        emoji="📊"
+                        text={`No certificates in the last ${analyticsRange} days.`}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 10,
+                          padding: "8px 0",
+                        }}
+                      >
+                        {CERT_TYPES.map((ct) => {
+                          const count = analyticsData.byType[ct.id] || 0;
+                          const total = analyticsData.recentCerts.length || 1;
+                          const pct = Math.round((count / total) * 100);
+                          return (
+                            <div key={ct.id}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  fontSize: "0.82rem",
+                                  marginBottom: 3,
+                                }}
+                              >
+                                <span>
+                                  {ct.icon} {ct.label}
+                                </span>
+                                <span style={{ fontWeight: 600 }}>
+                                  {count}{" "}
+                                  <span
+                                    style={{ color: "#aaa", fontWeight: 400 }}
+                                  >
+                                    ({pct}%)
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="vd-progress-track">
+                                <div
+                                  className="vd-progress-bar"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── Movement hotspots by town ── */}
+                  <div className="vd-card">
+                    <div className="vd-card-head">
+                      <span className="vd-card-head-title">
+                        <i>📍</i> Movement Hotspots
+                      </span>
+                      <span className="vd-table-sub">By town / district</span>
+                    </div>
+                    {analyticsData.townList.length === 0 ? (
+                      <EmptyState emoji="📍" text="No movement data yet." />
+                    ) : (
+                      <table className="vd-table">
+                        <thead>
+                          <tr>
+                            <th>Town / District</th>
+                            <th style={{ textAlign: "right" }}>Requests</th>
+                            <th style={{ textAlign: "right" }}>Volume</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {analyticsData.townList.map(([town, count], i) => {
+                            const max = analyticsData.townList[0][1] || 1;
+                            const pct = Math.round((count / max) * 100);
+                            return (
+                              <tr key={town}>
+                                <td>
+                                  <span
+                                    style={{
+                                      color:
+                                        i === 0
+                                          ? "#e67e22"
+                                          : i === 1
+                                            ? "#95a5a6"
+                                            : "#a8855a",
+                                      marginRight: 6,
+                                    }}
+                                  >
+                                    {i === 0 ? "🔥" : i === 1 ? "●" : "·"}
+                                  </span>
+                                  {town}
+                                </td>
+                                <td
+                                  style={{
+                                    textAlign: "right",
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {count}
+                                </td>
+                                <td style={{ width: 80 }}>
+                                  <div className="vd-progress-track">
+                                    <div
+                                      className="vd-progress-bar"
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Animal type breakdown ── */}
+                <div className="vd-card">
+                  <div className="vd-card-head">
+                    <span className="vd-card-head-title">
+                      <i>🐄</i> Livestock Movement by Species
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 12,
+                      padding: "8px 0",
+                    }}
+                  >
+                    {ANIMAL_TYPES.filter((a) => analyticsData.byAnimal[a] > 0)
+                      .length === 0 ? (
+                      <EmptyState
+                        emoji="🐄"
+                        text="No animal movement data yet."
+                      />
+                    ) : (
+                      ANIMAL_TYPES.map((a) => {
+                        const count = analyticsData.byAnimal[a] || 0;
+                        if (!count) return null;
+                        return (
+                          <div key={a} className="vd-animal-chip">
+                            <span className="vd-animal-chip-label">{a}</span>
+                            <span className="vd-animal-chip-count">
+                              {count}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Disease surveillance / alerts ── */}
+                <div className="vd-card">
+                  <div className="vd-card-head">
+                    <span className="vd-card-head-title">
+                      <i>🦠</i> Disease Surveillance Alerts
+                    </span>
+                    <button
+                      className="vd-topbar-btn vd-topbar-btn-warn"
+                      onClick={() =>
+                        setFlagModal({
+                          id: null,
+                          animalType: "",
+                          town: "",
+                          province: vetProfile?.province || "",
+                        })
+                      }
+                    >
+                      + Flag Disease
+                    </button>
+                  </div>
+                  {diseaseLoading ? (
+                    <Spinner />
+                  ) : diseaseAlerts.length === 0 ? (
+                    <EmptyState
+                      emoji="✅"
+                      text="No disease alerts flagged. Use '+ Flag Disease' after an inspection if you observe disease signs."
+                    />
+                  ) : (
+                    <table className="vd-table">
+                      <thead>
+                        <tr>
+                          <th>Disease</th>
+                          <th>Animal</th>
+                          <th>Location</th>
+                          <th>Severity</th>
+                          <th>Flagged</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {diseaseAlerts.map((a) => (
+                          <tr key={a.id}>
+                            <td>
+                              <strong>{a.disease}</strong>
+                            </td>
+                            <td>{a.animalType || "—"}</td>
+                            <td>
+                              {a.town ? `${a.town}, ` : ""}
+                              {a.province}
+                            </td>
+                            <td>
+                              <span
+                                className={`vd-pill ${a.severity === "high" ? "vd-pill-rejected" : a.severity === "medium" ? "vd-pill-pending" : "vd-pill-scheduled"}`}
+                              >
+                                {a.severity === "high"
+                                  ? "🔴"
+                                  : a.severity === "medium"
+                                    ? "🟠"
+                                    : "🟡"}{" "}
+                                {a.severity}
+                              </span>
+                            </td>
+                            <td style={{ whiteSpace: "nowrap" }}>
+                              {formatDate(a.flaggedAt)}
+                            </td>
+                            <td>
+                              <span
+                                className={`vd-pill ${a.status === "active" ? "vd-pill-rejected" : "vd-pill-completed"}`}
+                              >
+                                {a.status === "active"
+                                  ? "⚠ Active"
+                                  : "✅ Resolved"}
+                              </span>
+                            </td>
+                            <td>
+                              {a.status === "active" && (
+                                <button
+                                  className="vd-btn-sm vd-btn-sm-green"
+                                  onClick={() =>
+                                    updateDoc(doc(db, "disease_alerts", a.id), {
+                                      status: "resolved",
+                                    })
+                                  }
+                                >
+                                  ✅ Resolve
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
           {/* ══ MESSAGES ══════════════════════════════════════════════════ */}
           {activeTab === "Messages" && (
             <>
@@ -1204,7 +1792,6 @@ const [viewingCert, setViewingCert] = useState(null);
               </div>
               <div className="vd-content" style={{ padding: "0 22px 80px" }}>
                 <div className="vd-msg-layout">
-                  {/* Conversation list */}
                   <div
                     className={`vd-msg-sidebar ${activeConvo ? "vd-msg-sidebar-hidden-mobile" : ""}`}
                   >
@@ -1270,7 +1857,6 @@ const [viewingCert, setViewingCert] = useState(null);
                     )}
                   </div>
 
-                  {/* Chat pane */}
                   <div
                     className={`vd-msg-main ${!activeConvo ? "vd-msg-main-hidden-mobile" : ""}`}
                   >
@@ -1451,8 +2037,6 @@ const [viewingCert, setViewingCert] = useState(null);
                 ✕
               </button>
             </div>
-
-            {/* Summary box */}
             <div className="vd-cert-summary">
               <div className="vd-cs-row">
                 <span>Certificate Type</span>
@@ -1478,16 +2062,25 @@ const [viewingCert, setViewingCert] = useState(null);
                 </strong>
               </div>
             </div>
-{/* After </div> closing vd-cert-summary */}
-<div>
-  <label style={{ fontSize: "0.78rem", fontWeight: 600, color: "#2C2A26", display: "block", marginBottom: 8 }}>
-    Certificate Template
-  </label>
-  <TemplateSelector
-    selectedId={issueModal.certType}
-    onSelect={(id) => setIssueModal((m) => ({ ...m, certType: id }))}
-  />
-</div>
+            <div>
+              <label
+                style={{
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  color: "#2C2A26",
+                  display: "block",
+                  marginBottom: 8,
+                }}
+              >
+                Certificate Template
+              </label>
+              <TemplateSelector
+                selectedId={issueModal.certType}
+                onSelect={(id) =>
+                  setIssueModal((m) => ({ ...m, certType: id }))
+                }
+              />
+            </div>
             <div className="vd-form-row">
               <div className="vd-form-group">
                 <label>Certificate Number</label>
@@ -1522,7 +2115,6 @@ const [viewingCert, setViewingCert] = useState(null);
                 }
               />
             </div>
-
             <div className="vd-modal-actions">
               <button
                 className="vd-btn-cancel"
@@ -1541,10 +2133,120 @@ const [viewingCert, setViewingCert] = useState(null);
           </div>
         </div>
       )}
-<CertificateViewerModal
-  cert={viewingCert}
-  onClose={() => setViewingCert(null)}
-/>
+
+      {/* ══ DISEASE FLAG MODAL ════════════════════════════════════════════ */}
+      {flagModal && (
+        <div
+          className="vd-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setFlagModal(null);
+          }}
+        >
+          <div className="vd-modal">
+            <div className="vd-modal-head">
+              <div>
+                <h2>🦠 Flag Disease Concern</h2>
+                <p>Report a suspected disease for DVS surveillance tracking</p>
+              </div>
+              <button
+                className="vd-modal-close"
+                onClick={() => setFlagModal(null)}
+              >
+                ✕
+              </button>
+            </div>
+            {flagModal.id && (
+              <div className="vd-cert-summary">
+                <div className="vd-cs-row">
+                  <span>Linked to</span>
+                  <strong>
+                    {flagModal.certType || flagModal.certNumber || "Request"}
+                  </strong>
+                </div>
+                {flagModal.animalType && (
+                  <div className="vd-cs-row">
+                    <span>Animal</span>
+                    <strong>
+                      {flagModal.quantity ? `${flagModal.quantity}× ` : ""}
+                      {flagModal.animalType}
+                    </strong>
+                  </div>
+                )}
+                <div className="vd-cs-row">
+                  <span>Location</span>
+                  <strong>
+                    {flagModal.town ? `${flagModal.town}, ` : ""}
+                    {flagModal.province}
+                  </strong>
+                </div>
+              </div>
+            )}
+            <div className="vd-form-row">
+              <div className="vd-form-group">
+                <label>Suspected Disease *</label>
+                <select
+                  value={flagForm.disease}
+                  onChange={(e) =>
+                    setFlagForm((f) => ({ ...f, disease: e.target.value }))
+                  }
+                >
+                  <option value="">Select disease…</option>
+                  {DISEASE_FLAGS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="vd-form-group">
+                <label>Severity</label>
+                <select
+                  value={flagForm.severity}
+                  onChange={(e) =>
+                    setFlagForm((f) => ({ ...f, severity: e.target.value }))
+                  }
+                >
+                  <option value="low">🟡 Low — Monitor</option>
+                  <option value="medium">🟠 Medium — Investigate</option>
+                  <option value="high">🔴 High — Immediate action</option>
+                </select>
+              </div>
+            </div>
+            <div className="vd-form-group">
+              <label>Clinical Observations / Notes</label>
+              <textarea
+                rows={3}
+                placeholder="Describe symptoms observed, number of animals affected, onset date…"
+                value={flagForm.notes}
+                onChange={(e) =>
+                  setFlagForm((f) => ({ ...f, notes: e.target.value }))
+                }
+              />
+            </div>
+            <div className="vd-modal-actions">
+              <button
+                className="vd-btn-cancel"
+                onClick={() => setFlagModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="vd-btn-submit vd-btn-submit-warn"
+                onClick={submitDiseaseFlag}
+                disabled={!flagForm.disease || flagSubmitting}
+              >
+                {flagSubmitting ? "Submitting…" : "🦠 Submit Alert"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CertificateViewerModal
+        cert={viewingCert}
+        onClose={() => setViewingCert(null)}
+      />
       <ProfileSheet
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
