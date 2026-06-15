@@ -1313,7 +1313,7 @@ body,
 }
 
 .section-link {
-  color: var(--green-mid);
+  color: var(--hero-soil);
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 600;
@@ -1689,6 +1689,7 @@ body,
   background: var(--hero-cream);
 }
 .kraal-section {
+  display: block;
   padding: 72px 0;
   background: var(--hero-soil);
 }
@@ -1741,7 +1742,213 @@ body,
   color: var(--text-muted);
   line-height: 1.65;
 }
-
+.hero-trust-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+ 
+.hero-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #2d2d2d;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+ 
+/* ── 2. LIVE SOLD FEED ────────────────────────────────────────── */
+.hero-live-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  max-width: 480px;
+}
+ 
+.hlf-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-right: 6px;
+  animation: pulse-green 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+ 
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.3); }
+}
+ 
+.hlf-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #22c55e;
+  margin-bottom: 4px;
+}
+ 
+.hlf-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+ 
+.hlf-item {
+  font-size: 0.82rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+ 
+.hlf-item strong {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+ 
+.hlf-time {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+}
+ 
+/* ── 3. STATS ROW ─────────────────────────────────────────────── */
+.hero-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 20px;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
+ 
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px;
+  text-align: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.07);
+}
+ 
+.hero-stat:last-child {
+  border-right: none;
+}
+ 
+.hero-stat-icon {
+  font-size: 1.1rem;
+}
+ 
+.hero-stat-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1.1;
+}
+ 
+.hero-stat-label {
+  font-size: 0.68rem;
+  color: #666;
+  line-height: 1.2;
+}
+ 
+/* ── 4. QUICK CATEGORY PILLS ──────────────────────────────────── */
+.hero-quick-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  max-width: 480px;
+}
+ 
+.hero-quick-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  background: #fff;
+  border: 1.5px solid #e0d9cc;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2d2d2d;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
+}
+ 
+.hero-quick-cat:hover {
+  border-color: #c85a2a;
+  background: #fff8f5;
+  transform: translateY(-1px);
+}
+ 
+.hqc-count {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #888;
+}
+ 
+/* ── DESKTOP: keep hero-left from collapsing ──────────────────── */
+@media (min-width: 900px) {
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* vertically center block */
+    min-height: 520px;       /* match typical video frame height */
+    max-width: 500px;
+  }
+}
+ 
+/* ── MOBILE: hide stats row on tiny screens, show 2-col ─────── */
+@media (max-width: 600px) {
+  .hero-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ 
+  .hero-stat:nth-child(2) {
+    border-right: none;
+  }
+ 
+  .hero-stat:nth-child(3) {
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    border-right: 1px solid rgba(0, 0, 0, 0.07);
+  }
+ 
+  .hero-stat:nth-child(4) {
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+  }
+ 
+  .hero-live-feed,
+  .hero-stats-row,
+  .hero-quick-cats {
+    max-width: 100%;
+  }
+}
+ 
 /* ═══════════════════════════════════════
    HOW IT WORKS
 ═══════════════════════════════════════ */

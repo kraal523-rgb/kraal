@@ -493,6 +493,7 @@ useEffect(() => {
 
       {/* ── NAV ── */}
       <nav className="home-nav">
+        
         <div className="nav-inner">
           <Link to="/" className="nav-logo">
             <img src={logo} style={{ width: "140px" }} alt="Kraal" />
@@ -503,7 +504,9 @@ useEffect(() => {
 <Link to="/marketplace?category=cattle">Cattle</Link>
 <Link to="/marketplace?category=goats">Goats</Link>
 <Link to="/about">About</Link>
+
           </div>
+          
           <div className="nav-actions">
            <UserMenu />
             <Link to="/sell" className="nav-cta">
@@ -520,6 +523,7 @@ useEffect(() => {
               <span />
             </button>
           </div>
+         
         </div>
       </nav>
  {/* ── PRICE TICKER BAND ── */}
@@ -552,11 +556,7 @@ useEffect(() => {
     {/* ── LEFT — copy + search + CTAs ── */}
     <div className="hero-left">
  
-      <div className="hero-eyebrow">
-        <span className="eyebrow-dot" />
-        Zimbabwe's #1 Livestock Marketplace
-      </div>
- 
+     
       <h1 className="hero-title">
         Your livestock,
         <br />
@@ -571,25 +571,42 @@ useEffect(() => {
         commission.
       </p>
  
-      <form className="hero-search" onSubmit={handleSearch}>
-        <span className="search-icon">
-          <SearchIcon />
-        </span>
-        <input
-          type="text"
-          placeholder="Search cattle, goats, road runners…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="submit">Search</button>
-      </form>
- 
-     
+      
+
+
+<div className="hero-stats-row">
+  {STATS.map((s, i) => (
+    <div key={i} className="hero-stat">
+      <span className="hero-stat-icon">{s.icon}</span>
+      <strong className="hero-stat-value">{s.value}</strong>
+      <span className="hero-stat-label">{s.label}</span>
+    </div>
+  ))}
+</div>
+     <div className="hero-quick-cats">
+  {[
+    { id: "cattle",  emoji: "🐄", label: "Cattle",       count: "1,240+" },
+    { id: "goats",   emoji: "🐐", label: "Goats",        count: "890+"   },
+    { id: "chicken", emoji: "🐓", label: "Road Runners", count: "2,100+" },
+    { id: "sheep",   emoji: "🐑", label: "Sheep",        count: "560+"   },
+    { id: "pigs",    emoji: "🐖", label: "Pigs",         count: "320+"   },
+  ].map((c) => (
+    <button
+      key={c.id}
+      className="hero-quick-cat"
+      onClick={() => navigate(`/marketplace?category=${c.id}`)}
+    >
+      <span>{c.emoji}</span>
+      <span>{c.label}</span>
+      <span className="hqc-count">{c.count}</span>
+    </button>
+  ))}
+</div>
     </div>
  
     {/* ── RIGHT — contained video frame + mini listings ── */}
     <div className="hero-right">
- 
+
       {/* Farm-window video frame */}
    <div className="hero-video-frame">
         <div className="hero-video-track">
@@ -680,7 +697,18 @@ useEffect(() => {
         </span>
       </div>
  
-     
+      <form className="hero-search" onSubmit={handleSearch}>
+        <span className="search-icon">
+          <SearchIcon />
+        </span>
+        <input
+          type="text"
+          placeholder="Search cattle, goats, road runners…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button type="submit">Search</button>
+      </form>
     </div>
   </div>
  
@@ -1161,9 +1189,21 @@ useEffect(() => {
       </section>
   <section className="kraal-section">
         <div className="section-inner">
-          <img src={logo} alt="" className="kraal-section" />
+          <div className="hero-live-feed">
+  <span className="hlf-dot" />
+  <span className="hlf-label">Live sales</span>
+  <div className="hlf-items">
+    {RECENTLY_SOLD.slice(0, 4).map((s, i) => (
+      <span key={i} className="hlf-item">
+        <strong>{s.qty}×</strong> {s.animal} · {s.location}
+        <span className="hlf-time">{s.time}</span>
+      </span>
+    ))}
+  </div>
+</div>
           
         </div>
+        
       </section>
       {/* ── FOOTER ── */}
       <footer className="home-footer">
