@@ -21,6 +21,7 @@ import SellerDashboard from "./pages/SellerDashboard";
 import SellAnimal from "./pages/seller/SellAnimal";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import KraalMarketExplorer from "./pages/Kraalmarketexplorer";
 import Terms from "./pages/Terms";
 import VerifyIdentity, { VerificationGuard } from "./pages/VerifyIdentity";
 import DriverDashboard from "./pages/DriverDashboard";
@@ -159,6 +160,7 @@ function App() {
       <Routes>
         {/* ── Public routes ──────────────────────────────────────────────── */}
         <Route path="/" element={<Home />} />
+        <Route path="/explore" element={<KraalMarketExplorer />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/listings/:id" element={<ListingDetail />} />

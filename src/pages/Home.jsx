@@ -1207,6 +1207,66 @@ useEffect(() => {
    
   </div>
 </section>
+{/* ── UNLOCKING ZIMBABWE ── */}
+<section className="uzim-section">
+
+
+  <div className="uzim-inner">
+    {/* Left — copy */}
+    <div className="uzim-left">
+      <div className="uzim-eyebrow">
+        <span className="uzim-live-dot" />
+        New Feature
+      </div>
+      <h2 className="uzim-title">
+        Unlocking<br /><em>Zimbabwe</em><br />Province by Province
+      </h2>
+      <p className="uzim-desc">
+        Explore every province, district, and town across Zimbabwe — browse
+        local livestock markets, connect with farmers in your region, and
+        discover communities you never knew existed.
+      </p>
+      <div className="uzim-features">
+        <div className="uzim-feat"><span className="uzim-feat-icon">🗺️</span> All 10 provinces mapped with districts &amp; towns</div>
+        <div className="uzim-feat"><span className="uzim-feat-icon">🏘️</span> Browse wards and local community areas</div>
+        <div className="uzim-feat"><span className="uzim-feat-icon">🐄</span> Find farmers and listings near you</div>
+      </div>
+      <Link to="/explore" className="uzim-cta">
+        Explore Zimbabwe <span className="uzim-arrow">→</span>
+      </Link>
+    </div>
+
+    {/* Right — province cards */}
+    <div className="uzim-right">
+      <div className="uzim-card uzim-card-featured">
+        <span className="uzim-card-icon">🌆</span>
+        <div>
+          <div className="uzim-card-title">Harare · Mashonaland</div>
+          <div className="uzim-card-sub">Capital region · 7 districts · 10 towns</div>
+        </div>
+      </div>
+      {[
+        { icon: "🌾", name: "Bulawayo",     sub: "Matabeleland"       },
+        { icon: "⛰️", name: "Manicaland",   sub: "Eastern Highlands"  },
+        { icon: "🐘", name: "Matabeleland", sub: "North & South"      },
+        { icon: "🌿", name: "Midlands",     sub: "Gweru · Kwekwe"     },
+      ].map((p) => (
+        <div key={p.name} className="uzim-card">
+          <div className="uzim-card-icon">{p.icon}</div>
+          <div className="uzim-card-title">{p.name}</div>
+          <div className="uzim-card-sub">{p.sub}</div>
+        </div>
+      ))}
+      <div className="uzim-stats-row">
+        {[["10","Provinces"],["70+","Districts"],["100+","Towns"]].map(([v,l]) => (
+          <div key={l} className="uzim-stat">
+            <strong>{v}</strong><span>{l}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
       {/* ── FOOTER ── */}
       <footer className="home-footer">
         <div className="footer-inner">
