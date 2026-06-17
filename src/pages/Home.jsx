@@ -26,6 +26,7 @@ import google from "../assets/google-play.png"
 import honey from "../assets/honey.png"
 import eggs from "../assets/eggs.jpg";
 import imgDonkey from "../assets/pngegg__3.png"
+import harareCoat from "../assets/harare-coat.svg"
 import videoCattle from "../assets/videos/cattle-1.mp4";
 import imgGeese from "../assets/geese.png";
 import imgCats from "../assets/cat.jpg";
@@ -41,6 +42,7 @@ import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import videoGoats from "../assets/videos/cattle-1.mp4";
 import videoChicken from "../assets/videos/cattle-1.mp4";
+import zimCoat from "../assets/Coat_of_arms_of_Zimbabwe.png"
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
   { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },
@@ -1209,15 +1211,12 @@ useEffect(() => {
 </section>
 {/* ── UNLOCKING ZIMBABWE ── */}
 <section className="uzim-section">
-
+  
 
   <div className="uzim-inner">
     {/* Left — copy */}
     <div className="uzim-left">
-      <div className="uzim-eyebrow">
-        <span className="uzim-live-dot" />
-        New Feature
-      </div>
+     <img src={zimCoat} width={100} alt="" />
       <h2 className="uzim-title">
         Unlocking<br /><em>Zimbabwe</em><br />Province by Province
       </h2>
@@ -1239,14 +1238,14 @@ useEffect(() => {
     {/* Right — province cards */}
     <div className="uzim-right">
       <div className="uzim-card uzim-card-featured">
-        <span className="uzim-card-icon">🌆</span>
+        <span className="uzim-card-icon"><img src={harareCoat} width={60} alt="" /></span>
         <div>
           <div className="uzim-card-title">Harare · Mashonaland</div>
           <div className="uzim-card-sub">Capital region · 7 districts · 10 towns</div>
         </div>
       </div>
       {[
-        { icon: "🌾", name: "Bulawayo",     sub: "Matabeleland"       },
+        { img: harareCoat, name: "Bulawayo",     sub: "Matabeleland"       },
         { icon: "⛰️", name: "Manicaland",   sub: "Eastern Highlands"  },
         { icon: "🐘", name: "Matabeleland", sub: "North & South"      },
         { icon: "🌿", name: "Midlands",     sub: "Gweru · Kwekwe"     },

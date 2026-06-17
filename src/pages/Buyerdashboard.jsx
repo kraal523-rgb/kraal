@@ -508,10 +508,9 @@ useEffect(() => {
       {/* ── TOPBAR ── */}
       <header className="bd-topbar">
         <div className="bd-topbar-logo">
-          <div className="bd-topbar-logo-icon">K</div>
+         
           <div>
-            <div className="bd-topbar-logo-text">Kraal</div>
-            <div className="bd-topbar-logo-sub">Buyer Hub</div>
+            <img src={logo} width={100} alt="" />
           </div>
         </div>
 
