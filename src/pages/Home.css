@@ -1697,7 +1697,7 @@ body,
   background: var(--hero-cream);
 }
 .kraal-section {
-  display: block;
+  display:grid;
   padding: 72px 0;
   background: var(--hero-soil);
 }
@@ -1771,8 +1771,18 @@ body,
   white-space: nowrap;
   backdrop-filter: blur(4px);
 }
- 
-/* ── 2. LIVE SOLD FEED ────────────────────────────────────────── */
+ .hero-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 60px;
+  flex-wrap: wrap; 
+}
+
+.hero-live-feed,
+.hero-app {
+  margin-top: 0; 
+  flex: 1 1 320px; 
+}
 .hero-live-feed {
   display: flex;
   flex-direction: column;
@@ -1785,7 +1795,18 @@ body,
   backdrop-filter: blur(6px);
   max-width: 480px;
 }
- 
+ .hero-app {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  max-width: 480px;
+}
 .hlf-dot {
   display: inline-block;
   width: 8px;
@@ -2152,7 +2173,11 @@ body,
   display: block;
   margin-bottom: 10px;
 }
-
+.kraal-section .section-eyebrow {
+  text-align: center;
+  display: block;
+  margin-bottom: 10px;
+}
 .testimonials-wrap {
   max-width: 640px;
   margin: 44px auto 0;
@@ -2468,7 +2493,7 @@ body,
   align-items: center;
   gap: 12px;
   padding-right: 48px;
-  opacity: 0.06;
+  opacity: 0.9;
   pointer-events: none;
 }
 

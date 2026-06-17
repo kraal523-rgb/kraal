@@ -1,7 +1,7 @@
 /**
  * messageProcessor.js — Routes incoming WhatsApp messages by type + session step
  */
-
+import { isRegistered, handleRegistration } from "./registration.js"
 import {
   getSession,
   saveSession,
@@ -13,7 +13,7 @@ import {
   sendTextMessage,
   sendButtonMessage,
   downloadMedia,
-} from "./webhook.js";
+} from "./Webhook.js";
 import { extractListingFromImage, transcribeAudio } from "./ai.js";
 import { uploadToR2, getPublicUrl } from "./storage.js";
 import { createAssistedListing } from "./firestore.js";
@@ -25,6 +25,11 @@ export async function processMessage(message, senderName, env) {
   const phone = message.from;
   const type = message.type;
 
+  const registered = await isRegistered(phone, env);
+  if (!registered) {
+    await handleRegistration(message, senderName, env);
+    return;                         // don't proceed to listing flow until done
+  }
   // Load or create session
   let session = await getSession(phone, env);
   if (!session) {

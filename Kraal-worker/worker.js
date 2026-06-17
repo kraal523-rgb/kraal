@@ -1,5 +1,5 @@
 
-import { handleWebhookVerification, handleWebhookEvent } from "./webhook.js";
+import { handleWebhookVerification, handleWebhookEvent } from "./Webhook.js";
 export default {
   // eslint-disable-next-line no-unused-vars
   async fetch(request, env, ctx) {

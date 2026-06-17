@@ -22,6 +22,7 @@ import imgDog from "../assets/pngegg__4.png";
 import fish from "../assets/fish.png";
 import manure from "../assets/manure.jpg";
 import bees from "../assets/bee.jpg";
+import google from "../assets/google-play.png"
 import honey from "../assets/honey.png"
 import eggs from "../assets/eggs.jpg";
 import imgDonkey from "../assets/pngegg__3.png"
@@ -1177,35 +1178,35 @@ useEffect(() => {
           </div>
         </div>
         <div className="cta-emojis" aria-hidden="true">
-          {["🐄", "🐐", "🐑", "🐓", "🦆"].map((e, i) => (
-            <span
-              key={i}
-              className="cta-emoji"
-              style={{ animationDelay: `${i * 0.3}s` }}
-            >
-              {e}
+          <div className="hero-live-feed">
+        <span className="hlf-dot" />
+        <span className="hlf-label">Live sales</span>
+        <div className="hlf-items">
+          {RECENTLY_SOLD.slice(0, 4).map((s, i) => (
+            <span key={i} className="hlf-item">
+              <strong>{s.qty}×</strong> {s.animal} · {s.location}
+              <span className="hlf-time">{s.time}</span>
             </span>
           ))}
         </div>
-      </section>
-  <section className="kraal-section">
-        <div className="section-inner">
-          <div className="hero-live-feed">
-  <span className="hlf-dot" />
-  <span className="hlf-label">Live sales</span>
-  <div className="hlf-items">
-    {RECENTLY_SOLD.slice(0, 4).map((s, i) => (
-      <span key={i} className="hlf-item">
-        <strong>{s.qty}×</strong> {s.animal} · {s.location}
-        <span className="hlf-time">{s.time}</span>
-      </span>
-    ))}
-  </div>
-</div>
-          
+      </div>
         </div>
-        
       </section>
+<section className="kraal-section">
+  <div className="section-inner">
+   
+     
+
+      <div className="hero-app">
+        <h1 className="section-eyebrow light">
+        Download the KraalMarket app
+      </h1>
+        <img src={google} alt="" />
+      </div>
+       
+   
+  </div>
+</section>
       {/* ── FOOTER ── */}
       <footer className="home-footer">
         <div className="footer-inner">

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
 import { uploadImage } from "../lib/cloudflare";
+import { getDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
 import useAuthStore from "../store/useAuthStore";
 import { updateProfile, onAuthStateChanged } from "firebase/auth";
 
@@ -102,7 +103,7 @@ export function useRegister() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [firebaseUser, setFirebaseUser] = useState(null);
+  const [ setFirebaseUser] = useState(null);
 
   const { registerWithEmail, signInWithGoogle, createSellerProfile } =
     useAuthStore();
@@ -155,6 +156,40 @@ export function useRegister() {
         if (form.password.length < 8)
           throw new Error("Password must be at least 8 characters");
         const user = await registerWithEmail(form.email, form.password);
+        if (form.phone) {
+  try {
+    const ussdRef  = doc(db, "users", form.phone);   // USSD doc uses phone as ID
+    const ussdSnap = await getDoc(ussdRef);
+
+    if (ussdSnap.exists()) {
+      const ussdData = ussdSnap.data();
+
+      // Copy USSD data into the proper Firebase Auth UID doc
+      await setDoc(doc(db, "users", user.uid), {
+        ...ussdData,
+        uid:               user.uid,
+        email:             form.email,
+        migratedFromUSSD:  true,
+        migratedAt:        new Date().toISOString(),
+      });
+
+      // Pre-fill the registration form with what we already know
+      update({
+        role:          ussdData.role        || form.role,
+        businessName:  ussdData.businessName || form.businessName,
+        province:      ussdData.province    || form.province,
+        city:          ussdData.city        || form.city,
+        whatsapp:      ussdData.whatsapp    || form.whatsapp,
+        livestockTypes: ussdData.livestockTypes || [],
+      });
+
+      // Clean up the phone-keyed document
+      await deleteDoc(ussdRef);
+    }
+  } catch (err) {
+    console.warn("USSD migration check failed (non-fatal):", err.message);
+  }
+}
         setFirebaseUser(user);
       }
       setStep(STEPS.BUSINESS);
