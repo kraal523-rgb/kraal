@@ -103,7 +103,7 @@ export function useRegister() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [ setFirebaseUser] = useState(null);
+ const [firebaseUser, setFirebaseUser] = useState(null);
 
   const { registerWithEmail, signInWithGoogle, createSellerProfile } =
     useAuthStore();

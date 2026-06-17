@@ -130,7 +130,7 @@
 }
 .vd-topbar-btn-primary {
   background: var(--vd-accent);
-  color: #fff;
+  color: #005c2e;
 }
 .vd-topbar-btn-warn {
   background: var(--vd-warn-light);
@@ -496,12 +496,12 @@
 }
 .vd-btn-sm-primary {
   background: var(--vd-accent);
-  color: #fff;
+  color: #005c2e;
   border-color: var(--vd-accent);
 }
 .vd-btn-sm-green {
   background: #16a34a;
-  color: #fff;
+  color: #005c2e;
   border-color: #16a34a;
 }
 .vd-btn-sm-danger {

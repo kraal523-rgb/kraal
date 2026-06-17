@@ -137,10 +137,9 @@ export default function ProvinceMapFilter() {
 
  const activeProv = provinces.find((p) => p.id === active);
 
-function toggle(id) {
-  setActive((prev) => (prev === id ? null : id));
-  navigate(`/explore?province=${id}`);
-}
+  function toggle(id) {
+    setActive((prev) => (prev === id ? null : id));
+  }
 
   function handleBrowse() {
     if (activeProv) {
@@ -239,7 +238,7 @@ function toggle(id) {
                     <path
                       d={d}
                       className={`pmf-path ${isActive ? "pmf-path--active" : "pmf-path--idle"}`}
-                      onClick={() => toggle(id)}
+                      onClick={() => { toggle(id); handleBrowse(id); }}
                       onMouseMove={(e) => handleMouseMove(e, prov)}
                       onMouseEnter={() => setHoveredProvince(id)}
 onMouseLeave={() => { setTooltip(null); setHoveredProvince(null); }}
