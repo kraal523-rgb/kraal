@@ -493,7 +493,26 @@ useEffect(() => {
   return (
     <div className="home">
      
-
+ <div className="price-ticker-band" aria-label="Live market prices">
+        <div className="price-ticker-label">📊 Live Prices</div>
+        <img src={navIcon} alt="" className="price-ticker-icon" />
+        <div className="price-ticker-scroll">
+          <div className="price-ticker-track">
+            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
+              <span key={i} className="price-ticker-item">
+                <span className="pt-label">{item.label}</span>
+                <span className={`pt-price ${item.trend}`}>
+                  {item.price}
+                  <span className="pt-arrow">
+                    {item.trend === "up" ? "↑" : "↓"}
+                  </span>
+                </span>
+                <span className="pt-sep">·</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
       {/* ── NAV ── */}
       <nav className="home-nav">
         
@@ -507,7 +526,8 @@ useEffect(() => {
 <Link to="/marketplace?category=cattle">Cattle</Link>
 <Link to="/marketplace?category=goats">Goats</Link>
 <Link to="/about">About</Link>
-
+<Link to="/contact">Contact Us</Link>
+<Link to="/blog">Blog</Link>
           </div>
           
           <div className="nav-actions">
@@ -695,29 +715,104 @@ useEffect(() => {
     </div>
     
   </div>
-  {/* ── PRICE TICKER BAND ── */}
-      <div className="price-ticker-band" aria-label="Live market prices">
-        <div className="price-ticker-label">📊 Live Prices</div>
-        <img src={navIcon} alt="" className="price-ticker-icon" />
-        <div className="price-ticker-scroll">
-          <div className="price-ticker-track">
-            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
-              <span key={i} className="price-ticker-item">
-                <span className="pt-label">{item.label}</span>
-                <span className={`pt-price ${item.trend}`}>
-                  {item.price}
-                  <span className="pt-arrow">
-                    {item.trend === "up" ? "↑" : "↓"}
-                  </span>
-                </span>
-                <span className="pt-sep">·</span>
-              </span>
-            ))}
+  
+
+   <div className="hero-outer">   
+  <div className="mp-grid">
+      {fetchError ? (
+  <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "40px 0" }}>
+    Could not load listings right now. <button onClick={fetchFeatured}>Retry</button>
+  </p>
+) : featuredListings.length === 0 ?  (
+        // Skeleton loading cards
+        Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="listing-card skeleton">
+            <div className="lc-media lc-media-skeleton" />
+            <div className="lc-body">
+              <div className="skeleton-line" />
+              <div className="skeleton-line short" />
+            </div>
           </div>
-        </div>
-      </div>
- 
+        ))
+      ) : (
+        featuredListings.map((listing, i) => {
+          const firstPhoto = listing.photos?.[0]?.url;
+          const daysAgo = listing.createdAt?.seconds
+            // eslint-disable-next-line react-hooks/purity
+            ? Math.floor((Date.now() / 1000 - listing.createdAt.seconds) / 86400)
+            : 0;
+
+          return (
+            <div
+              key={listing.id}
+              className="mp-card visible"
+              style={{ animationDelay: `${i * 0.08}s` }}
+              onClick={() => navigate(`/listings/${listing.id}`)}
+            >
+              <div className="lc-media">
+                {firstPhoto ? (
+                  <img
+                    src={firstPhoto}
+                    alt={listing.title}
+                    className="lc-image"
+                    onError={(e) => {
+                      // Fallback to emoji if image fails
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                {/* Emoji fallback */}
+                <span
+                  className="lc-emoji"
+                  style={{ display: firstPhoto ? "none" : "flex" }}
+                >
+                  {getCategoryEmoji(listing.categoryId)}
+                </span>
+                <span className="lc-badge">
+                  {listing.vaccinated ? "Vaccinated" : listing.condition || "Good"}
+                </span>
+                <span className="lc-days">
+                  {daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
+                </span>
+              </div>
+
+              <div className="lc-body">
+                <h3 className="lc-title">{listing.title}</h3>
+                <p className="lc-location">
+                  📍 {listing.city || listing.province || "Zimbabwe"}
+                </p>
+                <div className="lc-meta">
+                  {listing.age && <span className="lc-age">Age: {listing.age}</span>}
+                  {listing.breed && <span className="lc-breed">{listing.breed}</span>}
+                </div>
+                <div className="lc-footer">
+                  <div className="lc-price">
+                    <strong>
+                      {listing.currency || "USD"} {listing.price?.toLocaleString()}
+                    </strong>
+                    <span>{listing.pricePerHead ? "per head" : "per lot"}</span>
+                  </div>
+                  <button
+                    className="lc-enquire"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/listings/${listing.id}`);
+                    }}
+                  >
+                    Enquire
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+    </div>
+    
 </section>
+
 <ProvinceMapFilter />
       {/* ── STATS ── */}
       

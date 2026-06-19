@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
-import logo from "../assets/kraal-logo.svg";
+import logo from "../assets/kraal-logo-black.svg";
 import navIcon from "../assets/kraal-logo.svg"
+import UserMenu from "../components/UserMenu";
 import { Link } from "react-router-dom";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD-yN9hu266boJpX1CqgxSYeTaMubpXXws",
@@ -328,7 +329,7 @@ export default function KraalMarketExplorer() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     fetchProvinces()
       .then(setProvinces)
@@ -418,7 +419,97 @@ export default function KraalMarketExplorer() {
           text-transform: uppercase;
           margin-left: auto;
         }
+.home-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--hero-cream);
+  backdrop-filter: blur(16px);
+  border-bottom: 0px solid rgba(0, 0, 0, 0.1);
+}
+  @media (max-width: 768px) {
+  .home-bottom-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+.home-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+background: var(--hero-cream);
+  backdrop-filter: blur(16px);
+  border-bottom: 0px solid rgba(255, 255, 255, 0.06);
+}
+  .home-bottom-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 56px;
+    padding: 0 8px;
+  }
 
+  .home-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-decoration: none;
+    color: #888;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 8px;
+    transition: color 0.2s;
+    min-width: 48px;
+  }
+  .home-bottom-nav-item span {
+    font-size: 10px;
+  }
+
+  .home-bottom-nav-item.active {
+    color: #2D5A27;
+  }
+
+  .home-bottom-nav-item:hover {
+    color: #2D5A27;
+    background: rgba(45, 90, 39, 0.06);
+  }
+
+  .home-bottom-nav-post {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: #2D5A27;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 4px;
+  }
+
+  .home-bottom-nav-post:hover {
+    background: #234820;
+    transform: scale(1.07);
+  }
+
+  /* Push footer content above the nav bar */
+  .home-footer {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+}
         /* ---- Breadcrumb ---- */
         .breadcrumb {
           padding: 14px 32px;
@@ -715,10 +806,41 @@ export default function KraalMarketExplorer() {
 
       <div className="app-shell">
         {/* Header */}
-        <header className="app-header">
-          <img src={logo} width={180} alt="" />
-          <span className="app-sub">Geographic Explorer</span>
-        </header>
+        <nav className="home-nav">
+               
+               <div className="nav-inner">
+                 <Link to="/" className="nav-logo">
+                   <img src={logo} style={{ width: "140px" }} alt="Kraal" />
+                   
+                 </Link>
+                 <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+                  <Link to="/marketplace">Browse Animals</Link>
+       <Link to="/marketplace?category=cattle">Cattle</Link>
+       <Link to="/marketplace?category=goats">Goats</Link>
+       <Link to="/about">About</Link>
+       <Link to="/contact">Contact Us</Link>
+<Link to="/blog">Blog</Link>
+                 </div>
+                 
+                 <div className="nav-actions">
+                  <UserMenu />
+                   <Link to="/sell" className="nav-cta">
+                     <span>+ Post</span>
+                   </Link>
+                 
+                   <button
+                     className="nav-hamburger"
+                     onClick={() => setMenuOpen(!menuOpen)}
+                     aria-label="Toggle menu"
+                   >
+                     <span />
+                     <span />
+                     <span />
+                   </button>
+                 </div>
+                
+               </div>
+             </nav>
 
         {/* Config warning if not yet set up */}
         {FIREBASE_CONFIG.apiKey === "YOUR_API_KEY" && (
@@ -770,8 +892,7 @@ export default function KraalMarketExplorer() {
                 ))}
                 {provinces.length === 0 && !loading && (
                   <p className="empty">
-                    No provinces found. Check your Firebase config and data
-                    structure.
+                    No provinces found. Check your internet connection
                   </p>
                 )}
               </div>

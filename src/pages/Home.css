@@ -502,6 +502,19 @@ body,
   width: 100%;
   box-sizing: border-box;
 }
+ .hero-outer {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 96px 48px 80px;
+  width: 100%;
+  box-sizing: border-box;
+}
  
 /* ── LEFT COLUMN ── */
 .hero-left {
@@ -737,7 +750,7 @@ body,
   gap: 16px;
 }
  
-/* The "farm window" frame that holds the video */
+
 .hero-video-frame {
   position: relative;
   width: 100%;
@@ -3596,7 +3609,7 @@ button.home-bottom-nav-item {
   }
 
   .hero-inner {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 28px;
     padding: 20px 20px 48px;
   }

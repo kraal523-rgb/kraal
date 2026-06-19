@@ -1,5 +1,6 @@
 import  { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu";
 import {
   collection,
   addDoc,
@@ -20,7 +21,7 @@ export default function BlogPost() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const post = BLOG_POSTS.find((p) => p.id === slug);
-
+const [menuOpen, setMenuOpen] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [guestName, setGuestName] = useState("");
@@ -125,18 +126,41 @@ export default function BlogPost() {
 
   return (
     <div className="blog-page">
-      <nav className="blog-nav">
-        <Link to="/" className="blog-logo">
-          <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-        </Link>
-        <div className="blog-nav-links">
-          <Link to="/marketplace">Marketplace</Link>
-          <Link to="/blog">All articles</Link>
-          <Link to="/register" className="blog-nav-cta">
-            Start selling
-          </Link>
-        </div>
-      </nav>
+      <nav className="home-nav">
+             
+             <div className="nav-inner">
+               <Link to="/" className="nav-logo">
+                 <img src={logo} style={{ width: "140px" }} alt="Kraal" />
+                 
+               </Link>
+               <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+                <Link to="/marketplace">Browse Animals</Link>
+     <Link to="/marketplace?category=cattle">Cattle</Link>
+     <Link to="/marketplace?category=goats">Goats</Link>
+     <Link to="/about">About</Link>
+     <Link to="/contact">Contact Us</Link>
+<Link to="/blog">Blog</Link>
+               </div>
+               
+               <div className="nav-actions">
+                <UserMenu />
+                 <Link to="/sell" className="nav-cta">
+                   <span>+ Post</span>
+                 </Link>
+                
+                 <button
+                   className="nav-hamburger"
+                   onClick={() => setMenuOpen(!menuOpen)}
+                   aria-label="Toggle menu"
+                 >
+                   <span />
+                   <span />
+                   <span />
+                 </button>
+               </div>
+              
+             </div>
+           </nav>
 
       <div className="post-wrap">
         {/* Back */}
@@ -311,46 +335,79 @@ export default function BlogPost() {
         </div>
       </div>
 
-      <footer className="blog-footer">
-        <div className="blog-footer-inner">
-          <span>© 2026 Kraal Market · Zimbabwe 🇿🇼</span>
-          <div className="footer-links">
-                       <div className="footer-col">
-                        <strong>Socials</strong>
-                        <Link to="https://www.x.com/@Kraalmarketzim">X / Twitter</Link>
-                        <Link to="https://www.linkedin.com/company/kraal">LinkedIn</Link>
-                        <Link to="https://www.youtube.com/channel/UCq0f7mTpFuPRDNCVkgpdyYw">Youtube</Link>
-                        <Link to="https://www.instagram.com/kraalmarket?utm_source=qr">Instagram</Link>
-                        <Link to="https://www.facebook.com/profile.php?id=61589812884808">Facebook</Link>
-                      </div>
-                      <div className="footer-col">
-                        <strong>Marketplace</strong>
-                        <Link to="/marketplace">Browse all</Link>
-                        <Link to="/marketplace?category=cattle">Cattle</Link>
-                        <Link to="/marketplace?category=goats">Goats</Link>
-                        <Link to="/marketplace?category=chicken">Road Runners</Link>
-                        <Link to="/marketplace?category=sheep">Sheep</Link>
-                      </div>
-                      <div className="footer-col">
-                        <strong>Sellers</strong>
-                       <Link to="/register">Start selling</Link>
-                        <Link to="/seller/dashboard">Dashboard</Link>
-                       <Link to="/sell">Post listing</Link>
-                       <Link to="/pricing">Pricing</Link>
-                      </div>
-                      <div className="footer-col">
-                        <strong>Company</strong>
-                       <Link to="/about">About Kraal</Link>
-                       <Link to="/blog/:slug">Blog Posts</Link>
-                       <Link to="/blog">Blog</Link>
-                        <Link to="/contact">Contact</Link>
-                        <Link to="/blog">Farming Tips</Link>
-                       <Link to="/terms">Terms</Link>
-                        <Link to="/privacy">Privacy</Link>
-                      </div>
-                    </div>
-        </div>
-      </footer>
+     <footer className="home-footer">
+            <div className="footer-inner">
+              <div className="footer-brand">
+                <div className="footer-logo">
+                  <img
+                    src={logo}
+                    style={{ width: "120px", filter: "brightness(0) invert(0)" }}
+                    alt="Kraal"
+                  />
+                  <span>Market</span>
+                </div>
+                <p>
+                  Zimbabwe's livestock marketplace,
+                  <br />
+                  going pan-African.
+                </p>
+                <div className="footer-socials">
+                 <Link to="https://www.facebook.com/profile.php?id=61589812884808" aria-label="Facebook">
+                    f
+                  </Link>
+                 <Link to="https://www.x.com/@Kraalmarketzim" aria-label="Twitter">
+                    𝕏
+                  </Link>
+                 <Link to="https://wa.me/27676056777" aria-label="WhatsApp">
+                    W
+                  </Link>
+                </div>
+              </div>
+              <div className="footer-links">
+                 <div className="footer-col">
+                  <strong>Socials</strong>
+                  <Link to="https://www.x.com/@Kraalmarketzim">X / Twitter</Link>
+                  <Link to="https://www.linkedin.com/company/kraal">LinkedIn</Link>
+                  <Link to="https://www.youtube.com/channel/UCq0f7mTpFuPRDNCVkgpdyYw">Youtube</Link>
+                  <Link to="https://www.instagram.com/kraalmarket?utm_source=qr">Instagram</Link>
+                  <Link to="https://www.facebook.com/profile.php?id=61589812884808">Facebook</Link>
+                </div>
+                <div className="footer-col">
+                  <strong>Marketplace</strong>
+                  <Link to="/marketplace">Browse all</Link>
+                  <Link to="/marketplace?category=cattle">Cattle</Link>
+                  <Link to="/marketplace?category=goats">Goats</Link>
+                  <Link to="/marketplace?category=chicken">Road Runners</Link>
+                  <Link to="/marketplace?category=sheep">Sheep</Link>
+                </div>
+                <div className="footer-col">
+                  <strong>Sellers</strong>
+                 <Link to="/register">Start selling</Link>
+                  <Link to="/seller/dashboard">Dashboard</Link>
+                 <Link to="/sell">Post listing</Link>
+                 <Link to="/pricing">Pricing</Link>
+                </div>
+                <div className="footer-col">
+                  <strong>Company</strong>
+                 <Link to="/about">About Kraal</Link>
+                 <Link to="/blog/:slug">Blog Posts</Link>
+                 <Link to="/blog">Blog</Link>
+                  <Link to="/contact">Contact</Link>
+                  <Link to="/blog">Farming Tips</Link>
+                 <Link to="/terms">Terms</Link>
+                  <Link to="/privacy">Privacy</Link>
+                </div>
+              </div>
+            </div>
+            <div className="footer-bottom">
+              <span>
+                © {new Date().getFullYear()} Kraal. Built with Love in Zimbabwe 🇿🇼
+              </span>
+              <span className="footer-tagline">
+                From the farm gate to the world.
+              </span>
+            </div>
+          </footer>
       <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       <nav className="home-bottom-nav">
         <div className="home-bottom-nav-inner">
