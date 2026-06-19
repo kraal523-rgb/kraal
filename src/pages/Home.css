@@ -502,19 +502,6 @@ body,
   width: 100%;
   box-sizing: border-box;
 }
- .hero-outer {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 48px;
-  align-items: center;
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 96px 48px 80px;
-  width: 100%;
-  box-sizing: border-box;
-}
  
 /* ── LEFT COLUMN ── */
 .hero-left {
@@ -750,7 +737,7 @@ body,
   gap: 16px;
 }
  
-
+/* The "farm window" frame that holds the video */
 .hero-video-frame {
   position: relative;
   width: 100%;
@@ -2748,89 +2735,7 @@ background: var(--hero-cream);
   display: none;
 }
 
-@media (max-width: 768px) {
-  .home-bottom-nav {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: #fff;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-.home-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-background: var(--hero-cream);
-  backdrop-filter: blur(16px);
-  border-bottom: 0px solid rgba(255, 255, 255, 0.06);
-}
-  .home-bottom-nav-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    height: 56px;
-    padding: 0 8px;
-  }
 
-  .home-bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    text-decoration: none;
-    color: #888;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 4px 12px;
-    border-radius: 8px;
-    transition: color 0.2s;
-    min-width: 48px;
-  }
-  .home-bottom-nav-item span {
-    font-size: 10px;
-  }
-
-  .home-bottom-nav-item.active {
-    color: #2D5A27;
-  }
-
-  .home-bottom-nav-item:hover {
-    color: #2D5A27;
-    background: rgba(45, 90, 39, 0.06);
-  }
-
-  .home-bottom-nav-post {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: #2D5A27;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 1;
-    text-decoration: none;
-    flex-shrink: 0;
-    transition: background 0.2s, transform 0.15s;
-    margin-bottom: 4px;
-  }
-
-  .home-bottom-nav-post:hover {
-    background: #234820;
-    transform: scale(1.07);
-  }
-
-  /* Push footer content above the nav bar */
-  .home-footer {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom));
-  }
-}
 /* ═══════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════ */
@@ -3609,7 +3514,7 @@ button.home-bottom-nav-item {
   }
 
   .hero-inner {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 28px;
     padding: 20px 20px 48px;
   }
