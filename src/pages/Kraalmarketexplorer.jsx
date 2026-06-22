@@ -635,7 +635,7 @@ background: var(--hero-cream);
           position: absolute;
           bottom: 0; left: 0;
           padding: 32px;
-          max-width: 600px;
+          max-width: 900px;
         }
         .pv-hero-title {
           font-family: 'Playfair Display', serif;

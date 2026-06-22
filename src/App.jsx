@@ -172,7 +172,7 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
 
-        {/* ── Identity verification (any logged-in user) ─────────────────── */}
+        {/* ── Identity verification (any logged-in user) ───────────────────
         <Route
           path="/verify"
           element={
@@ -181,7 +181,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+ */}
         {/* ── Seller dashboard ──────────────────────────────────────────── */}
         <Route
           path="/seller/dashboard"
