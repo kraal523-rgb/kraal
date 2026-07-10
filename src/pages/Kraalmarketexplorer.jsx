@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import logo from "../assets/kraal-logo-black.svg";
 import navIcon from "../assets/kraal-logo.svg"
@@ -12,7 +12,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "397476483398",
   appId: "1:397476483398:web:21e145f45945134c511547"
 };
-
+const CLOUDINARY_CLOUD_NAME = "tpcnhiq2";
 let _app = null;
 let _db = null;
 
@@ -38,9 +38,34 @@ async function getFirestore() {
   return _db;
 }
 
-// ============================================================
-// Data helpers
-// ============================================================
+const PROVINCE_IMAGES = {
+  "harare": null, 
+  "bulawayo": null, 
+  "manicaland": "v1783687339/manicaland_gz00il",
+  "mashonaland-central": "v1783687339/mash-central_kzqqwb",
+  "mashonaland-east": "v1783687338/mash-east_wqn8o2",
+  "mashonaland-west": "v1783687340/mash-west_vzunfm",
+  "masvingo": "v1783687338/masvingo_ghnawr",
+  "matabeleland-north": "v1783687338/mat-north_lefkkz",
+  "matabeleland-south": "v1783687339/mat-south_x5vcx2",
+  "midlands": "v1783687338/midlands_b4ku1y",
+};
+function normalizeProvinceKey(str) {
+  return (str || "")
+    .toString()
+    .toLowerCase()
+    .replace(/matebeleland/g, "matabeleland") 
+    .replace(/[^a-z]+/g, "-")                  
+    .replace(/^-+|-+$/g, "");                  
+}
+function getProvinceImage(province, opts = {}) {
+  const { width = 800, height = 500 } = opts;
+  const nameKey = normalizeProvinceKey(province.name);
+  const idKey = normalizeProvinceKey(province.id);
+  const publicId = PROVINCE_IMAGES[nameKey] || PROVINCE_IMAGES[idKey];
+  if (!publicId) return null;
+  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto,w_${width},h_${height},c_fill/${publicId}`;
+}
 async function fetchProvinces() {
   await getFirestore();
   const { collection, getDocs, db } = window.__geoFS;
@@ -92,9 +117,14 @@ function Breadcrumb({ trail, onNavigate }) {
   );
 }
 
-function ImageCard({ imgUrl, name, description, badge, onClick, accentColor }) {
+function ImageCard({ imgUrl, name, description, badge, onClick, accentColor, province }) {
   const [imgErr, setImgErr] = useState(false);
   const seed = name ? name.length + (name.charCodeAt(0) || 1) : 42;
+
+  const cloudinaryUrl = province ? getProvinceImage(province) : null;
+  const resolvedSrc = imgErr
+    ? PLACEHOLDER(name, seed)
+    : cloudinaryUrl || imgUrl || PLACEHOLDER(name, seed);
 
   return (
     <div
@@ -107,7 +137,7 @@ function ImageCard({ imgUrl, name, description, badge, onClick, accentColor }) {
     >
       <div className="card-img-wrap">
         <img
-          src={imgErr || !imgUrl ? PLACEHOLDER(name, seed) : imgUrl}
+          src={resolvedSrc}
           alt={name}
           onError={() => setImgErr(true)}
           className="card-img"
@@ -199,7 +229,7 @@ function TownGrid({ towns }) {
 // ============================================================
 // Province detail view (districts + towns side by side)
 // ============================================================
-function ProvinceView({ province, onBack }) {
+function ProvinceView({ province }) {
   const [districts, setDistricts] = useState([]);
   const [towns, setTowns] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -207,7 +237,6 @@ function ProvinceView({ province, onBack }) {
   const [tab, setTab] = useState("districts");
 
   useEffect(() => {
-    setLoading(true);
     Promise.all([fetchDistricts(province.id), fetchTowns(province.id)])
       .then(([d, t]) => {
         setDistricts(d);
@@ -880,15 +909,16 @@ background: var(--hero-cream);
             ) : (
               <div className="provinces-grid">
                 {provinces.map((prov, i) => (
-                  <ImageCard
-                    key={prov.id}
-                    imgUrl={prov.imgUrl}
-                    name={prov.name}
-                    description={prov.description}
-                    badge="Province"
-                    accentColor={ACCENT_COLORS[i % ACCENT_COLORS.length]}
-                    onClick={() => setSelected(prov)}
-                  />
+                 <ImageCard
+  key={prov.id}
+  imgUrl={prov.imgUrl}
+  province={prov}
+  name={prov.name}
+  description={prov.description}
+  badge="Province"
+  accentColor={ACCENT_COLORS[i % ACCENT_COLORS.length]}
+  onClick={() => setSelected(prov)}
+/>
                 ))}
                 {provinces.length === 0 && !loading && (
                   <p className="empty">

@@ -15,6 +15,7 @@ import breeds from "../assets/breeds.jpg";
 import records from "../assets/records.jpg";
 import UserMenu from "../components/UserMenu";
 import online1 from "../assets/online-1.jpg";
+import { Helmet } from "react-helmet-async";
 import "./Blog.css";
 import ProfileSheet from "../components/ProfileSheet";
 // eslint-disable-next-line react-refresh/only-export-components
@@ -562,6 +563,37 @@ export default function Blog() {
 
   return (
     <div className="blog-page">
+       <Helmet>
+      <title>Farming Tips & Livestock Guides | Kraal Market Zimbabwe</title>
+      <meta
+        name="description"
+        content="Practical livestock farming advice for Zimbabwean farmers — pricing, vaccinations, breeds, drought management, transport and more from Kraal Market."
+      />
+      <meta
+        name="keywords"
+        content="livestock farming Zimbabwe, cattle farming tips, goat farming, Road Runner chickens, Kraal Market"
+      />
+      <link rel="canonical" href="https://kraalmarket.com/blog" />
+
+      {/* Open Graph */}
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content="Farming Tips & Livestock Guides | Kraal Market" />
+      <meta
+        property="og:description"
+        content="Practical advice for livestock farmers across Zimbabwe and Southern Africa."
+      />
+      <meta property="og:image" content={brahman} />
+      <meta property="og:url" content="https://kraalmarket.com/blog" />
+
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Farming Tips & Livestock Guides | Kraal Market" />
+      <meta
+        name="twitter:description"
+        content="Practical advice for livestock farmers across Zimbabwe and Southern Africa."
+      />
+      <meta name="twitter:image" content={brahman} />
+    </Helmet>
       <nav className="home-nav">
              
              <div className="nav-inner">
