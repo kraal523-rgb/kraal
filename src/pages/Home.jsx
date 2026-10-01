@@ -768,7 +768,7 @@ useEffect(() => {
     {/* --- Farm Products divider --- */}
     <div className="farm-products-divider">
       <span className="fp-divider-line" />
-      <span className="fp-divider-badge">🌾 Aquaculture & Farm Products</span>
+      <span className="fp-divider-badge"> Aquaculture & Farm Products</span>
       <span className="fp-divider-line" />
     </div>
     <p className="fp-sub">

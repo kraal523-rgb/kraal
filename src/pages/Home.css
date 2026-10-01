@@ -2618,6 +2618,8 @@ background: var(--hero-cream);
   color: rgba(22, 38, 19, 0.65); 
   padding: 64px 36px 0;
   border-top: #0a0e08 1px solid;
+  position:sticky;
+  bottom:0;
 }
 
 .footer-inner {

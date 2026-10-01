@@ -141,6 +141,7 @@ function ImageCard({ imgUrl, name, description, badge, onClick, accentColor, pro
           alt={name}
           onError={() => setImgErr(true)}
           className="card-img"
+          style={{ objectPosition: "top" }}
         />
         {badge && <span className="badge">{badge}</span>}
         <div className="card-overlay" />
@@ -599,8 +600,8 @@ background: var(--hero-cream);
           border: 1px solid var(--border);
         }
         .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.16); }
-        .card-img-wrap { position: relative; height: 200px; }
-        .card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .card-img-wrap { position: relative; height: 200px; background: var(--bg);}
+        .card-img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .card-overlay {
           position: absolute; inset: 0;
           background: linear-gradient(to top, rgba(26,23,20,0.65) 0%, transparent 60%);

@@ -20,6 +20,1180 @@ import "./Blog.css";
 import ProfileSheet from "../components/ProfileSheet";
 // eslint-disable-next-line react-refresh/only-export-components
 export const BLOG_POSTS = [
+   {
+    id: "dorper-sheep-farming-zimbabwe",
+    title: "Dorper Sheep Farming in Zimbabwe: A Practical Guide",
+    excerpt:
+      "Dorpers are hardy, fast-growing and in strong demand. Here's how to start and run a profitable sheep flock.",
+    cover: goat,
+    emoji: "🐑",
+    category: "Farming Guide",
+    date: "August 10, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+Dorper sheep are the most popular meat sheep in Zimbabwe, and for good reason. They cope well with heat and poor pasture, they don't need shearing, and they grow fast enough to give quick returns.
+ 
+## Why farmers choose Dorpers
+ 
+- Heat-tolerant and able to maintain condition on veld
+- A natural coat that sheds, so no shearing costs
+- Good meat quality and strong demand from butcheries and abattoirs
+- Ewes that lamb well and mother their lambs carefully
+ 
+## Starting your flock
+ 
+Buy healthy ewes with good body condition, sound feet and teeth, and a well-formed udder. Ask the seller for health and vaccination records. A starter flock of 10–20 ewes and one good ram is enough to learn with. Quarantine new animals for two weeks before mixing them.
+ 
+## Housing and fencing
+ 
+Sheep need a dry, draft-free shelter at night and protection from predators such as dogs and jackals. Fencing must be strong and well maintained.
+ 
+## Feeding
+ 
+Sheep are grazers. Good veld and supplementary feed are enough for most of the year. In the dry season, add a protein lick or sunflower cake, and always provide clean water. Pregnant and lactating ewes need extra feed in the last six weeks of pregnancy and while nursing.
+ 
+## Breeding facts
+ 
+- Gestation lasts about 5 months (around 147–150 days)
+- One ram can serve roughly 25–30 ewes
+- Well-managed Dorper ewes can lamb up to three times in two years
+- Twins are common in good conditions
+ 
+## Health management
+ 
+Worms are the biggest problem. Deworm using a plan that rotates products, and learn the FAMACHA eye-scoring method to treat only animals that need it. Ask your vet about vaccination against pulpy kidney and pasteurellosis. Keep pens dry to prevent foot problems.
+ 
+## Marketing
+ 
+Lambs can reach 35–40kg in about four months with good feeding. Plan sales around peak demand periods such as Easter and December. List on Kraal three to four weeks beforehand.
+    `,
+  },
+  {
+    id: "goat-kidding-season-care",
+    title: "Kidding Season Care: How to Help Your Does and Save More Kids",
+    excerpt:
+      "Most kid losses happen in the first days. Good preparation and quick action make a big difference to your income.",
+    cover: goat1,
+    emoji: "🐐",
+    category: "Animal Health",
+    date: "August 5, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Every kid that survives is money in your pocket. With a few simple routines you can cut losses at kidding time.
+ 
+## Prepare before kidding
+ 
+- Feed does well in the last six weeks of pregnancy, when the kids grow fastest
+- Vaccinate against pulpy kidney about four weeks before kidding, as your vet advises, so antibodies reach the kids through colostrum
+- Deworm if needed
+- Prepare a clean, dry, draft-free kidding pen with fresh bedding
+ 
+Gestation in goats is about 150 days, so you can plan around the expected date.
+ 
+## Signs a doe is about to kid
+ 
+- Restlessness and separating from the herd
+- Swollen, tight udder
+- Sunken area near the tail
+- Pawing at the ground and a discharge
+ 
+## During birth
+ 
+Most does kid without help. Watch quietly from a distance. Call a vet or experienced farmer if:
+- A doe strains hard for an hour with no progress
+- You see only one leg, or the head with no legs
+- She is weak, or the kid appears stuck
+ 
+Don't pull unless you know what you're doing, as you can injure the doe and the kid.
+ 
+## First hour for the kid
+ 
+- Clear mucus from the nose and mouth
+- Dip the navel in iodine
+- Make sure the kid suckles within the first hour, since colostrum protects it from disease
+- Keep the kid warm and dry. Cold weather is a major killer of newborn kids
+ 
+## Care of the doe
+ 
+Give clean water and good feed after kidding. Check that the afterbirth passes within a few hours. Call a vet if it does not.
+ 
+## Common problems
+ 
+**Weak kids** — warm them up and help them suckle.
+ 
+**Rejected kids** — hold the doe so the kid can feed, or bottle-feed colostrum and milk.
+ 
+**Pregnancy toxaemia** — does carrying twins can become weak and stop eating in late pregnancy. Early feeding and vet help are essential.
+ 
+## Record keeping
+ 
+Note the date, doe tag, number of kids, sex and weights. After a few seasons you'll know which does are your best mothers.
+    `,
+  },
+  {
+    id: "start-livestock-business-small-budget-zimbabwe",
+    title: "How to Start a Livestock Business in Zimbabwe on a Small Budget",
+    excerpt:
+      "You don't need a big farm or lots of capital. Here's a step-by-step path from a few chickens to a growing herd.",
+    cover: tuli,
+    emoji: "🌱",
+    category: "Business",
+    date: "July 30, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+Many successful livestock farmers started small and grew by reinvesting. The key is to start with animals that give quick returns, learn, and expand step by step.
+ 
+## Step 1: Choose your starter animal
+ 
+Pick the animal that matches your money, space and experience:
+ 
+- Road Runner chickens — lowest cost, quick returns, easy to learn
+- Goats — still affordable, strong demand, fast breeding
+- Pigs — quick growth but need good feed and biosecurity
+- Cattle — highest capital, best as a later step
+ 
+## Step 2: Know your market before you buy
+ 
+Find out who buys the animals you plan to raise and what they pay. Check listings on Kraal, talk to local buyers and ask about the best selling seasons.
+ 
+## Step 3: Start small
+ 
+A starter flock of 20–50 Road Runners or 5–10 goats lets you learn without risking everything. Mistakes are cheaper when you have fewer animals.
+ 
+## Step 4: Buy healthy stock
+ 
+Buy from trusted sellers, ask for health records and inspect before you pay. Quarantine new animals for two weeks. A bargain price on sick animals is no bargain.
+ 
+## Step 5: Keep simple records
+ 
+Write down what you spend and what you earn. After one or two cycles you'll know your real profit.
+ 
+## Step 6: Protect your investment
+ 
+Vaccinate, deworm and provide good housing and water. Prevention costs far less than treatment or lost animals.
+ 
+## Step 7: Reinvest your profit
+ 
+Use your first profits to buy more breeding stock or improve housing before you move to the next animal type.
+ 
+## Step 8: Grow step by step
+ 
+A common path is poultry first, then goats or sheep, then cattle as capital and experience grow.
+ 
+## Mistakes to avoid
+ 
+- Borrowing heavily before you've proved your system
+- Buying too many animals for your feed or water
+- Ignoring disease prevention
+- Selling at the wrong time because you didn't plan
+ 
+## Use Kraal to reach buyers
+ 
+Listing your animals online costs little and brings buyers to you. Start with one clear listing and build your reputation.
+    `,
+  },
+  {
+    id: "cattle-fattening-finishing-zimbabwe",
+    title: "Fattening Cattle for Profit: A Practical Guide to Finishing Steers",
+    excerpt:
+      "Buying thin cattle, feeding them well and selling at a better price can be profitable if you do the sums first.",
+    cover: brahman,
+    emoji: "📈",
+    category: "Business",
+    date: "July 25, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+Fattening, or finishing, means feeding cattle for a period so they gain weight and sell for more. It can add real income, but only if feed costs and prices work in your favour.
+ 
+## Choose the right animals
+ 
+- Healthy steers or young bulls, often 18–24 months old
+- Animals of a similar size and age, so they can be sold together
+- A breed that grows well, such as Brahman or a good cross
+- Cattle with no obvious disease, and not stressed or already very thin from sickness
+ 
+## Prepare them
+ 
+Deworm, dip and vaccinate on arrival, and keep newly arrived animals separate for a short time. Let them rest and settle before heavy feeding.
+ 
+## The ration
+ 
+A fattening ration provides energy, protein, roughage and minerals. Common ingredients include maize or maize bran, sunflower or cotton seed cake, hay or crop residues, and a mineral lick. Your local Agritex officer or an animal nutritionist can help you design a ration for your budget.
+ 
+## Introduce grain slowly
+ 
+Moving cattle quickly from roughage to heavy grain can cause acidosis and bloat. Increase concentrates gradually over two to three weeks and always provide roughage and clean water.
+ 
+## How long and how much weight
+ 
+With a good ration, finishing cattle can often gain around 0.8–1.2kg per day. Many finishing periods run 90–120 days. Weigh a few animals every month to check progress.
+ 
+## Do the sums first
+ 
+Write down:
+- Purchase price per animal
+- Feed cost per animal per day × days
+- Vet, dip and labour costs
+- Transport
+- Expected sale weight and price
+ 
+Compare the total cost with your expected sale price. If the profit only appears at the best possible price, think again.
+ 
+## Watch the margin
+ 
+The biggest risk is feed cost rising or sale prices falling during the feeding period. Buy feed in bulk when it is cheaper, and agree on a buyer or sale timeframe before you start.
+ 
+## Selling
+ 
+Sell when animals reach the weight your buyers want. Waiting too long costs more feed for little extra gain.
+    `,
+  },
+  {
+    id: "dairy-farming-basics-small-farmers-zimbabwe",
+    title: "Dairy Farming Basics for Small-Scale Zimbabwean Farmers",
+    excerpt:
+      "Milk is a daily income. Learn the essentials of breeds, feeding, milking hygiene and mastitis prevention.",
+    cover: cow,
+    emoji: "🥛",
+    category: "Farming Guide",
+    date: "July 18, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+A good dairy cow produces income every day, unlike beef cattle that earn when sold. But dairying demands consistent work, clean milking and good feeding.
+ 
+## Choosing a dairy animal
+ 
+Common dairy breeds in Zimbabwe include Holstein and Jersey. Crosses with local cattle are often more hardy but give less milk. Choose animals suited to your climate and feed supply.
+ 
+## Feeding for milk
+ 
+Milk production needs energy, protein, minerals and a lot of clean water. A lactating cow drinks far more than a dry cow, so water must be available at all times.
+ 
+Good quality pasture or hay forms the base. Add a dairy meal and minerals according to production. Cows that are underfed produce less and are slower to get back in calf.
+ 
+## Milking hygiene
+ 
+Clean milk sells better and lasts longer.
+ 
+- Wash your hands and the udder before milking
+- Use clean, dedicated buckets and equipment
+- Dip teats after milking if recommended
+- Cool milk quickly and keep it covered
+- Never mix milk from sick cows into the supply
+ 
+## Mastitis
+ 
+Mastitis is infection of the udder and a major cause of lost income. Signs include swollen or hot quarters, clots or watery milk and a cow that kicks when milked. Clean milking, a clean resting area and prompt treatment help prevent it. Call a vet if you suspect mastitis.
+ 
+## Breeding and calving
+ 
+Aim for a calf every 12–14 months. A cow that calves regularly keeps producing milk. Look after the calf as well as the cow.
+ 
+## Selling milk
+ 
+Find out where you can sell: neighbours, shops, cooperatives or processors. Before selling milk to the public, check with your local authority about health and licensing requirements.
+ 
+## Keep records
+ 
+Write down milk yield, feed costs, breeding dates and treatments for each cow. Cows that don't pay for themselves should be replaced.
+    `,
+  },
+  {
+    id: "signs-of-sick-livestock-when-to-call-vet",
+    title: "Signs of a Sick Animal: When to Treat, Isolate or Call the Vet",
+    excerpt:
+      "Spotting illness early saves animals and money. Learn the warning signs every livestock farmer should know.",
+    cover: vaccination,
+    emoji: "🩺",
+    category: "Animal Health",
+    date: "July 12, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Animals hide illness until they are very sick. Walk through your herd every day and learn what normal looks like, so you notice the moment something is wrong.
+ 
+## General warning signs
+ 
+- Standing apart from the herd or lagging behind
+- Not eating or not chewing the cud
+- Dull eyes and a rough, staring coat
+- Drooping head or ears
+- Discharge from nose or eyes
+- Coughing or fast, laboured breathing
+- Diarrhoea or constipation
+- Swollen belly or visible bloat
+- Limping or reluctance to move
+- Sudden drop in milk
+- Fever
+ 
+## Normal temperatures
+ 
+Learn these and keep a thermometer on the farm:
+- Cattle: about 38–39.5°C
+- Goats and sheep: about 38.5–40°C
+ 
+A temperature well above normal usually means infection.
+ 
+## What to do right away
+ 
+1. Separate the sick animal from the herd
+2. Provide shade, water and feed
+3. Note the signs, the time they began and what the animal has eaten
+4. Take its temperature
+5. Call your vet or animal health officer
+ 
+## Call a vet urgently if you see
+ 
+- Bloat, with a hard swollen left side in cattle
+- A difficult birth
+- Severe breathing difficulty
+- Convulsions or staggering
+- Several animals sick at once
+- Blood in urine or dung
+ 
+## Sudden deaths
+ 
+If an animal dies suddenly, especially during the rainy season, be careful. Anthrax is one possible cause. Don't open the carcass. Report it to Veterinary Services and keep other animals and people away.
+ 
+## Don't guess with medicine
+ 
+Using the wrong drug, or too little of the right one, wastes money and can build resistance. Follow the vet's advice and finish the course. Observe withdrawal periods before selling meat or milk.
+ 
+## Keep a health record
+ 
+Write down every illness and treatment. Buyers trust records, and you'll learn which problems keep coming back.
+    `,
+  },
+  {
+    id: "layer-chickens-egg-farming-zimbabwe",
+    title: "Starting an Egg Business: A Guide to Keeping Layer Chickens",
+    excerpt:
+      "Eggs sell every day of the year. Here's how to set up a small layer operation and keep your hens laying.",
+    cover: roadrunner,
+    emoji: "🥚",
+    category: "Farming Guide",
+    date: "July 5, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Eggs are one of the most reliable products you can sell. A small layer flock can bring steady weekly income if you manage feed, housing and health well.
+ 
+## Choosing your birds
+ 
+Commercial hybrid layers give the most eggs. Many start laying at around 18–20 weeks and can lay 250 or more eggs in their first year with good care. Indigenous hens lay far fewer eggs but are hardier and cost less to feed.
+ 
+Buy chicks or pullets from a reputable supplier and ask what vaccinations they have had.
+ 
+## Housing
+ 
+- A clean, dry house with good ventilation
+- Nest boxes, one for every 4–5 hens
+- Perches for roosting
+- Protection from predators and rats
+- Space: crowded hens get stressed and lay less
+ 
+Deep litter systems work well for small flocks. Keep the litter dry and replace wet patches.
+ 
+## Feeding
+ 
+Layers need layer mash with enough calcium for strong eggshells. Feed chicks and growing pullets with the correct starter and grower feeds first. Provide clean water at all times. Hens that run out of water for even a few hours can drop production.
+ 
+## Light
+ 
+Hens lay best with around 14–16 hours of light per day. In winter, extra lighting can help keep production steady.
+ 
+## Health
+ 
+Follow a vaccination programme for Newcastle disease and other common diseases. Deworm regularly, and isolate any sick birds. Keep houses clean and limit visitors.
+ 
+## Collecting and selling eggs
+ 
+- Collect eggs at least twice a day
+- Keep them clean and cool
+- Discard cracked eggs
+- Sell in trays of 30 to shops, schools, restaurants and neighbours
+ 
+## Know when to replace hens
+ 
+Egg production drops after about 72–80 weeks. Plan to sell spent hens and replace them with a new batch of pullets so income continues.
+ 
+## Do the sums
+ 
+Feed is the biggest cost. Track feed per hen and eggs per day. If production falls, check water, feed, light and health before changing anything else.
+    `,
+  },
+  {
+    id: "supplying-butcheries-hotels-restaurants-zimbabwe",
+    title: "How to Supply Butcheries, Hotels and Restaurants with Livestock",
+    excerpt:
+      "Commercial buyers pay well for consistent quality and reliable supply. Here's what they want and how to win them.",
+    cover: online1,
+    emoji: "🤝",
+    category: "Business",
+    date: "June 28, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Selling to butcheries, lodges, hotels and restaurants can be more profitable and predictable than selling one animal at a time. But these buyers expect professionalism.
+ 
+## What commercial buyers want
+ 
+- Consistent quality and size
+- Reliable supply, on the day you promised
+- Healthy animals with proper paperwork
+- Fair, clear pricing
+- Good communication
+ 
+One missed delivery can lose a customer for good.
+ 
+## Know the product they need
+ 
+Ask each buyer:
+- Which animals: cattle, goats, sheep, pigs or poultry?
+- What weight or grade?
+- How many per week or month?
+- Do they buy live animals or carcass?
+ 
+Typical dressing percentages, meaning how much of live weight becomes carcass, vary by animal, breed and condition, and commonly sit around 45–55%. Agree whether you are being paid by live weight or carcass weight, so there are no surprises.
+ 
+## Build a supply plan
+ 
+Work backwards from the delivery date. If a buyer needs 10 goats a month, plan your breeding and feeding so animals are ready on time. Consider working with neighbouring farmers to pool supply when you can't cover an order alone.
+ 
+## Paperwork and health
+ 
+Keep vaccination records and movement permits ready. Follow any slaughter, inspection and withdrawal-period requirements. Buyers prefer sellers who make compliance easy.
+ 
+## Delivery
+ 
+Transport animals calmly and safely, and arrive on time. Poor handling leads to bruised meat and lower prices. Our transport guide covers how.
+ 
+## Price and payment
+ 
+Agree prices, payment terms and delivery days in writing. Start with small orders to build trust. Give receipts and keep records.
+ 
+## How to find buyers
+ 
+- Visit local butcheries and lodges with a short, clear offer
+- Ask existing customers for referrals
+- Post your regular supply on Kraal so buyers can find you
+- Be consistent. A reliable seller gets repeat orders.
+ 
+## Grow gradually
+ 
+Don't promise more than you can supply. Deliver reliably on small orders, then expand.
+    `,
+  },
+  {
+    id: "livestock-minerals-licks-supplements-zimbabwe",
+    title: "Minerals and Licks: What Your Livestock Actually Need",
+    excerpt:
+      "Mineral deficiencies quietly cost farmers calves, growth and income. Learn what to supplement and what to avoid.",
+    cover: drought2,
+    emoji: "🧂",
+    category: "Animal Health",
+    date: "June 20, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Grass may look green, but it doesn't always contain what animals need. In many parts of Zimbabwe, soils and veld are low in key minerals, and animals pay the price in slow growth, poor breeding and disease.
+ 
+## Why minerals matter
+ 
+Minerals support bones, milk, fertility, immunity and growth. Deficiencies often show up as:
+- Poor conception rates
+- Slow-growing calves and kids
+- Weak or brittle bones
+- Rough, dull coats
+- Reduced milk
+- Lower resistance to disease
+ 
+## Phosphorus
+ 
+Phosphorus is one of the most common shortages on dry-season veld, especially in sandy soils. Animals short of phosphorus may chew bones, wood or soil, a behaviour called pica.
+ 
+This habit is dangerous. Bone chewing can expose cattle to botulism, known as lamsiekte, which causes paralysis and death. Ask your vet about vaccination if you farm in a phosphorus-deficient area, and provide a phosphate lick.
+ 
+## Salt
+ 
+Salt is cheap and essential. Provide it all year, and keep it under shelter.
+ 
+## Calcium
+ 
+Calcium matters for lactating animals and especially for laying hens, whose eggshells depend on it. Use a layer feed or add oyster shell or limestone for hens.
+ 
+## Trace minerals
+ 
+Copper, zinc, selenium and cobalt are needed in small amounts. Deficiencies depend on your area. Your vet or Agritex officer can tell you what is common locally.
+ 
+## A warning about copper
+ 
+Goats need copper, but sheep are very sensitive to too much of it, and excess copper can poison them. Never give sheep a mineral lick made for goats or cattle unless the label says it is safe for sheep.
+ 
+## How to provide minerals
+ 
+- Use a commercial lick suited to your species and area
+- Put it in clean, covered troughs or lick holders
+- Keep it available all year, with extra attention in the dry season
+- Keep it separate from wet areas so it doesn't dissolve
+ 
+## Don't forget protein and energy
+ 
+In the dry season, minerals alone won't fix thin animals. They need protein supplements and enough feed, as our dry-season guide explains.
+    `,
+  },
+  {
+    id: "estimate-livestock-weight-without-scale",
+    title: "How to Estimate Your Animal's Weight Without a Scale",
+    excerpt:
+      "Most farmers don't own a scale. A tape measure and a simple formula can get you close enough to price and plan.",
+    cover: breeds,
+    emoji: "📏",
+    category: "Selling Tips",
+    date: "June 12, 2026",
+    readTime: "4 min read",
+    author: "Kraal Team",
+    content: `
+Buyers want to know weight, and you need it to price animals, plan feeding and decide when to sell. A weighbridge or scale is best, but a tape measure gets you a useful estimate.
+ 
+## What you need
+ 
+- A flexible measuring tape
+- A calm animal standing square on level ground
+- A pen and paper
+ 
+## Measure heart girth
+ 
+Wrap the tape around the animal's chest just behind the front legs, tight against the skin, and read the measurement in centimetres. This is the heart girth.
+ 
+## Measure body length
+ 
+Measure from the point of the shoulder to the point of the buttock (the pin bone). This is the body length, in centimetres.
+ 
+## The formula for cattle
+ 
+Weight in kg ≈ (heart girth × heart girth × body length) ÷ 10,840
+ 
+## Example
+ 
+An ox with a heart girth of 180cm and a body length of 140cm:
+- 180 × 180 = 32,400
+- 32,400 × 140 = 4,536,000
+- 4,536,000 ÷ 10,840 ≈ 418kg
+ 
+## How accurate is it?
+ 
+It is an estimate. Fat, pregnancy, full stomachs and breed shape can change the result, so expect it to be off by several percent. It is more useful for comparing animals and tracking growth than for a final sale price.
+ 
+## Goats and sheep
+ 
+The same method works for small stock, but accuracy varies by breed and condition. Use it to compare animals in the same flock rather than as an exact weight, and use a hanging scale where possible.
+ 
+## Tips for better results
+ 
+- Measure at the same time of day, ideally before feeding
+- Measure the same way each time
+- Take the measurement twice and average it
+- Avoid measuring heavily pregnant animals or those with a full rumen
+ 
+## Use weight to make decisions
+ 
+- Check growth monthly and see whether feed is paying off
+- Calculate price per kg to compare animals
+- Sell when animals reach the weight your buyers want
+- Give honest weight estimates in your Kraal listing and say they are estimates
+ 
+## Better than guessing
+ 
+Buyers appreciate sellers who measure. A listing that says "estimated 420kg by heart girth" is more trustworthy than "big bull".
+    `,
+  },
+  {
+    id: "best-time-to-sell-livestock-zimbabwe",
+    title: "The Best Time of Year to Sell Livestock in Zimbabwe",
+    excerpt:
+      "Timing your sale can add 15–25% to what you earn. Here's the Zimbabwean calendar of buyer demand, holidays and seasonal price swings.",
+    cover: brahman,
+    emoji: "📅",
+    category: "Selling Tips",
+    date: "October 1, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+When you sell matters almost as much as what you sell. Demand and condition both change through the year, and farmers who plan around them consistently get better prices.
+ 
+## Demand peaks you can plan for
+ 
+- **Christmas and December** — the biggest demand of the year for goats, cattle and chickens. Weddings, family gatherings and church events all drive buying.
+- **Easter** — strong demand for goats, chickens and beef animals.
+- **Independence Day (April 18)** — a reliable spike, especially for goats and sheep.
+- **Heroes and Defence Forces holidays (August)** — good demand for goats and cattle.
+- **Funerals, weddings and lobola** — year-round, but often urgent. Buyers will pay for animals that are ready now.
+ 
+## School fee seasons
+ 
+Many farmers sell at the start of each school term (January, May and September) to pay fees. This increases supply and can push prices down. If you can sell 3–4 weeks before term starts, you often avoid the crowd.
+ 
+## Condition changes the price
+ 
+Pasture is best from December to April. Animals are in their best condition around the end of the rains and fetch full price. By September and October, dry-season stress sets in and body condition drops. An animal that loses condition can be discounted 30% or more.
+ 
+The practical rule: sell finished animals between March and July, before the late dry season squeezes them.
+ 
+## Harvest-time buyers
+ 
+After harvest (April to June), many rural households have cash from crop sales and are ready to buy. This is a good window for breeding stock and weaners.
+ 
+## Plan backwards
+ 
+Work out your target sale date, then count back:
+- Goat kids need 3–4 months to reach selling weight
+- Road Runners need 4–5 months
+- Cattle finishing on feed need several months of good nutrition
+ 
+List on Kraal 3–4 weeks before a peak date so buyers have time to find you and arrange transport.
+ 
+## The exception
+ 
+If drought is coming, sell early whatever the calendar says. Prices collapse when everyone sells at once.
+    `,
+  },
+  {
+    id: "write-a-livestock-listing-that-sells",
+    title: "How to Write an Online Livestock Listing That Sells Fast",
+    excerpt:
+      "Two sellers list the same bull. One sells in 3 days, the other in 3 weeks. The difference is usually the listing. Here's the formula.",
+    cover: online1,
+    emoji: "✍️",
+    category: "Selling Tips",
+    date: "September 28, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Buyers scroll quickly. A clear, honest listing stops them and gets the phone call. Here's how to write one.
+ 
+## Start with a clear title
+ 
+Include breed, sex, age and location. Compare these two:
+- "Bull for sale"
+- "Brahman bull, 3 years, 650kg, Gweru"
+ 
+The second tells the buyer what they need before they even open it.
+ 
+## Say how many
+ 
+Buyers searching for 10 goats won't contact a listing that doesn't say how many are available. State the number, and say whether you'll split the group.
+ 
+## Give the numbers that matter
+ 
+- Age (or estimated age)
+- Weight or a realistic estimate
+- Breed or cross
+- Sex, and whether females are pregnant or in milk
+- Vaccination and deworming dates
+- Price in USD and whether it is per head or for the group
+ 
+## Photos do most of the work
+ 
+Use at least 3 clear photos in morning or late afternoon light. Show the side, the rear and the face. Clean the animal and the background first. Photos of one animal for a whole group should say so honestly.
+ 
+## Be honest about condition
+ 
+Mention any flaws, such as a healed scar or a missing ear tag. Buyers who arrive and find what you described will buy. Buyers who feel misled leave, and tell others.
+ 
+## Write about delivery
+ 
+Say whether buyers must collect, whether you can help arrange transport, and which days are good for viewing. Removing questions removes hesitation.
+ 
+## Price with room to negotiate
+ 
+Most buyers expect to bargain. Build in 10–15% as we explain in our pricing guide.
+ 
+## Reply fast
+ 
+Buyers often contact several sellers at once. The seller who replies within the hour usually wins. Keep your phone and WhatsApp on, and answer questions politely and clearly.
+ 
+## Example listing
+ 
+Boer does, 18 months, 12 available, Marondera. Vaccinated for pulpy kidney in August and dewormed this month. Good body condition, 40–45kg. USD 150 per head, USD 135 each for 5 or more. Viewing any day. Buyer arranges transport; I can recommend a local driver.
+    `,
+  },
+  {
+    id: "tick-control-dipping-zimbabwe",
+    title: "Tick Control and Dipping: Protect Your Cattle from Tick-Borne Disease",
+    excerpt:
+      "Ticks cost Zimbabwean farmers thousands of cattle each year. A good dipping routine is the cheapest insurance you can buy.",
+    cover: vaccination,
+    emoji: "🪲",
+    category: "Animal Health",
+    date: "September 24, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+Ticks do more than irritate cattle. They spread some of the most damaging diseases in Southern Africa, and they are the main reason animals lose condition and die in the rainy season.
+ 
+## Diseases ticks spread
+ 
+- Heartwater — sudden fever, nervous signs, can kill fast
+- Redwater (babesiosis) — fever, red-brown urine, anaemia
+- Gallsickness (anaplasmosis) — fever, pale gums, weakness
+- Theileriosis, including January disease — high fever, swollen lymph glands, often fatal
+ 
+Tick bites also damage hides and reduce growth and milk production.
+ 
+## How often to dip
+ 
+A common guide is weekly in the wet season (roughly November to March), when ticks are most active, and every two weeks in the dry season. Your vet or local Veterinary Services office can adjust this for your area and the product you use.
+ 
+## Dipping and spraying methods
+ 
+**Communal dip tanks** — use your local dip tank and keep the dipping records. Buyers often ask for them.
+ 
+**Spray race or hand spray** — cheaper to set up on your own farm. Wet the whole animal, especially the ears, under the tail, between the legs and under the belly where ticks hide.
+ 
+**Pour-ons** — convenient and effective, but check the label for what they control.
+ 
+## Common mistakes
+ 
+- Mixing the dip too weak. Under-dosing breeds resistant ticks. Measure carefully.
+- Using the same chemical forever. Rotate between classes of acaricide on veterinary advice.
+- Skipping calves, or dipping them with adult doses. Read the label.
+- Ignoring withdrawal periods before slaughter or sale.
+ 
+## Hand dressing and checking
+ 
+Run your hands over ears, tails and udders during routine handling. Remove and kill ticks you find. Check for fever in any animal that looks dull.
+ 
+## Immunity and endemic stability
+ 
+Calves exposed to some ticks early in life can build natural immunity. Totally eliminating ticks may leave animals vulnerable later. Ask your vet about a plan that suits your herd.
+ 
+## Keep records
+ 
+Write down each dipping date and the product used. Buyers pay more for animals from managed herds.
+    `,
+  },
+  {
+    id: "avoid-livestock-scams-zimbabwe",
+    title: "How to Buy Livestock Online Without Getting Scammed",
+    excerpt:
+      "Buying online is convenient, but smart buyers protect themselves. Use this checklist before you send a dollar.",
+    cover: records,
+    emoji: "🛡️",
+    category: "Buying Tips",
+    date: "September 20, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Most sellers are genuine farmers. A few are not, and stolen animals and fake listings do exist. Here is how careful buyers protect themselves.
+ 
+## Red flags
+ 
+- The price is far below the market
+- The seller asks for a deposit or transport fee before you have seen the animals
+- The seller refuses a video call or visit
+- Photos look copied or professionally styled rather than taken on a farm
+- The seller is in a hurry and pushes you to pay now
+- The story keeps changing
+ 
+## See the animal in person, or through someone you trust
+ 
+If you can't travel, ask a trusted friend, a vet or an Agritex officer near the seller to inspect. For high-value animals this is worth the cost.
+ 
+## Ask for a live video
+ 
+Ask the seller to film the animal and show a piece of paper with today's date and your name. A genuine seller can do this in minutes.
+ 
+## Check ownership and documents
+ 
+- Ear tags or brands match the paperwork
+- Vaccination records are available and make sense
+- The seller can explain where the animal came from
+- For cattle, a valid movement permit is arranged for transport
+ 
+Stolen livestock is a serious problem. If a seller has no paperwork and no clear history, walk away.
+ 
+## Pay safely
+ 
+- Pay on collection or once the animal is inspected, not before
+- Avoid paying large sums to people you have never met
+- Use a method that leaves a record, and get a written receipt with names, tag numbers and the amount
+ 
+## Meet in a safe place
+ 
+Meet at the farm or a public place such as a market or veterinary office. Bring someone with you.
+ 
+## Inspect before you load
+ 
+Check eyes, nose, coat, hooves, teeth and general behaviour. Ask about recent illness. Count the animals. Confirm they match the listing.
+ 
+## Report suspicious listings
+ 
+If you see a suspicious listing on Kraal, tell us through the contact page so we can investigate.
+    `,
+  },
+  {
+    id: "calf-rearing-guide-zimbabwe",
+    title: "Calf Rearing in Zimbabwe: From Birth to Weaning",
+    excerpt:
+      "The first 48 hours decide whether a calf thrives or fails. A practical guide to colostrum, feeding, health and weaning.",
+    cover: cow,
+    emoji: "🐮",
+    category: "Farming Guide",
+    date: "September 15, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+Calves are your future herd and your future income. Healthy calves grow faster, get sick less often and sell for more at weaning.
+ 
+## Before calving
+ 
+- Keep cows in good condition in the last 3 months of pregnancy
+- Use a clean, dry calving paddock away from the main herd
+- Check cows at least twice a day when calving is near
+- Know when to call a vet: a cow struggling for more than an hour without progress needs help
+ 
+## The first hours matter most
+ 
+**Colostrum** is the first milk. It carries the antibodies the calf needs, because calves are born without protection.
+ 
+- Make sure the calf stands and suckles within 2–4 hours
+- Aim for at least 2 litres in the first hours, and about 10% of body weight within the first day
+- If the calf can't suckle, help it, or milk the cow and feed colostrum by bottle
+ 
+Calves that miss colostrum are far more likely to get scours and die.
+ 
+## Navel care
+ 
+Dip the navel in iodine solution soon after birth. This helps prevent infection that can enter through the navel.
+ 
+## Weeks 1 to 8
+ 
+- Keep calves with their mothers where possible
+- Watch for diarrhoea (scours). Keep calves drinking. Oral rehydration solution helps, and call the vet if a calf is weak or won't suck
+- Keep the calving area clean and dry
+ 
+## Creep feed and clean water
+ 
+From around 2 months, calves begin eating roughage. Fresh water and a little good-quality creep feed or a protein lick improves growth, especially in the dry season.
+ 
+## Vaccination and deworming
+ 
+Your vet will advise on a programme for your area. Many farmers vaccinate against clostridial diseases such as blackleg at 3–4 months, with a booster later. Keep a record of each date.
+ 
+## Weaning
+ 
+Beef calves are commonly weaned at 6–8 months. Weaning earlier can help a thin cow recover. Wean gradually if possible, and keep calves on good feed and water so they don't lose condition.
+ 
+## Record everything
+ 
+Note the birth date, tag number, dam, sire, weaning weight and treatments. Documented calves sell better.
+    `,
+  },
+  {
+    id: "pig-farming-zimbabwe-beginners",
+    title: "Pig Farming in Zimbabwe: A Beginner's Guide",
+    excerpt:
+      "Pigs grow fast, breed often and give a quick return. Here's what new pig farmers need to know about housing, feed, breeding and biosecurity.",
+    cover: null,
+    emoji: "🐖",
+    category: "Farming Guide",
+    date: "September 10, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+Pigs are one of the fastest ways to turn feed into cash. A sow can have two litters a year, and pigs reach market weight in about six months. They also need more care than goats or cattle, so start small and learn.
+ 
+## Why pigs
+ 
+- Large litters, often 8–12 piglets
+- Short cycle from birth to sale
+- Strong demand from butcheries, hotels and households
+- Manure is valuable for crops
+ 
+## Housing
+ 
+Pigs need a dry, shaded and well-ventilated pen with a concrete or well-drained floor that is easy to clean. Pigs struggle in extreme heat, so provide shade and plenty of clean water. Give pregnant sows and sows with piglets separate space.
+ 
+## Feeding
+ 
+Feed cost is the biggest expense. Pigs need balanced rations with energy, protein, vitamins and minerals. Different stages need different feed: starter for piglets, grower for young pigs, finisher for market pigs, and sow feed for breeding animals.
+ 
+Always provide clean drinking water. Feeding kitchen scraps and swill is risky because it can spread disease.
+ 
+## Breeding facts
+ 
+- Gestation lasts about 114 days (3 months, 3 weeks and 3 days)
+- Piglets are usually weaned at 4–6 weeks
+- Sows can return to heat a few days after weaning
+- A well-managed sow can produce around two litters a year
+ 
+## Piglet care in the first days
+ 
+Keep newborn piglets warm and make sure each one gets colostrum. Ask your vet about iron supplementation, which piglets need because sow milk is low in iron.
+ 
+## Market weight
+ 
+Many pigs are sold around 90–100kg, which they commonly reach at roughly 5.5–6 months with good feeding. Check which weights your buyer wants before you finish them.
+ 
+## Biosecurity matters
+ 
+African swine fever is a serious risk in Southern Africa and has no vaccine. To protect your pigs:
+- Keep pigs fenced and away from wild and stray pigs
+- Limit visitors and don't share equipment
+- Never feed untreated swill
+- Report unexplained deaths or sick pigs to your Veterinary Services office immediately
+ 
+## Start small
+ 
+Begin with a few gilts and a plan for feed and buyers. Add more as you learn.
+    `,
+  },
+  {
+    id: "broilers-vs-road-runners",
+    title: "Broilers vs Road Runners: Which Chickens Make You More Money?",
+    excerpt:
+      "Fast broilers or hardy Road Runners? We compare time to market, costs, risk and who your buyers are.",
+    cover: roadrunner,
+    emoji: "🐔",
+    category: "Farming Guide",
+    date: "September 5, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Poultry is the entry point for many farmers. The two most common choices in Zimbabwe are commercial broilers and indigenous Road Runners. They suit different farmers.
+ 
+## Broilers
+ 
+Broilers are bred to grow very fast. With good feed and management they reach market size in about 5–7 weeks.
+ 
+Advantages:
+- Quick turnaround, so you can run several batches a year
+- Steady demand from households, butcheries and caterers
+- Predictable growth
+ 
+Challenges:
+- High feed cost, because broilers need complete commercial feed
+- Chicks need heat in the first weeks (brooding) or they die
+- Disease and heat stress can cause heavy losses
+- Prices depend on competition from big producers
+ 
+## Road Runners
+ 
+Road Runners take 4–5 months to reach market size, but they are hardy and can find part of their feed by scavenging.
+ 
+Advantages:
+- Lower feed and housing costs
+- Better disease resistance when vaccinated
+- Premium price for the taste many customers prefer
+- Good for small yards and communal areas
+ 
+Challenges:
+- Slower growth, so fewer cycles
+- Newcastle disease can wipe out a flock without vaccination
+- Predators and theft in free-range systems
+ 
+## Quick comparison
+ 
+- Time to market: broilers 5–7 weeks, Road Runners 4–5 months
+- Feed cost: broilers high, Road Runners lower
+- Risk: broilers sensitive to temperature and management, Road Runners sensitive to Newcastle disease
+- Price per bird: Road Runners usually higher
+- Capital needed: broilers more
+ 
+## Which should you choose?
+ 
+- Choose broilers if you have capital, reliable water and electricity or heating, access to feed, and a ready market
+- Choose Road Runners if you have little capital, space to free-range, and want steady low-input income
+ 
+## Many farmers do both
+ 
+Run Road Runners as your base income and add small broiler batches for peak periods like December.
+ 
+## Do the sums first
+ 
+Before buying chicks, write down the cost of chicks, feed, vaccines, heating and transport, and compare with a cautious sale price. If it only works at the best prices, wait.
+    `,
+  },
+  {
+    id: "cattle-breeding-bull-selection-zimbabwe",
+    title: "Cattle Breeding Basics: Choosing a Bull and Planning Your Calving Season",
+    excerpt:
+      "A good bull can improve your whole herd in one generation. A bad one can cost you for years. Here's how to choose and manage.",
+    cover: tuli,
+    emoji: "🐂",
+    category: "Farming Guide",
+    date: "August 30, 2026",
+    readTime: "6 min read",
+    author: "Kraal Team",
+    content: `
+The bull provides half the genetics of every calf in your herd. Good breeding decisions are one of the cheapest ways to raise herd income.
+ 
+## What to look for in a bull
+ 
+- A breed that suits your environment (see our breeds guide)
+- Good structure: strong legs, sound feet, and a well-muscled body
+- Healthy testicles of good size and shape
+- Good temperament, because aggressive bulls are dangerous
+- Fertility: ask for a breeding soundness examination from a vet before the season
+- Records, if possible, such as growth rates and calving history of his daughters
+ 
+Avoid buying a bull on looks alone. A fat bull is not necessarily a fertile bull.
+ 
+## How many cows per bull
+ 
+A mature, healthy bull can usually serve around 20–30 cows in a controlled breeding season. Young bulls should serve fewer. Your vet can advise based on your pasture and terrain.
+ 
+## Plan a calving season
+ 
+Cattle are pregnant for about 283 days. If you want calves born from November to January, when the rains bring fresh grass, cows should be mated roughly from February to April.
+ 
+A fixed breeding season helps you:
+- Time calving when feed is plentiful
+- Wean calves of similar age
+- Sell calves in batches, which buyers prefer
+- Manage cows more closely when calving begins
+ 
+## Prepare cows and the bull
+ 
+Cows in good condition conceive faster. Give the bull good feed and vet checks before mating, because he can lose condition quickly during the season.
+ 
+## Avoid inbreeding
+ 
+Don't mate a bull to his daughters or close relatives. Change bulls every 2–3 years, or swap with a neighbour.
+ 
+## Cull for performance
+ 
+Keep records of which cows calve every year. A cow that misses two seasons in a row costs you feed without producing a calf. Sell her and keep the best heifers.
+ 
+## Aim for one calf per cow per year
+ 
+That target, with healthy calves at weaning, is the real measure of a profitable breeding herd.
+    `,
+  },
+  {
+    id: "livestock-theft-prevention-zimbabwe",
+    title: "How to Protect Your Livestock from Theft",
+    excerpt:
+      "Stock theft hurts farmers of every size. Simple habits make your animals harder to steal and easier to recover.",
+    cover: transport,
+    emoji: "🔒",
+    category: "Farm Management",
+    date: "August 22, 2026",
+    readTime: "4 min read",
+    author: "Kraal Team",
+    content: `
+Losing animals to theft can wipe out a season's income. You can't remove the risk completely, but you can reduce it a lot.
+ 
+## Make every animal identifiable
+ 
+- Use ear tags and, where appropriate, a registered brand
+- Record tag numbers, breed, sex, colour and any markings
+- Take clear photos of each animal from the side and face
+ 
+If an animal is stolen, this information helps police and neighbours recognise it.
+ 
+## Count regularly
+ 
+Count your animals at least once a day, ideally when they go out and when they return. Theft is often noticed too late because no one counted.
+ 
+## Secure the kraal
+ 
+- Keep a strong, well-maintained kraal for the night
+- Use sturdy gates with proper locks
+- Fix gaps in fences
+- Consider lighting and dogs
+ 
+## Use night watch
+ 
+Where possible, have a trusted herder or family member watch at night. Neighbours can share watch duties. Community alertness is one of the best protections.
+ 
+## Know who is around
+ 
+Be cautious with strangers asking about your animals or the daily routine. Make sure herders are trustworthy, and know where your animals graze.
+ 
+## Keep paperwork
+ 
+Keep records of purchases, births, vaccinations and sales, and any movement permits. If you sell, give the buyer receipts. Paperwork shows legitimate ownership.
+ 
+## If animals go missing
+ 
+1. Search the immediate area and ask neighbours quickly
+2. Report to the police as soon as possible, with tag numbers, photos and descriptions
+3. Alert local farmers, dip tank committees and community leaders
+4. Tell nearby markets and abattoirs
+5. Keep checking online listings for your animals
+ 
+## Buy safely, too
+ 
+Buyers who purchase stolen animals can lose them and face legal trouble. Always ask for documents.
+    `,
+  },
+  {
+    id: "veld-management-grazing-zimbabwe",
+    title: "Veld and Pasture Management: Keep Your Grazing Healthy Year After Year",
+    excerpt:
+      "Overgrazed land produces thin cattle and falling incomes. Learn simple grazing practices that rebuild veld and feed more animals.",
+    cover: drought2,
+    emoji: "🌱",
+    category: "Farming Guide",
+    date: "August 15, 2026",
+    readTime: "5 min read",
+    author: "Kraal Team",
+    content: `
+Good grazing is the foundation of a profitable livestock farm. Pasture that is cared for grows more grass, holds more water and carries more animals.
+ 
+## Know your stocking rate
+ 
+Stocking rate is how many animals your land can feed year-round. It depends on rainfall, soil and grass type. Too many animals for the available grazing leads to bare soil, erosion and thin cattle.
+ 
+Agritex officers can help estimate the carrying capacity of your area. When in doubt, stock lightly.
+ 
+## Rotate your grazing
+ 
+Instead of leaving animals on the same land all year, divide the farm into paddocks and move animals between them.
+ 
+- Graze one paddock while the others rest
+- Give grass time to recover, especially in the growing season
+- Don't graze the same area at the same time every year
+ 
+Even simple rotation with a few paddocks helps.
+ 
+## Rest in the rains
+ 
+Grass needs to grow and build roots in the wet season. Overgrazing early in the season weakens the plants for the whole year. Where possible, rest part of your veld in the rains and save it for the dry season.
+ 
+## Spread out the water
+ 
+Animals overgraze around water points. Placing troughs and water points in different areas spreads grazing more evenly.
+ 
+## Watch for warning signs
+ 
+- Bare ground between grass tufts
+- Gullies forming
+- Weeds and unpalatable plants taking over
+- Good grasses disappearing
+ 
+If you notice them, reduce animal numbers and rest the area.
+ 
+## Be careful with fire
+ 
+Fire can clear old growth, but uncontrolled fires destroy grazing and property. Follow local fire regulations, make fireguards and don't burn in dry, windy conditions.
+ 
+## Save some grass for the dry season
+ 
+Keep a standing hay paddock for late dry season. Cutting and baling hay during the rains gives you reserves when feed is scarce.
+ 
+## Healthy veld, healthy profit
+ 
+Animals on good pasture grow faster, breed better and sell for more.
+    `,
+  },
   {
     id: "how-to-price-livestock",
     title: "How to Price Your Livestock for a Fast Sale",

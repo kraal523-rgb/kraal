@@ -16,6 +16,7 @@ import { BLOG_POSTS } from "./Blog";
 import logo from "../assets/kraal-logo-black.svg";
 import "./Blog.css";
 import ProfileSheet from "../components/ProfileSheet";
+import { Helmet } from "react-helmet-async";
 export default function BlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -428,6 +429,14 @@ const [menuOpen, setMenuOpen] = useState(false);
       </Link>
         </div>
       </nav>
+      <Helmet>
+  <title>{post.title} | Kraal Market</title>
+  <meta name="description" content={post.excerpt} />
+  <link rel="canonical" href={`https://kraalmarket.com/blog/${post.id}`} />
+  <meta property="og:title" content={post.title} />
+  <meta property="og:description" content={post.excerpt} />
+  <meta property="og:image" content={post.cover} />
+</Helmet>
     </div>
   );
 }
