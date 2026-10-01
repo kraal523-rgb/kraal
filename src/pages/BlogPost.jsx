@@ -435,7 +435,7 @@ const [menuOpen, setMenuOpen] = useState(false);
   <link rel="canonical" href={`https://kraalmarket.com/blog/${post.id}`} />
   <meta property="og:title" content={post.title} />
   <meta property="og:description" content={post.excerpt} />
-  <meta property="og:image" content={post.cover} />
+  <meta property="og:image" content={`https://kraalmarket.com/og/${post.id}.png`} />
 </Helmet>
     </div>
   );

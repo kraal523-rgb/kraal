@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prebuild": "node scripts/generate-sitemap.mjs"
+    "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-social-images.mjs",
+"postbuild": "node scripts/prerender-post-meta.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "sharp": "^0.35.5",
     "vite": "^8.0.10",
     "vite-plugin-pwa": "^1.3.0"
   }
