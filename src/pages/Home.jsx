@@ -38,6 +38,7 @@ import imgQuail from "../assets/quail.png";
 import CookieConsent from "../components/CookieConsent";
 import "./Home.css";
 import "./Marketplace.css";
+import "./Home.classic.css";
 import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import videoGoats from "../assets/videos/cattle-1.mp4";
@@ -676,7 +677,7 @@ useEffect(() => {
 
       <div className="hero-actions">
         <Link to="/register" className="btn-hero-primary">
-          🐄 Post a Listing — Free
+          Post a Listing — Free
         </Link>
         <Link to="/marketplace" className="btn-hero-ghost">
           Browse Animals →
@@ -1203,9 +1204,9 @@ useEffect(() => {
      
 
       <div className="hero-app">
-        <h1 className="section-eyebrow light">
+        <h2 className="section-eyebrow light">
         Download the KraalMarket app
-      </h1>
+      </h2>
         <img src={google} alt="" />
       </div>
        
