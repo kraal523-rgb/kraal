@@ -6,6 +6,7 @@ import {
   where,
   onSnapshot,
   doc,
+  deleteDoc,
   getDoc,
   getDocs,
   addDoc,
@@ -192,23 +193,39 @@ export default function BuyerDashboard() {
     );
   }, [user?.uid]);
 
-  useEffect(() => {
-    if (!user?.uid) return;
-    (async () => {
+useEffect(() => {
+  if (!user?.uid) return;
+  const q = query(
+    collection(db, "users", user.uid, "savedListings"),
+    orderBy("savedAt", "desc")
+  );
+  return onSnapshot(
+    q,
+    async (snap) => {
       try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        const ids = snap.data()?.savedListings || [];
-        if (!ids.length) { setSavedListings([]); setSavedLoading(false); return; }
-        const results = await Promise.all(ids.map((id) => getDoc(doc(db, "listings", id))));
-        setSavedListings(
-          results.filter((s) => s.exists()).map((s) => ({
-            id: s.id, ...s.data(), emoji: getCategoryEmoji(s.data().categoryId),
-          })),
+        const saved = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        // Fetch the live listing so price/status are current
+        const results = await Promise.all(
+          saved.map((s) =>
+            getDoc(doc(db, "listings", s.listingId || s.id)).catch(() => null)
+          )
         );
-      } catch (err) { console.error(err); }
-      finally { setSavedLoading(false); }
-    })();
-  }, [user?.uid]);
+        setSavedListings(
+          results
+            .filter((r) => r && r.exists())
+            .map((r) => ({
+              id: r.id,
+              ...r.data(),
+              emoji: getCategoryEmoji(r.data().categoryId),
+            }))
+        );
+      } finally {
+        setSavedLoading(false);
+      }
+    },
+    () => setSavedLoading(false)
+  );
+}, [user?.uid]);
 useEffect(() => {
   if (!user?.uid) return;
   getDoc(doc(db, "users", user.uid)).then((snap) => {
@@ -458,7 +475,14 @@ useEffect(() => {
     setActiveTab("Messages");
   }, [user]);
 
-  const unsaveListing = (id) => setSavedListings((p) => p.filter((l) => l.id !== id));
+  const unsaveListing = async (id) => {
+  setSavedListings((p) => p.filter((l) => l.id !== id)); // instant UI
+  try {
+    await deleteDoc(doc(db, "users", user.uid, "savedListings", id));
+  } catch (err) {
+    console.error("Unsave failed:", err);
+  }
+};
 
   const handleTransportSubmit = async (e) => {
     e.preventDefault();

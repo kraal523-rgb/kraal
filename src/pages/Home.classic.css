@@ -1054,7 +1054,7 @@
 /* ── Footer ─────────────────────────────────────────────── */
 .home-footer {
   background: var(--ivory);
-  position: static; /* was sticky, which made it stick over content */
+  position: sticky; /* was sticky, which made it stick over content */
   border-top: 1px solid var(--line-strong);
   color: var(--muted);
   padding: 72px 36px 0;
