@@ -957,7 +957,7 @@ background: var(--hero-cream);
                    <Link to="https://www.x.com/@Kraalmarketzim" aria-label="Twitter">
                       𝕏
                     </Link>
-                   <Link to="https://wa.me/27676056777" aria-label="WhatsApp">
+                   <Link to="https://wa.me/263776109275" aria-label="WhatsApp">
                       W
                     </Link>
                   </div>

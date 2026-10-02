@@ -42,7 +42,9 @@ import ProvinceVideo from "../components/ProvinceVideo";
 import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import videoGoats from "../assets/videos/cattle-1.mp4";
-import videoChicken from "../assets/videos/cattle-1.mp4";
+import goatsVideo from "../assets/videos/goats.mp4";
+import sheepVideo from "../assets/videos/sheep.mp4";
+import roadRunner from "../assets/videos/roadrunner.mp4";
 import zimCoat from "../assets/Coat_of_arms_of_Zimbabwe.png"
 const CATEGORIES = [
   { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
@@ -66,7 +68,7 @@ const CATEGORIES = [
 ];
 const heroVideos = [
   {
-    src: videoCattle,
+    src: goatsVideo,
     badge: "Live on Farm",
     title: "Brahman Herd · Marondera",
     subtitle: "Zimbabwe's finest beef cattle",
@@ -82,7 +84,15 @@ const heroVideos = [
     linkText: "View Goats →",
   },
   {
-    src: videoChicken,
+    src: sheepVideo,
+    badge: "Live on Farm",
+    title: "Sheep · Bulawayo",
+    subtitle: "Healthy, grass-fed sheep herds",
+    link: "/marketplace?category=goats",
+    linkText: "View Goats →",
+  },
+  {
+    src: roadRunner,
     badge: "Live on Farm",
     title: "Road Runners · Harare",
     subtitle: "Free-range indigenous chickens",
@@ -94,7 +104,6 @@ const FARM_PRODUCTS = [
   { id: "fish",      img: fish, label: "Fish (Aquaculture)", count: "60+",  emoji: "🐟" },
   { id: "bees",      img: bees, label: "Bees & Honey",       count: "45+",  emoji: "🐝" },
   { id: "eggs",      img: eggs, label: "Eggs (by tray)",     count: "130+", emoji: "🥚" },
-  { id: "compost",   img: manure, label: "Manure & Compost",   count: "30+",  emoji: "🌱" },
   { id: "honey",     img: honey, label: "Raw Honey",          count: "70+",  emoji: "🍯" },
 ];
 const PRICE_TICKER = [
@@ -507,7 +516,7 @@ useEffect(() => {
       <h1 className="hero-title">
         Your livestock,
         <br />
-        <em>found by buyers</em>
+        <em style={{ color: "#05c0c7", fontWeight: "bold" }}>Marketplace</em>
         <br />
         across Africa.
       </h1>
@@ -1246,7 +1255,7 @@ useEffect(() => {
              <Link to="https://www.x.com/@Kraalmarketzim" aria-label="Twitter">
                 𝕏
               </Link>
-             <Link to="https://wa.me/27676056777" aria-label="WhatsApp">
+             <Link to="https://wa.me/263776109275" aria-label="WhatsApp">
                 W
               </Link>
             </div>
@@ -1349,7 +1358,7 @@ useEffect(() => {
   </div>
 )}
 <a
-  href="https://wa.me/27676056777?text=Hi%20Kraal%2C%20I%20need%20help%20with%20a%20listing"
+  href="https://wa.me/263776109275?text=Hi%20Kraal%2C%20I%20need%20help%20with%20a%20listing"
   target="_blank"
   rel="noopener noreferrer"
   className="whatsapp-float"
