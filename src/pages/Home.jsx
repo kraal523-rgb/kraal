@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useLocation } from "react-router-dom";
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp  } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useNavigate, Link } from "react-router-dom";
@@ -18,14 +17,12 @@ import imgTurkey from "../assets/pngegg__16.png";
 import imgPig from "../assets/pngegg__18.png"; 
 import imgDog from "../assets/pngegg__4.png";
 import fish from "../assets/fish.png";
-import manure from "../assets/manure.jpg";
 import bees from "../assets/bee.jpg";
 import google from "../assets/google-play.png"
 import honey from "../assets/honey.png"
 import eggs from "../assets/eggs.jpg";
 import imgDonkey from "../assets/pngegg__3.png"
 import harareCoat from "../assets/harare-coat.svg"
-import videoCattle from "../assets/videos/cattle-1.mp4";
 import imgGeese from "../assets/geese.png";
 import imgCats from "../assets/cat.jpg";
 import imgPigeons from "../assets/pigeon.png";
@@ -38,7 +35,6 @@ import HomeNav from "../components/HomeNav";
 import "./Home.css";
 import "./Marketplace.css";
 import "./Home.classic.css";
-import ProvinceVideo from "../components/ProvinceVideo";
 import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import videoGoats from "../assets/videos/cattle-1.mp4";
@@ -108,149 +104,6 @@ const PRICE_TICKER = [
   { label: "Bronze Turkey", price: "USD 45", trend: "up" },
   { label: "Ankole Bull", price: "USD 1,500", trend: "up" },
 ];
-const TOP_FARMERS = [
-  {
-    initials: "TM",
-    name: "Takudzwa Moyo",
-    farm: "Moyo Cattle Farm",
-    location: "Marondera",
-    sells: "Brahman Bulls, Nguni Cows",
-    rating: 4.9,
-    sales: 47,
-    color: "#2D5A27",
-    verified: true,
-  },
-  {
-    initials: "SN",
-    name: "Sithembile Ndlovu",
-    farm: "Ndlovu Poultry",
-    location: "Bulawayo",
-    sells: "Road Runners, Guinea Fowl",
-    rating: 4.8,
-    sales: 132,
-    color: "#C85A2A",
-    verified: true,
-  },
-  {
-    initials: "FC",
-    name: "Farai Chikwanda",
-    farm: "Chikwanda Goats",
-    location: "Mutare",
-    sells: "Boer Goats, Sheep",
-    rating: 4.7,
-    sales: 61,
-    color: "#7A5C1E",
-    verified: true,
-  },
-  {
-    initials: "BM",
-    name: "Blessing Mutasa",
-    farm: "Mutasa Mixed Farm",
-    location: "Gweru",
-    sells: "Pigs, Cattle, Goats",
-    rating: 4.9,
-    sales: 89,
-    color: "#1A5C6B",
-    verified: true,
-  },
-  {
-    initials: "RZ",
-    name: "Rudo Zvobgo",
-    farm: "Zvobgo Piggery",
-    location: "Chinhoyi",
-    sells: "Duroc Pigs, Landrace",
-    rating: 4.6,
-    sales: 38,
-    color: "#5C1A6B",
-    verified: true,
-  },
-  {
-    initials: "JM",
-    name: "Joseph Mhuri",
-    farm: "Mhuri Horse Stud",
-    location: "Harare",
-    sells: "Thoroughbreds, Warmbloods",
-    rating: 5.0,
-    sales: 14,
-    color: "#1A3A6B",
-    verified: true,
-  },
-];
-const FEATURED_LISTINGS = [
-  {
-    id: 1,
-    emoji: "🐄",
-    title: "10× Brahman Bulls",
-    location: "Marondera, Mashonaland",
-    price: "USD 1,200",
-    unit: "per head",
-    badge: "Verified Seller",
-    age: "3 yrs",
-    tag: "cattle",
-    daysAgo: 1,
-  },
-  {
-    id: 2,
-    emoji: "🐐",
-    title: "25× Boer Goats",
-    location: "Gweru, Midlands",
-    price: "USD 175",
-    unit: "per head",
-    badge: "Vaccinated",
-    age: "18 mo",
-    tag: "goats",
-    daysAgo: 2,
-  },
-  {
-    id: 3,
-    emoji: "🐓",
-    title: "200× Road Runners",
-    location: "Mutare, Manicaland",
-    price: "USD 8",
-    unit: "per bird",
-    badge: "Bulk Discount",
-    age: "16 wks",
-    tag: "chicken",
-    daysAgo: 1,
-  },
-  {
-    id: 4,
-    emoji: "🐑",
-    title: "15× Merino Ewes",
-    location: "Bulawayo, Matabeleland",
-    price: "USD 220",
-    unit: "per head",
-    badge: "Pedigree",
-    age: "2 yrs",
-    tag: "sheep",
-    daysAgo: 3,
-  },
-  {
-    id: 5,
-    emoji: "🐖",
-    title: "8× Duroc Piglets",
-    location: "Chinhoyi, Mashonaland",
-    price: "USD 95",
-    unit: "per head",
-    badge: "Weaned",
-    age: "8 wks",
-    tag: "pigs",
-    daysAgo: 2,
-  },
-  {
-    id: 6,
-    emoji: "🐴",
-    title: "3× Thoroughbred Mares",
-    location: "Harare, Mashonaland",
-    price: "USD 3,800",
-    unit: "per head",
-    badge: "Registered",
-    age: "5 yrs",
-    tag: "horses",
-    daysAgo: 4,
-  },
-];
-
 const TESTIMONIALS = [
   {
     name: "Takudzwa M.",
@@ -331,24 +184,41 @@ const REGIONS = [
 ];
 
 export default function Home() {
-  const location = useLocation();
   const [featuredListings, setFeaturedListings] = useState([]);
   const navigate = useNavigate();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [alertEmail, setAlertEmail] = useState("");
-  const [topFarmers, setTopFarmers] = useState([]);
   const [alertSubmitted, setAlertSubmitted] = useState(false);
-  const [visibleSections, setVisibleSections] = useState(new Set());
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const observerRef = useRef(null);
   const [fetchError, setFetchError] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [cookieAccepted, setCookieAccepted] = useState(
-  () => localStorage.getItem("kraal_cookies") === "accepted"
-);
-const [cookieBannerOpen, setCookieBannerOpen] = useState(false);
   const [current, setCurrent] = useState(0);
+const footerRef = useRef(null);
+const [footerH, setFooterH] = useState(0);
+const [curtain, setCurtain] = useState(true);
 
+useEffect(() => {
+  const el = footerRef.current;
+  if (!el) return;
+
+  const update = () => {
+    const h = el.offsetHeight;
+    setFooterH(h);
+    // If the footer is nearly as tall as the screen (small phones),
+    // fall back to a normal footer so content doesn't get cut off.
+    setCurtain(h < window.innerHeight * 0.9);
+  };
+
+  update();
+  const ro = new ResizeObserver(update);
+  ro.observe(el);
+  window.addEventListener("resize", update);
+  return () => {
+    ro.disconnect();
+    window.removeEventListener("resize", update);
+  };
+}, []);
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroVideos.length);
@@ -358,11 +228,7 @@ const [cookieBannerOpen, setCookieBannerOpen] = useState(false);
   }, []);
 
   const active = heroVideos[current];
-const acceptCookies = () => {
-  localStorage.setItem("kraal_cookies", "accepted");
-  setCookieAccepted(true);
-  setCookieBannerOpen(false);
-};
+
   // Rotate testimonials
   useEffect(() => {
     const t = setInterval(
@@ -470,10 +336,7 @@ useEffect(() => {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   fetchFeatured();
 }, [fetchFeatured]);
-  const handleSearch = (e) => {
-    e.preventDefault();
-    navigate(`/marketplace${search ? `?q=${encodeURIComponent(search)}` : ""}`);
-  };
+
 
  const handleAlertSubmit = async (e) => {
   e.preventDefault();
@@ -492,6 +355,10 @@ useEffect(() => {
   return (
     <div className="home">
       {/* ── NAV ── */}
+    <main
+      className="home-content"
+      style={{ marginBottom: curtain ? footerH : 0 }}
+    >
     <HomeNav />
  
       {/* ── HERO ── */}
@@ -857,82 +724,7 @@ useEffect(() => {
     </div>
   </div>
 </section>
-{/* ── TOP FARMERS 
-<section className="spotlight-section">
-  <div className="section-inner">
-    <div className="section-header">
-      <div>
-        <p className="section-eyebrow">Community</p>
-        <h2 className="section-title">Top Farmers on Kraal</h2>
-      </div>
-      <Link to="/marketplace" className="section-link">
-        Browse all sellers →
-      </Link>
-    </div>
 
-    {topFarmers.length === 0 ? (
-      // Skeleton while loading
-      <div className="spotlight-track">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="spotlight-card skeleton">
-            <div className="sp-skeleton-avatar" />
-            <div className="skeleton-line" />
-            <div className="skeleton-line short" />
-            <div className="skeleton-line short" />
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div className="spotlight-track-wrap">
-        <div className="spotlight-track">
-          {topFarmers.map((farmer, i) => (
-            <div key={farmer.id} className="spotlight-card">
-              <div className="sp-header">
-                <div className="sp-avatar" style={{ background: farmer.color }}>
-                  {farmer.avatar
-                    ? <img src={farmer.avatar} alt={farmer.name} style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
-                    : farmer.initials
-                  }
-                </div>
-                <div className="sp-meta">
-                  <strong className="sp-name">{farmer.name}</strong>
-                  <span className="sp-farm">{farmer.farm || "Independent Farmer"}</span>
-                </div>
-                {farmer.verified && (
-                  <span className="sp-verified" title="Verified seller">✅</span>
-                )}
-              </div>
-
-              <div className="sp-location">📍 {farmer.location}</div>
-              <div className="sp-sells">🐾 {farmer.sells || "Various animals"}</div>
-
-              <div className="sp-stats">
-                <span className="sp-listing-count">
-                  📋 {farmer.listingCount} listing{farmer.listingCount !== 1 ? "s" : ""}
-                </span>
-                {farmer.rating && (
-                  <span className="sp-rating">★ {farmer.rating}</span>
-                )}
-              </div>
-
-              <button
-                className="sp-cta"
-                onClick={() => {
-                  // Home.jsx — use navigate
-                  // Marketplace.jsx — use setSearch
-                  navigate(`/marketplace?seller=${encodeURIComponent(farmer.name)}`);
-                }}
-              >
-                View Listings →
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-</section>
-── */}
       {/* ── TRUST STRIP ── */}
       <section className="trust-section">
         <div className="section-inner">
@@ -1222,6 +1014,7 @@ useEffect(() => {
     </div>
   </div>
 </section>
+</main>
       {/* ── FOOTER ── */}
       <footer className="home-footer">
         <div className="footer-inner">
@@ -1297,38 +1090,7 @@ useEffect(() => {
         </div>
       </footer>
       <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
-{/* ── BOTTOM NAV (mobile) ── */}
-<nav className="home-bottom-nav">
-  <div className="home-bottom-nav-inner">
-    <Link
-      to="/"
-      className={`home-bottom-nav-item ${location.pathname === "/" ? "active" : ""}`}
-    >
-      🏠<span>Home</span>
-    </Link>
-    <Link
-      to="/marketplace"
-      className={`home-bottom-nav-item ${location.pathname === "/marketplace" ? "active" : ""}`}
-    >
-      🏪<span>Browse</span>
-    </Link>
-    <Link to="/sell" className="home-bottom-nav-post">
-      +
-    </Link>
-    <Link
-      to="/marketplace?saved=1"
-      className={`home-bottom-nav-item ${location.pathname === "/marketplace" && location.search.includes("saved=1") ? "active" : ""}`}
-    >
-      🤍<span>Saved</span>
-    </Link>
-    <button
-      className={`home-bottom-nav-item ${profileOpen ? "active" : ""}`}
-      onClick={() => setProfileOpen(true)}
-    >
-      👤<span>Profile</span>
-    </button>
-  </div>
-</nav>
+
 {joinModalOpen && (
   <div className="kraal-modal-backdrop" onClick={() => setJoinModalOpen(false)}>
     <div className="kraal-modal-box" onClick={(e) => e.stopPropagation()}>
@@ -1399,20 +1161,4 @@ function nameToColor(name = "") {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
   return colors[Math.abs(hash) % colors.length];
-}
-function SearchIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.35-4.35" />
-    </svg>
-  );
 }

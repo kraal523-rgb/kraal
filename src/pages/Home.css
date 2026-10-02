@@ -2531,14 +2531,7 @@ body,
 /* ═══════════════════════════════════════
    FOOTER
 ═══════════════════════════════════════ */
-.home-footer {
-background: var(--hero-cream);  
-  color: rgba(22, 38, 19, 0.65); 
-  padding: 64px 36px 0;
-  border-top: #0a0e08 1px solid;
-  position:sticky;
-  bottom:0;
-}
+
 
 .footer-inner {
   max-width: 1280px;
@@ -2897,10 +2890,6 @@ background: var(--hero-cream);
     display: none;
   }
 
-  /* ── Footer ── */
-  .home-footer {
-    padding: 48px 20px 0;
-  }
   .footer-inner {
     flex-direction: column;
     gap: 36px;

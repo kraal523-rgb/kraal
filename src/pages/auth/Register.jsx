@@ -31,32 +31,7 @@ export default function Register() {
 
   return (
     <div className="register-page">
-      {/* ── Left panel ── */}
-      <div className="register-brand">
-        <div className="brand-content">
-          <div className="brand-logo">
-             <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-          </div>
-          <h1>Sell your livestock to the world</h1>
-          <p>
-            Join thousands of farmers across Zimbabwe already using Kraal to
-            connect with buyers locally and internationally.
-          </p>
-          <div className="brand-stats">
-            <div className="stat"><strong>12,000+</strong><span>Sellers</span></div>
-            <div className="stat"><strong>5 countries</strong><span>Reach</span></div>
-            <div className="stat"><strong>Free</strong><span>To list</span></div>
-          </div>
-        </div>
-        <div className="brand-art" aria-hidden="true">
-          <span className="art-emoji art-1">🐄</span>
-          <span className="art-emoji art-2">🐐</span>
-          <span className="art-emoji art-3">🐓</span>
-          <span className="art-emoji art-4">🐑</span>
-        </div>
-      </div>
-
-      {/* ── Right panel ── */}
+     
       <div className="register-form-panel">
         {!isDone && (
           <div className="progress-bar">

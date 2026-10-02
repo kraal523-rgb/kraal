@@ -221,6 +221,7 @@
   outline-offset: 10px;
   box-shadow: 0 22px 44px -22px rgba(20, 38, 28, 0.45);
 }
+
 .hero-float-pills {
   display: none;
 }
@@ -1049,17 +1050,40 @@
   text-transform: none;
   font-size: 0.85rem;
 }
+/* ── Footer (curtain reveal) ───────────────────────────── */
+.home-content {
+  position: relative;
+  z-index: 2;                 /* sits above the footer */
+  background: var(--ivory);   /* must be opaque so the footer is hidden */
+  box-shadow: 0 24px 48px -12px rgba(20, 38, 28, 0.35); /* shadow along the "curtain" edge */
+}
 
-/* ── Footer ─────────────────────────────────────────────── */
 .home-footer {
+  position: sticky;         /* default: normal footer */
+  z-index: 1;
   background: var(--ivory);
-  position: sticky; /* was sticky, which made it stick over content */
   border-top: 1px solid var(--line-strong);
   color: var(--muted);
   padding: 72px 36px 0;
 }
+
+.home-footer.is-curtain {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
 .footer-inner {
   border-bottom: 1px solid var(--line);
+}
+.home-footer.is-curtain .footer-inner {
+  animation: footerRise linear both;
+  animation-timeline: scroll(root);
+  animation-range: calc(100% - 500px) 100%;
+}
+@keyframes footerRise {
+  from { transform: translateY(40px); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 .footer-logo span {
   font-family: var(--font-display);

@@ -1,10 +1,10 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import useAuthStore from "../store/useAuthStore";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import "./Login.css";
-import logo from "../assets/kraal-logo.svg";
+import logo from "../assets/kraal-logo-black.svg";
 
 async function getRoleRedirect(uid, from) {
   try {
@@ -14,18 +14,19 @@ async function getRoleRedirect(uid, from) {
     if (role === "transporter") return "/driver";
     if (role === "seller" || role === "admin") return from || "/seller/dashboard";
     if (role === "buyer") return from || "/buyer";
-    if (role === "vet") return from || "/vet";   // ← add this
+    if (role === "vet") return from || "/vet";
     return from || "/";
   } catch {
     return from || "/";
   }
 }
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, signInWithGoogle } = useAuthStore();
 
- const from = location.state?.from?.pathname || null;
+  const from = location.state?.from?.pathname || null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,92 +34,54 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-const handleEmail = async (e) => {
-  e.preventDefault();
-  setError(null);
-  if (!email || !password) {
-    setError("Please fill in all fields");
-    return;
-  }
-  setLoading(true);
-  try {
-    const user = await signIn(email, password);             // ← no destructuring
-    const redirect = await getRoleRedirect(user.uid, from);
-    navigate(redirect, { replace: true });
-  } catch (err) {
-    setError(friendlyError(err.code));
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleEmail = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const user = await signIn(email, password);
+      const redirect = await getRoleRedirect(user.uid, from);
+      navigate(redirect, { replace: true });
+    } catch (err) {
+      setError(friendlyError(err.code));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const handleGoogle = async () => {
-  setError(null);
-  setLoading(true);
-  try {
-    const user = await signInWithGoogle();                  // ← no destructuring
-    const redirect = await getRoleRedirect(user.uid, from);
-    navigate(redirect, { replace: true });
-  } catch (err) {
-    setError(friendlyError(err.code));
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleGoogle = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const user = await signInWithGoogle();
+      const redirect = await getRoleRedirect(user.uid, from);
+      navigate(redirect, { replace: true });
+    } catch (err) {
+      setError(friendlyError(err.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="login-page">
-      {/* ── LEFT PANEL ── */}
-      <div className="login-panel-left">
-        <div className="lpl-inner">
-          <Link to="/" className="login-logo">
-            <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-          </Link>
-
-          <div className="lpl-art" aria-hidden="true">
-            <span className="lpa lpa-1">🐄</span>
-            <span className="lpa lpa-2">🐐</span>
-            <span className="lpa lpa-3">🐑</span>
-            <span className="lpa lpa-4">🐓</span>
-            <span className="lpa lpa-5">🦆</span>
-          </div>
-
-          <div className="lpl-copy">
-            <h2>Welcome back to Kraal</h2>
-            <p>
-              Zimbabwe's livestock marketplace — connecting farmers and buyers
-              across Africa and beyond.
-            </p>
-          </div>
-
-          <div className="lpl-stats">
-            <div className="lps">
-              <strong>12k+</strong>
-              <span>Sellers</span>
-            </div>
-            <div className="lps">
-              <strong>45k+</strong>
-              <span>Animals</span>
-            </div>
-            <div className="lps">
-              <strong>5</strong>
-              <span>Countries</span>
-            </div>
-          </div>
-        </div>
-      </div>
+   
 
       {/* ── RIGHT PANEL ── */}
       <div className="login-panel-right">
         <div className="login-form-wrap">
           <div className="login-header">
             <h1>Sign in</h1>
+            <img src={logo} width={260} alt="Kraal" />
             <p>
-              Don't have an account?{" "}
-              <Link to="/register">Create one free →</Link>
+              Don't have an account? <Link to="/register">Create one free</Link>
             </p>
           </div>
 
-          {/* Google */}
           <button
             type="button"
             className="btn-google"
@@ -133,7 +96,6 @@ const handleGoogle = async () => {
             <span>or sign in with email</span>
           </div>
 
-          {/* Email form */}
           <form onSubmit={handleEmail} noValidate>
             <div className="login-field">
               <label htmlFor="email">Email address</label>
@@ -193,8 +155,7 @@ const handleGoogle = async () => {
           </form>
 
           <p className="login-register-nudge">
-            New to Kraal?{" "}
-            <Link to="/register">Create a free seller account</Link>
+            New to Kraal? <Link to="/register">Create a free seller account</Link>
           </p>
         </div>
       </div>
@@ -221,7 +182,6 @@ function friendlyError(code) {
       return "Something went wrong. Please try again.";
   }
 }
-
 
 function GoogleIcon() {
   return (
@@ -290,7 +250,7 @@ function AlertIcon() {
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
-      style={{ flexShrink: 0, marginTop: 1 }}
+      style={{ flexShrink: 0, marginTop: 2 }}
     >
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="12" />
