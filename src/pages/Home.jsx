@@ -43,7 +43,6 @@ import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import videoGoats from "../assets/videos/cattle-1.mp4";
 import goatsVideo from "../assets/videos/goats.mp4";
-import sheepVideo from "../assets/videos/sheep.mp4";
 import roadRunner from "../assets/videos/roadrunner.mp4";
 import zimCoat from "../assets/Coat_of_arms_of_Zimbabwe.png"
 const CATEGORIES = [
@@ -80,14 +79,6 @@ const heroVideos = [
     badge: "Live on Farm",
     title: "Boer Goats · Bulawayo",
     subtitle: "Healthy, grass-fed goat herds",
-    link: "/marketplace?category=goats",
-    linkText: "View Goats →",
-  },
-  {
-    src: sheepVideo,
-    badge: "Live on Farm",
-    title: "Sheep · Bulawayo",
-    subtitle: "Healthy, grass-fed sheep herds",
     link: "/marketplace?category=goats",
     linkText: "View Goats →",
   },
