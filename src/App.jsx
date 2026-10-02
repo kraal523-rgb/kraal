@@ -171,7 +171,8 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
-
+         <Route path="/explore" element={<KraalMarketExplorer />} />
+<Route path="/explore/:provinceSlug" element={<KraalMarketExplorer />} />
         {/* ── Identity verification (any logged-in user) ───────────────────
         <Route
           path="/verify"

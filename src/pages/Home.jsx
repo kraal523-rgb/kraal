@@ -1159,7 +1159,7 @@ useEffect(() => {
         <h2 className="section-eyebrow light">
         Download the KraalMarket app
       </h2>
-        <img src={google} alt="" />
+        <img className="app-badge" src={google} alt="" />
       </div>
        
    

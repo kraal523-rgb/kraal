@@ -1697,6 +1697,10 @@ body,
   margin-top: 0; 
   flex: 1 1 320px; 
 }
+.app-badge{
+  width: 360px;
+  height: auto;
+}
 .hero-live-feed {
   display: flex;
   flex-direction: column;

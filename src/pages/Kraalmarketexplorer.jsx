@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import logo from "../assets/kraal-logo-black.svg";
-import navIcon from "../assets/kraal-logo.svg"
-import UserMenu from "../components/UserMenu";
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import HomeNav from "../components/HomeNav";
+import { Helmet } from "react-helmet-async";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD-yN9hu266boJpX1CqgxSYeTaMubpXXws",
   authDomain: "zimbabweland-67218.firebaseapp.com",
@@ -58,6 +58,10 @@ function normalizeProvinceKey(str) {
     .replace(/[^a-z]+/g, "-")                  
     .replace(/^-+|-+$/g, "");                  
 }
+const SITE_URL = "https://kraalmarket.com"; // your real domain
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+
+const getProvinceSlug = (province) => normalizeProvinceKey(province.name);
 function getProvinceImage(province, opts = {}) {
   const { width = 800, height = 500 } = opts;
   const nameKey = normalizeProvinceKey(province.name);
@@ -117,7 +121,7 @@ function Breadcrumb({ trail, onNavigate }) {
   );
 }
 
-function ImageCard({ imgUrl, name, description, badge, onClick, accentColor, province }) {
+function ImageCard({ imgUrl, name, description, badge, to, accentColor, province }) {
   const [imgErr, setImgErr] = useState(false);
   const seed = name ? name.length + (name.charCodeAt(0) || 1) : 42;
 
@@ -127,18 +131,15 @@ function ImageCard({ imgUrl, name, description, badge, onClick, accentColor, pro
     : cloudinaryUrl || imgUrl || PLACEHOLDER(name, seed);
 
   return (
-    <div
+    <Link
+      to={to}
       className="card"
-      onClick={onClick}
       style={{ "--accent": accentColor || "#C2714F" }}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
     >
       <div className="card-img-wrap">
         <img
           src={resolvedSrc}
-          alt={name}
+          alt={`Landscape of ${name} Province, Zimbabwe`}
           onError={() => setImgErr(true)}
           className="card-img"
           style={{ objectPosition: "top" }}
@@ -149,13 +150,11 @@ function ImageCard({ imgUrl, name, description, badge, onClick, accentColor, pro
       <div className="card-body">
         <h3 className="card-title">{name || "—"}</h3>
         {description && <p className="card-desc">{description}</p>}
-        {onClick && (
-          <span className="card-cta">
-            Explore <span className="arrow">→</span>
-          </span>
-        )}
+        <span className="card-cta">
+          Explore <span className="arrow">→</span>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -355,11 +354,13 @@ function ProvinceView({ province }) {
 // Main App
 // ============================================================
 export default function KraalMarketExplorer() {
+  const { provinceSlug } = useParams();
+  const navigate = useNavigate();
+
   const [provinces, setProvinces] = useState([]);
-  const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     fetchProvinces()
       .then(setProvinces)
@@ -367,30 +368,92 @@ const [menuOpen, setMenuOpen] = useState(false);
       .finally(() => setLoading(false));
   }, []);
 
+  // Scroll to top when moving between list and province pages
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [provinceSlug]);
+
+  // Selected province is now derived from the URL
+  const selected = provinceSlug
+    ? provinces.find((p) => getProvinceSlug(p) === provinceSlug.toLowerCase()) || null
+    : null;
+  const notFound = !!provinceSlug && !loading && !error && !selected;
+
   const trail = [
-    { label: "All Provinces" },
-    ...(selected ? [{ label: selected.name }] : []),
+    { label: "All Provinces", path: "/explore" },
+    ...(selected
+      ? [{ label: selected.name, path: `/explore/${getProvinceSlug(selected)}` }]
+      : []),
   ];
 
-  const handleNav = (idx) => {
-    if (idx === 0) setSelected(null);
-  };
+  const handleNav = (idx) => navigate(trail[idx].path);
 
   const ACCENT_COLORS = [
-    "#C2714F",
-    "#4A7C59",
-    "#2E6B8E",
-    "#8B4B8B",
-    "#B8860B",
-    "#C94F4F",
-    "#4F7FA8",
-    "#6B8E4E",
-    "#A0522D",
-    "#3E7B6F",
+    "#C2714F", "#4A7C59", "#2E6B8E", "#8B4B8B", "#B8860B",
+    "#C94F4F", "#4F7FA8", "#6B8E4E", "#A0522D", "#3E7B6F",
   ];
+
+  // ---------- SEO ----------
+  const canonicalUrl = selected
+    ? `${SITE_URL}/explore/${getProvinceSlug(selected)}`
+    : `${SITE_URL}/explore`;
+
+  const seoTitle = notFound
+    ? "Province not found | Kraal Market"
+    : selected
+      ? `${selected.name} Province, Zimbabwe – Districts, Towns & Wards | Kraal Market`
+      : "Explore Zimbabwean Provinces – Districts, Towns & Wards | Kraal Market";
+
+  const seoDescription = selected
+    ? selected.description?.slice(0, 155) ||
+      `Browse districts, towns and wards in ${selected.name} Province, Zimbabwe, and find livestock for sale near you on Kraal Market.`
+    : "Explore all 10 provinces of Zimbabwe. Browse districts, towns and wards, and find livestock for sale near you on Kraal Market.";
+
+  const seoImage = selected
+    ? getProvinceImage(selected, { width: 1200, height: 630 }) || DEFAULT_OG_IMAGE
+    : DEFAULT_OG_IMAGE;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": selected ? "WebPage" : "CollectionPage",
+    name: seoTitle,
+    description: seoDescription,
+    url: canonicalUrl,
+    isPartOf: { "@type": "WebSite", name: "Kraal Market", url: SITE_URL },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: trail.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.label,
+        item: `${SITE_URL}${c.path}`,
+      })),
+    },
+  };
 
   return (
     <>
+   <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content={notFound ? "noindex, follow" : "index, follow"} />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Kraal Market" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={seoImage} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@Kraalmarketzim" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={seoImage} />
+
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -469,6 +532,7 @@ const [menuOpen, setMenuOpen] = useState(false);
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     padding-bottom: env(safe-area-inset-bottom);
   }
+    a.card { display: block; text-decoration: none; color: inherit; }
 .home-nav {
   position: sticky;
   top: 0;
@@ -571,7 +635,7 @@ background: var(--hero-cream);
         .page-hero {
           margin-bottom: 32px;
         }
-        .page-hero h2 {
+        .page-hero h1 {
           font-family: 'Playfair Display', serif;
           font-size: 36px;
           font-weight: 700;
@@ -836,41 +900,7 @@ background: var(--hero-cream);
 
       <div className="app-shell">
         {/* Header */}
-        <nav className="home-nav">
-               
-               <div className="nav-inner">
-                 <Link to="/" className="nav-logo">
-                   <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-                   
-                 </Link>
-                 <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-                  <Link to="/marketplace">Browse Animals</Link>
-       <Link to="/marketplace?category=cattle">Cattle</Link>
-       <Link to="/marketplace?category=goats">Goats</Link>
-       <Link to="/about">About</Link>
-       <Link to="/contact">Contact Us</Link>
-<Link to="/blog">Blog</Link>
-                 </div>
-                 
-                 <div className="nav-actions">
-                  <UserMenu />
-                   <Link to="/sell" className="nav-cta">
-                     <span>+ Post</span>
-                   </Link>
-                 
-                   <button
-                     className="nav-hamburger"
-                     onClick={() => setMenuOpen(!menuOpen)}
-                     aria-label="Toggle menu"
-                   >
-                     <span />
-                     <span />
-                     <span />
-                   </button>
-                 </div>
-                
-               </div>
-             </nav>
+       <HomeNav />
 
         {/* Config warning if not yet set up */}
         {FIREBASE_CONFIG.apiKey === "YOUR_API_KEY" && (
@@ -888,50 +918,60 @@ background: var(--hero-cream);
         <Breadcrumb trail={trail} onNavigate={handleNav} />
 
         {/* Content */}
-        {!selected ? (
-          <div className="page-content">
-            <div className="page-hero">
-              <h2>Explore Zimbabwean Provinces</h2>
-              <p>
-                Select a province to browse its districts, towns, and wards.
-              </p>
-            </div>
+      {provinceSlug ? (
+  loading ? (
+    <div className="loading-state">
+      <div className="spinner" />
+      <p>Loading province…</p>
+    </div>
+  ) : selected ? (
+    <ProvinceView key={selected.id} province={selected} />
+  ) : (
+    <div className="page-content">
+      <div className="error-banner">
+        <strong>Province not found</strong>
+        We couldn't find "{provinceSlug}". <Link to="/explore">View all provinces</Link>
+      </div>
+    </div>
+  )
+) : (
+  <div className="page-content">
+    <div className="page-hero">
+      <h1>Explore Zimbabwean Provinces</h1>
+      <p>Select a province to browse its districts, towns, and wards.</p>
+    </div>
 
-            {loading ? (
-              <div className="loading-state">
-                <div className="spinner" />
-                <p>Loading provinces…</p>
-              </div>
-            ) : error ? (
-              <div className="error-banner">
-                <strong>Failed to load provinces</strong>
-                {error}
-              </div>
-            ) : (
-              <div className="provinces-grid">
-                {provinces.map((prov, i) => (
-                 <ImageCard
-  key={prov.id}
-  imgUrl={prov.imgUrl}
-  province={prov}
-  name={prov.name}
-  description={prov.description}
-  badge="Province"
-  accentColor={ACCENT_COLORS[i % ACCENT_COLORS.length]}
-  onClick={() => setSelected(prov)}
-/>
-                ))}
-                {provinces.length === 0 && !loading && (
-                  <p className="empty">
-                    No provinces found. Check your internet connection
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <ProvinceView province={selected} onBack={() => setSelected(null)} />
+    {loading ? (
+      <div className="loading-state">
+        <div className="spinner" />
+        <p>Loading provinces…</p>
+      </div>
+    ) : error ? (
+      <div className="error-banner">
+        <strong>Failed to load provinces</strong>
+        {error}
+      </div>
+    ) : (
+      <div className="provinces-grid">
+        {provinces.map((prov, i) => (
+          <ImageCard
+            key={prov.id}
+            imgUrl={prov.imgUrl}
+            province={prov}
+            name={prov.name}
+            description={prov.description}
+            badge="Province"
+            accentColor={ACCENT_COLORS[i % ACCENT_COLORS.length]}
+            to={`/explore/${getProvinceSlug(prov)}`}
+          />
+        ))}
+        {provinces.length === 0 && (
+          <p className="empty">No provinces found. Check your internet connection</p>
         )}
+      </div>
+    )}
+  </div>
+)}
       </div>
         {/* ── FOOTER ── */}
             <footer className="home-footer">

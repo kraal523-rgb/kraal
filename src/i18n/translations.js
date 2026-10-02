@@ -10,7 +10,7 @@ export const translations = {
     help: "Need help? WhatsApp us",
     searchPlaceholder: "Search cattle, goats, road runners…",
     search: "Search",
-    sell: "Sell Livestock",
+    sell: "Create Free Account",
     allAnimals: "All Animals",
     cattle: "Cattle", goats: "Goats", sheep: "Sheep", pigs: "Pigs", chicken: "Road Runners",
     tips: "Farming Tips", about: "About", contact: "Contact",

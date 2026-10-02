@@ -100,6 +100,9 @@ export default {
       ) {
         return await handleReplySuggestions(request, env, corsHeaders);
       }
+      if (url.pathname === "/ussd" && request.method === "POST") {
+  return await handleUSSD(request, env);
+}
       // ── GET /:key  (R2 file serving) ─────────────────────────────────────────
       if (request.method === "GET") {
         const key = url.pathname.slice(1);
@@ -391,7 +394,7 @@ async function handleVerifyStatus(request, env, corsHeaders) {
     corsHeaders,
   );
 }
-
+let cachedToken = { value: null, exp: 0 };
 // ─── Shared auth helper ───────────────────────────────────────────────────────
 
 async function requireAuth(request, env) {
@@ -405,13 +408,16 @@ async function requireAuth(request, env) {
 
 async function getAdminToken(env) {
   const now = Math.floor(Date.now() / 1000);
+  if (cachedToken.value && cachedToken.exp - 60 > now) return cachedToken.value;
+
   const payload = {
     iss: env.FIREBASE_CLIENT_EMAIL,
     sub: env.FIREBASE_CLIENT_EMAIL,
     aud: "https://oauth2.googleapis.com/token",
     iat: now,
     exp: now + 3600,
-    scope: "https://www.googleapis.com/auth/datastore",
+    scope:
+      "https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/identitytoolkit",
   };
 
   const headerB64 = toB64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
@@ -420,23 +426,20 @@ async function getAdminToken(env) {
 
   const pemKey = env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
   const cryptoKey = await importPrivatePemKey(pemKey);
-
   const signature = await crypto.subtle.sign(
     { name: "RSASSA-PKCS1-v1_5" },
     cryptoKey,
     new TextEncoder().encode(sigInput),
   );
-
   const sigB64 = toB64url(String.fromCharCode(...new Uint8Array(signature)));
-  const jwt = `${sigInput}.${sigB64}`;
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${sigInput}.${sigB64}`,
   });
-
   const data = await tokenRes.json();
+  cachedToken = { value: data.access_token, exp: now + (data.expires_in || 3600) };
   return data.access_token;
 }
 
@@ -482,6 +485,7 @@ function toFirestoreFields(obj) {
       fields[k] = { doubleValue: v }; // 👈 handles decimals like 55.114
     else if (typeof v === "boolean") fields[k] = { booleanValue: v };
     else if (v === null) fields[k] = { nullValue: null };
+    else if (v instanceof Date) fields[k] = { timestampValue: v.toISOString() };
     else if (typeof v === "object")
       fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
   }
@@ -973,7 +977,237 @@ async function handleTransportEstimate(request, env, corsHeaders) {
     );
   }
 }
+const USSD_ROLES = { 1: "seller", 2: "buyer", 3: "transporter", 4: "vet" };
 
+const USSD_PROVINCES = [
+  "Harare", "Bulawayo", "Manicaland", "Mash Central", "Mash East",
+  "Mash West", "Masvingo", "Mat North", "Mat South", "Midlands",
+];
+
+const ussdCon = (m) => "CON " + m;
+const ussdEnd = (m) => "END " + m;
+const textResponse = (body, status = 200) =>
+  new Response(body, { status, headers: { "Content-Type": "text/plain" } });
+
+function normalizePhone(raw) {
+  const d = String(raw || "").replace(/[^\d]/g, "");
+  if (d.startsWith("263")) return "+" + d;
+  if (d.startsWith("0")) return "+263" + d.slice(1);
+  return "+263" + d;
+}
+
+const ID_RE = /^\d{2}-?\d{6,7}-?[A-Za-z]-?\d{2}$/;
+
+function ussdStepsFor(role) {
+  const steps = [
+    { key: "name", prompt: "Enter your full name:", ok: (v) => v.length >= 3 },
+    {
+      key: "nationalId",
+      prompt: "Enter your National ID (e.g. 63-123456-A-42):",
+      ok: (v) => ID_RE.test(v),
+      map: (v) => v.toUpperCase(),
+    },
+    {
+      key: "province",
+      prompt:
+        "Province:\n" + USSD_PROVINCES.map((p, i) => `${i + 1} ${p}`).join("\n"),
+      ok: (v) => /^\d+$/.test(v) && +v >= 1 && +v <= USSD_PROVINCES.length,
+      map: (v) => USSD_PROVINCES[+v - 1],
+    },
+  ];
+
+  if (role === "seller") {
+    steps.push({ key: "village", prompt: "Village / farm name:", ok: (v) => v.length >= 2 });
+  }
+  if (role === "transporter") {
+    steps.push(
+      { key: "vehicleReg", prompt: "Vehicle registration number:", ok: (v) => v.length >= 4, map: (v) => v.toUpperCase() },
+      {
+        key: "vehicleType",
+        prompt: "Vehicle type:\n1 Pickup\n2 Small truck\n3 Large truck",
+        ok: (v) => ["1", "2", "3"].includes(v),
+        map: (v) => ({ 1: "pickup", 2: "small_truck", 3: "large_truck" })[v],
+      },
+    );
+  }
+  if (role === "vet") {
+    steps.push({ key: "vetRegNo", prompt: "Veterinary registration number:", ok: (v) => v.length >= 3 });
+  }
+
+  steps.push(
+    { key: "pin", prompt: "Choose a 4-digit PIN:", ok: (v) => /^\d{4}$/.test(v) },
+    { key: "pinConfirm", prompt: "Confirm your PIN:", ok: (v, a) => v === a.pin },
+  );
+  return steps;
+}
+
+// PBKDF2 (scrypt isn't available in Workers). 100k is the Workers max.
+async function hashPin(pin, saltHex) {
+  const salt = Uint8Array.from(saltHex.match(/.{2}/g).map((h) => parseInt(h, 16)));
+  const keyMat = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMat, 256,
+  );
+  return [...new Uint8Array(bits)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// ── Firebase Auth (Identity Toolkit REST) ────────────────────────────────────
+async function getOrCreateAuthUser(env, msisdn, displayName) {
+  const token = await getAdminToken(env);
+  const base = `https://identitytoolkit.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/accounts`;
+  const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+
+  const createRes = await fetch(base, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ phoneNumber: msisdn, displayName }),
+  });
+  const created = await createRes.json();
+  if (createRes.ok && created.localId) return created.localId;
+
+  if (created?.error?.message?.includes("PHONE_NUMBER_EXISTS")) {
+    const lookupRes = await fetch(`${base}:lookup`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ phoneNumber: [msisdn] }),
+    });
+    const found = await lookupRes.json();
+    if (found?.users?.[0]?.localId) return found.users[0].localId;
+  }
+  throw new Error("Auth user create failed: " + JSON.stringify(created));
+}
+
+// ── Firestore helpers specific to USSD ───────────────────────────────────────
+async function findUserByPhone(env, msisdn) {
+  const token = await getAdminToken(env);
+  const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "users" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "phone" },
+            op: "EQUAL",
+            value: { stringValue: msisdn },
+          },
+        },
+        limit: 1,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error("Firestore query failed: " + (await res.text()));
+  const rows = await res.json();
+  const doc = rows.find((r) => r.document)?.document;
+  return doc?.fields ? fromFirestoreFields(doc.fields) : null;
+}
+
+// PATCH with updateMask = merge behaviour (won't wipe fields the website added)
+async function firestoreMerge(env, docPath, data) {
+  const token = await getAdminToken(env);
+  const mask = Object.keys(data)
+    .map((k) => `updateMask.fieldPaths=${encodeURIComponent(k)}`)
+    .join("&");
+  const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${docPath}?${mask}`;
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: toFirestoreFields(data) }),
+  });
+  if (!res.ok) throw new Error("Firestore write failed: " + (await res.text()));
+}
+
+async function createUssdUser(env, msisdn, role, a) {
+  const uid = await getOrCreateAuthUser(env, msisdn, a.name);
+
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  const pinSalt = [...saltBytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const pinHash = await hashPin(a.pin, pinSalt);
+
+  const profile = {
+    uid,
+    role,
+    name: a.name,
+    phone: msisdn,
+    nationalId: a.nationalId,
+    province: a.province,
+    channel: "ussd",
+    verificationStatus: "pending",
+    pinHash,
+    pinSalt,
+    createdAt: new Date(),
+  };
+  for (const k of ["village", "vehicleReg", "vehicleType", "vetRegNo"]) {
+    if (a[k]) profile[k] = a[k];
+  }
+  await firestoreMerge(env, `users/${uid}`, profile);
+}
+
+// ── Menu logic (same flow as before) ─────────────────────────────────────────
+async function ussdFlow(env, msisdn, text) {
+  const parts = text === "" ? [] : text.split("*");
+  const existing = await findUserByPhone(env, msisdn);
+
+  if (existing) {
+    if (parts.length === 0) {
+      return ussdCon(`Welcome back ${(existing.name || "").split(" ")[0]}\n1 My account\n2 Market info`);
+    }
+    if (parts[0] === "1") {
+      return ussdEnd(`Role: ${existing.role}\nVerification: ${existing.verificationStatus || "pending"}`);
+    }
+    if (parts[0] === "2") return ussdEnd("Market days: update this text with your schedule.");
+    return ussdEnd("Invalid option.");
+  }
+
+  if (parts.length === 0) return ussdCon("Kraal Market\n1 Register\n2 Market info");
+  if (parts[0] === "2") return ussdEnd("Market days: update this text with your schedule.");
+  if (parts[0] !== "1") return ussdEnd("Invalid option.");
+
+  if (parts.length === 1) {
+    return ussdCon("I am a:\n1 Seller\n2 Buyer\n3 Transporter\n4 Veterinary officer");
+  }
+
+  const role = USSD_ROLES[parts[1]];
+  if (!role) return ussdEnd("Invalid choice. Dial again to retry.");
+
+  const steps = ussdStepsFor(role);
+  const inputs = parts.slice(2);
+  const answers = {};
+
+  for (let i = 0; i < steps.length; i++) {
+    if (i >= inputs.length) return ussdCon(steps[i].prompt);
+    const v = inputs[i].trim();
+    if (!steps[i].ok(v, answers)) return ussdEnd("Invalid entry. Dial again to retry.");
+    answers[steps[i].key] = steps[i].map ? steps[i].map(v) : v;
+  }
+
+  await createUssdUser(env, msisdn, role, answers);
+  const extra = role === "buyer" ? "" : " An admin will verify your details shortly.";
+  return ussdEnd(`Welcome ${answers.name}! You are registered as ${role}.${extra}`);
+}
+
+// ── Route handler ────────────────────────────────────────────────────────────
+async function handleUSSD(request, env) {
+  const url = new URL(request.url);
+  if (!env.USSD_SECRET || url.searchParams.get("key") !== env.USSD_SECRET) {
+    return textResponse("END Forbidden", 403);
+  }
+
+  try {
+    // Africa's Talking posts application/x-www-form-urlencoded
+    const form = await request.formData();
+    const msisdn = normalizePhone(form.get("phoneNumber"));
+    const text = (form.get("text") || "").toString();
+    return textResponse(await ussdFlow(env, msisdn, text));
+  } catch (err) {
+    console.error("USSD error:", err);
+    return textResponse("END Service error. Please try again later.");
+  }
+}
 // ── Smart reply suggestions in the Messages tab ───────────────────────────────
 async function handleReplySuggestions(request, env, corsHeaders) {
   const uid = await requireAuth(request, env);
