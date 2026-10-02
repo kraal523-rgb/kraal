@@ -377,25 +377,7 @@ const [menuOpen, setMenuOpen] = useState(false);
             </div>
           </footer>
       <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
-      <nav className="home-bottom-nav">
-        <div className="home-bottom-nav-inner">
-          <Link to="/" className="home-bottom-nav-item active">
-            🏠<span>Home</span>
-          </Link>
-          <Link to="/marketplace" className="home-bottom-nav-item">
-            🏪<span>Browse</span>
-          </Link>
-          <Link to="/sell" className="home-bottom-nav-post">
-            +
-          </Link>
-          <Link to="/marketplace?saved=1" className="home-bottom-nav-item">
-            🤍<span>Saved</span>
-          </Link>
-         <Link className="mp-bottom-nav-item" onClick={() => setProfileOpen(true)}>
-        👤<span>Profile</span>
-      </Link>
-        </div>
-      </nav>
+      
       <Helmet>
   <title>{post.title} | Kraal Market</title>
   <meta name="description" content={post.excerpt} />
