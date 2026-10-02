@@ -31,6 +31,7 @@ import all5 from "../assets/all-5.jpg";
 import ProfileSheet from "../components/ProfileSheet";
 import ListingGalleryModal from "../components/ListingGalleryModal";
 import "./Marketplace.css";
+import HomeNav from "../components/HomeNav";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 // ─── DATA ────────────────────────────────────────────────────────────────────
@@ -521,107 +522,11 @@ export default function Marketplace() {
 
   return (
     <div className="mp">
-      {/* ── PRICE TICKER ── */}
-       {/* ── <div className="mp-ticker" aria-label="Live market prices">
-        <div className="mp-ticker-label">📊 Live Prices</div>
-        <div className="mp-ticker-scroll">
-          <div className="mp-ticker-track">
-            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
-              <span key={i} className="mp-ticker-item">
-                <span className="mpt-label">{item.label}</span>
-                <span className={`mpt-price ${item.trend}`}>
-                  {item.price}
-                  <span className="mpt-arrow">
-                    {item.trend === "up" ? "↑" : "↓"}
-                  </span>
-                </span>
-                <span className="mpt-sep">·</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>── */}
+  
 
       {/* ── NAV ── */}
-      <nav className="mp-nav">
-        <div className="mp-nav-inner">
-          {/* 1. Logo — always far left */}
-          <Link to="/" className="mp-nav-logo">
-            <img src={logo} style={{ width: "120px" }} alt="Kraal" />
-            <span className="mp-nav-logo-text">Market</span>
-          </Link>
-
-          {/* 2. Nav links — fills the middle on desktop, dropdown on mobile */}
-          <div className={`mp-nav-links ${menuOpen ? "open" : ""}`}>
-            <Link
-              to="/marketplace"
-              className="active"
-              onClick={() => setMenuOpen(false)}
-            >
-              Browse Animals
-            </Link>
-            <Link
-              to="/marketplace?category=cattle"
-              onClick={() => setMenuOpen(false)}
-            >
-              Cattle
-            </Link>
-            <Link
-              to="/marketplace?category=goats"
-              onClick={() => setMenuOpen(false)}
-            >
-              Goats
-            </Link>
-            <Link to="/about" onClick={() => setMenuOpen(false)}>
-              About
-            </Link>
-             <Link to="/contact">Contact Us</Link>
-<Link to="/blog">Blog</Link>
-            {/* "+ Post" visible only inside the mobile dropdown */}
-            <Link
-              to="/sell"
-              className="mp-nav-cta"
-              onClick={() => setMenuOpen(false)}
-            >
-              + Post Listing
-            </Link>
-          </div>
-
-          {/* 3. Actions — pushed to right by margin-left: auto */}
-          <div className="mp-nav-actions">
-            <LanguageSwitcher />
-            <Link to="/sell" className="mp-nav-cta">
-              + Post
-            </Link>
-            <UserMenu />
-          </div>
-
-          {/* 4. Hamburger — mobile only, always last */}
-          <button
-            className={`mp-hamburger ${menuOpen ? "open" : ""}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={menuOpen}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
-      </nav>
-      <div className="mp-trust-bar">
-        {[
-          { icon: "✅", text: "Verified sellers only" },
-          { icon: "📲", text: "Contact via WhatsApp" },
-          { icon: "🆓", text: "Free to list" },
-          { icon: "🌍", text: "Pan-African reach" },
-        ].map((item) => (
-          <span key={item.text} className="mp-trust-item">
-            {item.icon} {item.text}
-          </span>
-        ))}
-      </div>
-     
+      <HomeNav />
+    
 
       {/* ── CATEGORY PILLS CAROUSEL ── */}
       <div className="mp-cats-wrap">

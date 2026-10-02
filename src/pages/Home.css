@@ -268,94 +268,8 @@ body,
   }
 }
 
-/* ═══════════════════════════════════════
-   NAV
-═══════════════════════════════════════ */
-.home-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--hero-cream);
-  backdrop-filter: blur(16px);
-  border-bottom: 0px solid rgba(0, 0, 0, 0.1);
-}
 
-.nav-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 36px;
-  height: 68px;
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
 
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-   color: var(--hero-soil);
-  font-family: "Cormorant Garant", serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  flex-shrink: 0;
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-  flex: 1;
-}
-
-.nav-links a {
-  color: var(--hero-soil); 
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: color 0.15s;
-  position: relative;
-}
-
-.nav-links a::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  right: 0;
-  height: 1.5px;
-  background: var(--gold-light);
-  transform: scaleX(0);
-  transition: transform 0.2s;
-  transform-origin: left;
-}
-
-.nav-links a:hover {
- color: var(--hero-soil);
-}
-.nav-links a:hover::after {
-  transform: scaleX(1);
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nav-signin {
-  color: var(--hero-soil);
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 8px 16px;
-  transition: color 0.15s;
-}
-.nav-signin:hover {
-  color: white;
-}
 .lc-image {
   width: 100%;
   height: 100%;
@@ -2712,9 +2626,7 @@ background: var(--hero-cream);
 .footer-col a:hover {
   color: rgba(22, 38, 19, 0.85);
 }
-.nav-links .nav-signin {
-  display: none;
-}
+
 .footer-bottom {
   max-width: 1280px;
   margin: 0 auto;
@@ -2778,36 +2690,8 @@ background: var(--hero-cream);
     font-size: 0.64rem;
   }
 
-  /* ── Nav ── */
-  .nav-inner {
-    padding: 0 16px;
-    height: 58px;
-    gap: 16px;
-    justify-content: space-between;
-  }
-   .nav-actions {
-    margin-left: auto; 
-  }
-  .nav-links {
-    display: none;
-  }
-  .nav-links.open {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 58px;
-    left: 0;
-    right: 0;
-    background: var(--cream-warm);
-    padding: 20px;
-    gap: 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    z-index: 99;
-  }
-  .nav-links.open a {
-    font-size: 1rem;
-    color: var(--hero-soil);
-  }
+ 
+
   .nav-signin {
     display: none;
   }
@@ -2818,11 +2702,7 @@ background: var(--hero-cream);
   .nav-hamburger {
     display: flex;
   }
-.nav-links.open .nav-signin {
-    display: block;
-    color: rgba(255, 255, 255, 0.65);
-    font-size: 1rem;
-  }
+
   /* ── Hero ── */
   .hero {
     padding: 60px 20px 48px;
@@ -3056,9 +2936,7 @@ background: var(--hero-cream);
   }
 }
 @media (max-width: 390px) {
-  .nav-inner {
-    padding: 0 12px;
-  }
+
   .nav-cta {
     padding: 8px 12px;
     font-size: 0.75rem;

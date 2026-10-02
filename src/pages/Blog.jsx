@@ -17,6 +17,7 @@ import UserMenu from "../components/UserMenu";
 import online1 from "../assets/online-1.jpg";
 import { Helmet } from "react-helmet-async";
 import "./Blog.css";
+import HomeNav from "../components/HomeNav";
 import ProfileSheet from "../components/ProfileSheet";
 // eslint-disable-next-line react-refresh/only-export-components
 export const BLOG_POSTS = [
@@ -1768,41 +1769,7 @@ export default function Blog() {
       />
       <meta name="twitter:image" content={brahman} />
     </Helmet>
-      <nav className="home-nav">
-             
-             <div className="nav-inner">
-               <Link to="/" className="nav-logo">
-                 <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-                 
-               </Link>
-               <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-                <Link to="/marketplace">Browse Animals</Link>
-     <Link to="/marketplace?category=cattle">Cattle</Link>
-     <Link to="/marketplace?category=goats">Goats</Link>
-     <Link to="/about">About</Link>
-     <Link to="/contact">Contact Us</Link>
-<Link to="/blog">Blog</Link>
-               </div>
-               
-               <div className="nav-actions">
-                <UserMenu />
-                 <Link to="/sell" className="nav-cta">
-                   <span>+ Post</span>
-                 </Link>
-                
-                 <button
-                   className="nav-hamburger"
-                   onClick={() => setMenuOpen(!menuOpen)}
-                   aria-label="Toggle menu"
-                 >
-                   <span />
-                   <span />
-                   <span />
-                 </button>
-               </div>
-              
-             </div>
-           </nav>
+      <HomeNav />
 
       <section className="blog-hero">
         <img

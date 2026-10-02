@@ -1,0 +1,47 @@
+export const LANGS = [
+  { code: "en", label: "EN", name: "English" },
+  { code: "sn", label: "SN", name: "ChiShona" },
+  { code: "nd", label: "ND", name: "isiNdebele" },
+];
+
+export const translations = {
+  en: {
+    tagline: "Zimbabwe's livestock marketplace · Free to list",
+    help: "Need help? WhatsApp us",
+    searchPlaceholder: "Search cattle, goats, road runners…",
+    search: "Search",
+    sell: "Sell Livestock",
+    allAnimals: "All Animals",
+    cattle: "Cattle", goats: "Goats", sheep: "Sheep", pigs: "Pigs", chicken: "Road Runners",
+    tips: "Farming Tips", about: "About", contact: "Contact",
+    browse: "Browse animals", kraal: "Kraal",
+    signIn: "Sign in", register: "Register", welcome: "Welcome",
+    whatsapp: "Chat with us on WhatsApp", language: "Language",
+  },
+  sn: {
+    tagline: "Musika wezvipfuwo weZimbabwe · Kuisa hakubhadharwe",
+    help: "Unoda rubatsiro? Titumirire pa WhatsApp",
+    searchPlaceholder: "Tsvaga mombe, mbudzi, huku…",
+    search: "Tsvaga",
+    sell: "Tengesa Zvipfuwo",
+    allAnimals: "Zvipfuwo Zvese",
+    cattle: "Mombe", goats: "Mbudzi", sheep: "Makwai", pigs: "Nguruve", chicken: "Huku",
+    tips: "Zano Rekurima", about: "Nezvedu", contact: "Taurira Nesu",
+    browse: "Tarisa zvipfuwo", kraal: "Kraal",
+    signIn: "Pinda", register: "Nyoresa", welcome: "Mauya",
+    whatsapp: "Taura nesu pa WhatsApp", language: "Mutauro",
+  },
+  nd: {
+    tagline: "Imakethe yezifuyo yaseZimbabwe · Ukubeka kuyamahala",
+    help: "Udinga usizo? Sibhalele ku-WhatsApp",
+    searchPlaceholder: "Dinga izinkomo, izimbuzi, izinkukhu…",
+    search: "Dinga",
+    sell: "Thengisa Izifuyo",
+    allAnimals: "Zonke Izifuyo",
+    cattle: "Izinkomo", goats: "Izimbuzi", sheep: "Izimvu", pigs: "Izingulube", chicken: "Izinkukhu",
+    tips: "Amathiphu Okulima", about: "Ngathi", contact: "Xhumana Lathi",
+    browse: "Khangela izifuyo", kraal: "Kraal",
+    signIn: "Ngena", register: "Bhalisa", welcome: "Siyakwemukela",
+    whatsapp: "Khuluma lathi ku-WhatsApp", language: "Ulimi",
+  },
+};

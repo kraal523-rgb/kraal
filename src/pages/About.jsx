@@ -4,6 +4,7 @@ import "./About.css";
 import logo from "../assets/kraal-logo-black.svg";
 import heroImage from "../assets/hero-image.jpg";
 import UserMenu from "../components/UserMenu";
+import HomeNav from "../components/HomeNav";
 import ProfileSheet from "../components/ProfileSheet";
 const TEAM = [
   {
@@ -79,41 +80,7 @@ const [profileOpen, setProfileOpen] = useState(false);
   return (
     <div className="about-page">
       {/* ── NAV ── */}
-     <nav className="home-nav">
-            
-            <div className="nav-inner">
-              <Link to="/" className="nav-logo">
-                <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-                
-              </Link>
-              <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-               <Link to="/marketplace">Browse Animals</Link>
-    <Link to="/marketplace?category=cattle">Cattle</Link>
-    <Link to="/marketplace?category=goats">Goats</Link>
-    <Link to="/about">About</Link>
-    <Link to="/contact">Contact Us</Link>
-<Link to="/blog">Blog</Link>
-              </div>
-              
-              <div className="nav-actions">
-               <UserMenu />
-                <Link to="/sell" className="nav-cta">
-                  <span>+ Post</span>
-                </Link>
-                <button
-                  className="nav-hamburger"
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  aria-label="Toggle menu"
-                >
-                  <span />
-                  <span />
-                  <span />
-                </button>
-              </div>
-             
-            </div>
-          </nav>
-
+      <HomeNav />
       {/* ── HERO ── */}
   
      <section className="about-hero">

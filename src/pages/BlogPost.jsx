@@ -17,6 +17,7 @@ import logo from "../assets/kraal-logo-black.svg";
 import "./Blog.css";
 import ProfileSheet from "../components/ProfileSheet";
 import { Helmet } from "react-helmet-async";
+import HomeNav from "../components/HomeNav";
 export default function BlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -127,41 +128,7 @@ const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="blog-page">
-      <nav className="home-nav">
-             
-             <div className="nav-inner">
-               <Link to="/" className="nav-logo">
-                 <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-                 
-               </Link>
-               <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-                <Link to="/marketplace">Browse Animals</Link>
-     <Link to="/marketplace?category=cattle">Cattle</Link>
-     <Link to="/marketplace?category=goats">Goats</Link>
-     <Link to="/about">About</Link>
-     <Link to="/contact">Contact Us</Link>
-<Link to="/blog">Blog</Link>
-               </div>
-               
-               <div className="nav-actions">
-                <UserMenu />
-                 <Link to="/sell" className="nav-cta">
-                   <span>+ Post</span>
-                 </Link>
-                
-                 <button
-                   className="nav-hamburger"
-                   onClick={() => setMenuOpen(!menuOpen)}
-                   aria-label="Toggle menu"
-                 >
-                   <span />
-                   <span />
-                   <span />
-                 </button>
-               </div>
-              
-             </div>
-           </nav>
+       <HomeNav />
 
       <div className="post-wrap">
         {/* Back */}

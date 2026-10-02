@@ -1,10 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import InstallButton from '../components/InstallButton'
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp  } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import UserMenu from "../components/UserMenu";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/kraal-logo-black.svg";
 import navIcon from "../assets/kraal-logo.svg"
@@ -36,6 +34,7 @@ import imgOstrich from "../assets/ostrich.png";
 import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
 import CookieConsent from "../components/CookieConsent";
+import HomeNav from "../components/HomeNav";
 import "./Home.css";
 import "./Marketplace.css";
 import "./Home.classic.css";
@@ -335,9 +334,7 @@ export default function Home() {
   const location = useLocation();
   const [featuredListings, setFeaturedListings] = useState([]);
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
   const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [alertEmail, setAlertEmail] = useState("");
   const [topFarmers, setTopFarmers] = useState([]);
   const [alertSubmitted, setAlertSubmitted] = useState(false);
@@ -494,63 +491,8 @@ useEffect(() => {
 
   return (
     <div className="home">
-     
-   {/* ──<div className="price-ticker-band" aria-label="Live market prices">
-        <div className="price-ticker-label">📊 Live Prices</div>
-        <img src={navIcon} alt="" className="price-ticker-icon" />
-        <div className="price-ticker-scroll">
-          <div className="price-ticker-track">
-            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
-              <span key={i} className="price-ticker-item">
-                <span className="pt-label">{item.label}</span>
-                <span className={`pt-price ${item.trend}`}>
-                  {item.price}
-                  <span className="pt-arrow">
-                    {item.trend === "up" ? "↑" : "↓"}
-                  </span>
-                </span>
-                <span className="pt-sep">·</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>  ── */}
       {/* ── NAV ── */}
-      <nav className="home-nav">
-        
-        <div className="nav-inner">
-          <Link to="/" className="nav-logo">
-            <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-            
-          </Link>
-          <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-           <Link to="/marketplace">Browse Animals</Link>
-<Link to="/marketplace?category=cattle">Cattle</Link>
-<Link to="/marketplace?category=goats">Goats</Link>
-<Link to="/about">About</Link>
-<Link to="/contact">Contact Us</Link>
-<Link to="/blog">Blog</Link>
-          </div>
-          
-          <div className="nav-actions">
-           <UserMenu />
-            <Link to="/sell" className="nav-cta">
-              <span>+ Post</span>
-            </Link>
-            <InstallButton />
-            <button
-              className="nav-hamburger"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-          </div>
-         
-        </div>
-      </nav>
+    <HomeNav />
  
       {/* ── HERO ── */}
     <section className="hero">
@@ -703,23 +645,31 @@ useEffect(() => {
         </span>
       </div>
  
-      <form className="hero-search" onSubmit={handleSearch}>
-        <span className="search-icon">
-          <SearchIcon />
-        </span>
-        <input
-          type="text"
-          placeholder="Search cattle, goats, road runners…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="submit">Search</button>
-      </form>
+      
     </div>
     
   </div>
   
-  {/* ── PRICE TICKER BAND ── */}
+<div className="price-ticker-band" aria-label="Live market prices">
+        <div className="price-ticker-label">📊 Live Prices</div>
+        <img src={navIcon} alt="" className="price-ticker-icon" />
+        <div className="price-ticker-scroll">
+          <div className="price-ticker-track">
+            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
+              <span key={i} className="price-ticker-item">
+                <span className="pt-label">{item.label}</span>
+                <span className={`pt-price ${item.trend}`}>
+                  {item.price}
+                  <span className="pt-arrow">
+                    {item.trend === "up" ? "↑" : "↓"}
+                  </span>
+                </span>
+                <span className="pt-sep">·</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
      
  
 </section>
