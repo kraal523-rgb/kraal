@@ -1,0 +1,77 @@
+.hero-video-frame {
+  display: grid;
+  place-items: center;
+  overflow: hidden;           /* keep your existing clip-path, outline, etc. */
+}
+
+.zw-map {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 530 / 835;    /* same as VB.w / VB.h so the map isn't stretched */
+}
+
+.zw-map video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.zw-map-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.zw-province {
+  fill: transparent;
+  stroke: var(--forest-deep);          /* the "gap" between provinces */
+  stroke-width: 3px;
+  vector-effect: non-scaling-stroke;   /* stays 3px at any size */
+  stroke-linejoin: round;
+  transition: fill 0.2s;
+  cursor: pointer;
+}
+
+.zw-province:hover,
+.zw-province.is-hovered {
+  fill: rgba(181, 146, 70, 0.35);   /* your --brass at low opacity */
+}
+
+.zw-province:focus-visible {
+  outline: none;
+  fill: rgba(181, 146, 70, 0.45);
+  stroke: var(--ivory);
+}
+
+.zw-map-label {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translate(-50%, 6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 14px;
+  background: rgba(20, 38, 28, 0.85);
+  border: 1px solid rgba(250, 248, 242, 0.3);
+  border-radius: 2px;
+  color: var(--ivory);
+  font-size: 0.8rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.zw-map-label.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.zw-map-label strong {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+}

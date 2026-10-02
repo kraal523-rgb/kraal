@@ -39,6 +39,7 @@ import CookieConsent from "../components/CookieConsent";
 import "./Home.css";
 import "./Marketplace.css";
 import "./Home.classic.css";
+import ProvinceVideo from "../components/ProvinceVideo";
 import KraalOnboardingForm from "../components/Kraalonboardingform";
 import ProvinceMapFilter from "../components/ProvinceMapFilter";
 import videoGoats from "../assets/videos/cattle-1.mp4";
@@ -494,7 +495,7 @@ useEffect(() => {
   return (
     <div className="home">
      
- <div className="price-ticker-band" aria-label="Live market prices">
+   {/* ──<div className="price-ticker-band" aria-label="Live market prices">
         <div className="price-ticker-label">📊 Live Prices</div>
         <img src={navIcon} alt="" className="price-ticker-icon" />
         <div className="price-ticker-scroll">
@@ -513,7 +514,7 @@ useEffect(() => {
             ))}
           </div>
         </div>
-      </div>
+      </div>  ── */}
       {/* ── NAV ── */}
       <nav className="home-nav">
         
@@ -612,6 +613,7 @@ useEffect(() => {
     <div className="hero-right">
 
       {/* Farm-window video frame */}
+      
    <div className="hero-video-frame">
         <div className="hero-video-track">
           {heroVideos.map((video, index) => (

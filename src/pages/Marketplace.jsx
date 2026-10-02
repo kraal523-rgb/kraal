@@ -522,7 +522,7 @@ export default function Marketplace() {
   return (
     <div className="mp">
       {/* ── PRICE TICKER ── */}
-      <div className="mp-ticker" aria-label="Live market prices">
+       {/* ── <div className="mp-ticker" aria-label="Live market prices">
         <div className="mp-ticker-label">📊 Live Prices</div>
         <div className="mp-ticker-scroll">
           <div className="mp-ticker-track">
@@ -540,7 +540,7 @@ export default function Marketplace() {
             ))}
           </div>
         </div>
-      </div>
+      </div>── */}
 
       {/* ── NAV ── */}
       <nav className="mp-nav">
