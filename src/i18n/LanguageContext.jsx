@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { translations } from "./translations";
 
-const LanguageContext = createContext({ lang: "en", setLang: () => {}, t: (k) => k });
+
 
 export function LanguageProvider({ children }) {
   const [lang, setLangState] = useState(() => {
@@ -27,5 +27,5 @@ export function LanguageProvider({ children }) {
     </LanguageContext.Provider>
   );
 }
-
+const LanguageContext = createContext({ lang: "en", setLang: () => {}, t: (k) => k });
 export const useLang = () => useContext(LanguageContext);

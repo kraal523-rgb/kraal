@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../assets/kraal-logo-black.svg";
 import UserMenu from "./UserMenu";
 import InstallButton from "./InstallButton";
@@ -21,7 +21,6 @@ const WHATSAPP =
 
 export default function HomeNav() {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const { t } = useLang();
   const { user } = useAuthStore();

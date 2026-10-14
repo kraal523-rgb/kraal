@@ -26,9 +26,9 @@ export const translations = {
     sell: "Tengesa Zvipfuwo",
     allAnimals: "Zvipfuwo Zvese",
     cattle: "Mombe", goats: "Mbudzi", sheep: "Makwai", pigs: "Nguruve", chicken: "Huku",
-    tips: "Zano Rekurima", about: "Nezvedu", contact: "Taurira Nesu",
+    tips: "Zano Rekurima", about: "Nezvedu", contact: "Taurai Nesu",
     browse: "Tarisa zvipfuwo", kraal: "Kraal",
-    signIn: "Pinda", register: "Nyoresa", welcome: "Mauya",
+    signIn: "Vhura", register: "Nyoresa", welcome: "Mauya",
     whatsapp: "Taura nesu pa WhatsApp", language: "Mutauro",
   },
   nd: {

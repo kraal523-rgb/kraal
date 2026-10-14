@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeFileSync, mkdirSync } from "node:fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -9,8 +10,16 @@ const ROOT = path.resolve(__dirname, "..");
 const SITE_URL = "https://kraalmarket.com"; // no trailing slash
 const BLOG_FILE = path.join(ROOT, "src/pages/Blog.jsx"); // adjust if different
 const OUT_DIR = path.join(ROOT, "public");
+const PROJECT_ID = "zimbabweland-67218";
 
-// Public pages (path, changefreq, priority). Add or remove as needed.
+const slugify = (str) =>
+  (str || "")
+    .toString()
+    .toLowerCase()
+    .replace(/matebeleland/g, "matabeleland")
+    .replace(/[^a-z]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const STATIC_PAGES = [
   { loc: "/", changefreq: "daily", priority: "1.0" },
   { loc: "/marketplace", changefreq: "daily", priority: "0.9" },
@@ -32,6 +41,37 @@ const pad = (n) => String(n).padStart(2, "0");
 function toISODate(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+async function fetchProvinceNames() {
+  const names = [];
+  let pageToken = "";
+  do {
+    const url =
+      `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}` +
+      `/databases/(default)/documents/provinces?pageSize=100` +
+      (pageToken ? `&pageToken=${pageToken}` : "");
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Firestore ${res.status}: ${await res.text()}`);
+    const json = await res.json();
+    for (const doc of json.documents || []) {
+      const name = doc.fields?.name?.stringValue;
+      if (name) names.push(name);
+    }
+    pageToken = json.nextPageToken || "";
+  } while (pageToken);
+  return names;
+}
+const staticRoutes = [
+  { path: "/", priority: "1.0", changefreq: "daily" },
+  { path: "/marketplace", priority: "0.9", changefreq: "daily" },
+  { path: "/explore", priority: "0.8", changefreq: "weekly" },
+  { path: "/blog", priority: "0.7", changefreq: "weekly" },
+  { path: "/about", priority: "0.5", changefreq: "monthly" },
+  { path: "/pricing", priority: "0.5", changefreq: "monthly" },
+  { path: "/contact", priority: "0.4", changefreq: "yearly" },
+  { path: "/terms", priority: "0.2", changefreq: "yearly" },
+  { path: "/privacy", priority: "0.2", changefreq: "yearly" },
+];
+
 
 // Escape characters that are illegal inside XML text (e.g. & in URLs)
 function xmlEscape(str) {

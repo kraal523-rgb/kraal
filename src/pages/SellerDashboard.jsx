@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSellerVerification } from "../hooks/useSellerVerification.jsx";
 import {
   collection,
   query,
@@ -121,6 +122,9 @@ function getCategoryEmoji(categoryId) {
 export default function SellerDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+     const { requestPost, verifyModal, checking } = useSellerVerification({
+     onVerified: () => requestPost(),
+   });
   const WORKER_URL =
     import.meta.env.VITE_UPLOAD_WORKER_URL ||
     "https://kraal-upload.kraal523.workers.dev";
@@ -362,7 +366,7 @@ useEffect(() => {
           </button>
           <button
             className="sd-topbar-btn sd-topbar-btn-primary"
-            onClick={() => navigate("/sell")}
+            onClick={() => requestPost()}
           >
             + New Listing
           </button>
@@ -407,7 +411,7 @@ useEffect(() => {
 
           <div className="sd-sidebar-divider" />
           <div className="sd-sidebar-section">Quick Actions</div>
-          <button className="sd-sidebar-item" onClick={() => navigate("/sell")}>
+          <button className="sd-sidebar-item" onClick={() => requestPost()}>
             <i>➕</i> Post Listing
           </button>
           <button
@@ -537,7 +541,7 @@ useEffect(() => {
                         emoji="📋"
                         text="No active listings yet."
                         cta="+ Post First Listing"
-                        onCta={() => navigate("/sell")}
+                        onCta={() => requestPost()}
                       />
                     ) : (
                       <table className="sd-table">
@@ -646,7 +650,7 @@ useEffect(() => {
                 <div className="sd-page-bar-actions">
                   <button
                     className="sd-topbar-btn sd-topbar-btn-primary"
-                    onClick={() => navigate("/sell")}
+                    onClick={() => requestPost()}
                   >
                     + New Listing
                   </button>
@@ -671,7 +675,7 @@ useEffect(() => {
                       emoji="🐾"
                       text="No listings found. Post your first animal to get started."
                       cta="+ Post First Listing"
-                      onCta={() => navigate("/sell")}
+                      onCta={() => requestPost()}
                     />
                   ) : (
                     <div className="sd-listings-grid" style={{ padding: 14 }}>
@@ -984,6 +988,7 @@ useEffect(() => {
         </main>
       </div>
  {vetRequestModal}
+ {verifyModal}
       {/* ══ EDIT LISTING MODAL ═════════════════════════════════════════════ */}
       {editListing && (
         <div className="sd-modal-overlay" onClick={() => setEditListing(null)}>
@@ -1175,7 +1180,7 @@ useEffect(() => {
           </button>
           <button
             className="sd-bottom-nav-post"
-            onClick={() => navigate("/sell")}
+            onClick={() => requestPost()}
           >
             +
           </button>

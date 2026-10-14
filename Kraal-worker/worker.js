@@ -1,5 +1,14 @@
-
 import { handleWebhookVerification, handleWebhookEvent } from "./Webhook.js";
+
+// Keys under these prefixes are private: never served publicly, never deletable via the API.
+const PRIVATE_PREFIXES = ["verifications/"];
+const isPrivateKey = (key) =>
+  PRIVATE_PREFIXES.some((p) => key.toLowerCase().startsWith(p));
+
+// Face++ confidence thresholds
+const FACE_APPROVE_AT = 74; // >= 74  -> auto-approve (~1 in 10,000 false positive)
+const FACE_REJECT_BELOW = 65; // <  65  -> reject; 65-74 -> manual review
+
 export default {
   // eslint-disable-next-line no-unused-vars
   async fetch(request, env, ctx) {
@@ -48,22 +57,25 @@ export default {
         return await handleAIListing(request, env, corsHeaders);
       }
       if (request.method === "GET" && url.pathname === "/whatsapp/webhook") {
-      return handleWebhookVerification(request, env);
-    }
- 
-    // ── Incoming messages (POST)
-    if (request.method === "POST" && url.pathname === "/whatsapp/webhook") {
-      ctx.waitUntil(handleWebhookEvent(request, env));
-      // Always respond 200 immediately — Meta will retry if you don't
-      return new Response("OK", { status: 200 });
-    }
- 
-    // ── Health check
-    if (url.pathname === "/health") {
-      return new Response(JSON.stringify({ status: "ok", service: "kraal-whatsapp" }), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+        return handleWebhookVerification(request, env);
+      }
+
+      // ── Incoming messages (POST)
+      if (request.method === "POST" && url.pathname === "/whatsapp/webhook") {
+        ctx.waitUntil(handleWebhookEvent(request, env));
+        // Always respond 200 immediately — Meta will retry if you don't
+        return new Response("OK", { status: 200 });
+      }
+
+      // ── Health check
+      if (url.pathname === "/health") {
+        return new Response(
+          JSON.stringify({ status: "ok", service: "kraal-whatsapp" }),
+          {
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
       // ── POST /api/ai/insights  (overview analytics insight card) ─────────────────
       if (url.pathname === "/api/ai/insights" && request.method === "POST") {
         return await handleAIInsights(request, env, corsHeaders);
@@ -101,12 +113,20 @@ export default {
         return await handleReplySuggestions(request, env, corsHeaders);
       }
       if (url.pathname === "/ussd" && request.method === "POST") {
-  return await handleUSSD(request, env);
-}
+        return await handleUSSD(request, env);
+      }
       // ── GET /:key  (R2 file serving) ─────────────────────────────────────────
       if (request.method === "GET") {
-        const key = url.pathname.slice(1);
-        if (!key)
+        let key;
+        try {
+          key = decodeURIComponent(url.pathname.slice(1));
+        } catch {
+          return new Response("Not found", {
+            status: 404,
+            headers: corsHeaders,
+          });
+        }
+        if (!key || isPrivateKey(key))
           return new Response("Not found", {
             status: 404,
             headers: corsHeaders,
@@ -156,6 +176,12 @@ async function handleUpload(request, env, url, corsHeaders) {
     return jsonResponse({ error: "No file provided" }, 400, corsHeaders);
   }
 
+  // Keep folder names simple and stop clients writing into private areas
+  folder = String(folder).replace(/[^a-zA-Z0-9_\-/]/g, "_");
+  if (isPrivateKey(`${folder}/`)) {
+    return jsonResponse({ error: "Invalid folder" }, 400, corsHeaders);
+  }
+
   const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   if (!allowedTypes.includes(file.type)) {
     return jsonResponse(
@@ -201,7 +227,7 @@ async function handleDelete(request, env, url, corsHeaders) {
   if (!uid) return jsonResponse({ error: "Unauthorized" }, 401, corsHeaders);
 
   const key = decodeURIComponent(url.pathname.replace("/media/", ""));
-  if (!key.includes(`/${uid}/`)) {
+  if (!key.includes(`/${uid}/`) || isPrivateKey(key)) {
     return jsonResponse({ error: "Forbidden" }, 403, corsHeaders);
   }
 
@@ -265,7 +291,7 @@ async function handleVerifySubmit(request, env, corsHeaders) {
     );
   }
 
-  // ── Store in R2 ────────────────────────────────────────────────────────────
+  // ── Store in R2 (private: not served by GET /:key) ─────────────────────────
   const ts = Date.now();
   const ext = (type) =>
     type === "application/pdf" ? "pdf" : type.split("/")[1];
@@ -291,13 +317,12 @@ async function handleVerifySubmit(request, env, corsHeaders) {
       faceResult = await compareFaces(env, idBuffer, selfieBuffer);
 
       // Face++ threshold guide:
-      // confidence > 80  → very likely same person (1 in 100,000 false positive)
-      // confidence > 74  → likely same person     (1 in 10,000 false positive)
-      // confidence > 65  → possible match         (1 in 1,000 false positive)
-      // We use 74 as our auto-approve threshold
-      if (faceResult.confidence >= 50) {
+      //   >= 80 very likely same person (1 in 100,000 false positive)
+      //   >= 74 likely same person      (1 in 10,000 false positive)
+      //   >= 65 possible match          (1 in 1,000 false positive)
+      if (faceResult.confidence >= FACE_APPROVE_AT) {
         faceState = "approved";
-      } else if (faceResult.confidence < 45) {
+      } else if (faceResult.confidence < FACE_REJECT_BELOW) {
         faceState = "rejected";
       } else {
         faceState = "pending"; // 65–74 range → manual review
@@ -439,7 +464,10 @@ async function getAdminToken(env) {
     body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${sigInput}.${sigB64}`,
   });
   const data = await tokenRes.json();
-  cachedToken = { value: data.access_token, exp: now + (data.expires_in || 3600) };
+  cachedToken = {
+    value: data.access_token,
+    exp: now + (data.expires_in || 3600),
+  };
   return data.access_token;
 }
 
@@ -475,32 +503,49 @@ async function firestoreGet(env, docPath) {
 }
 
 // ─── Firestore field converters ───────────────────────────────────────────────
+function toFirestoreValue(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === "string") return { stringValue: v };
+  if (typeof v === "boolean") return { booleanValue: v };
+  if (typeof v === "number")
+    return Number.isInteger(v)
+      ? { integerValue: String(v) }
+      : { doubleValue: v }; // 👈 handles decimals like 55.114
+  if (v instanceof Date) return { timestampValue: v.toISOString() };
+  if (Array.isArray(v))
+    return { arrayValue: { values: v.map(toFirestoreValue) } };
+  if (typeof v === "object")
+    return { mapValue: { fields: toFirestoreFields(v) } };
+  return { nullValue: null };
+}
+
 function toFirestoreFields(obj) {
   const fields = {};
   for (const [k, v] of Object.entries(obj)) {
-    if (typeof v === "string") fields[k] = { stringValue: v };
-    else if (typeof v === "number" && Number.isInteger(v))
-      fields[k] = { integerValue: String(v) };
-    else if (typeof v === "number")
-      fields[k] = { doubleValue: v }; // 👈 handles decimals like 55.114
-    else if (typeof v === "boolean") fields[k] = { booleanValue: v };
-    else if (v === null) fields[k] = { nullValue: null };
-    else if (v instanceof Date) fields[k] = { timestampValue: v.toISOString() };
-    else if (typeof v === "object")
-      fields[k] = { mapValue: { fields: toFirestoreFields(v) } };
+    if (v === undefined) continue;
+    fields[k] = toFirestoreValue(v);
   }
   return fields;
+}
+
+function fromFirestoreValue(v) {
+  if ("stringValue" in v) return v.stringValue;
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return v.doubleValue;
+  if ("booleanValue" in v) return v.booleanValue;
+  if ("nullValue" in v) return null;
+  if ("timestampValue" in v) return v.timestampValue;
+  if ("arrayValue" in v)
+    return (v.arrayValue.values || []).map(fromFirestoreValue);
+  if ("mapValue" in v) return fromFirestoreFields(v.mapValue.fields || {});
+  return undefined;
 }
 
 function fromFirestoreFields(fields) {
   const obj = {};
   for (const [k, v] of Object.entries(fields)) {
-    if ("stringValue" in v) obj[k] = v.stringValue;
-    else if ("integerValue" in v) obj[k] = Number(v.integerValue);
-    else if ("booleanValue" in v) obj[k] = v.booleanValue;
-    else if ("nullValue" in v) obj[k] = null;
-    else if ("mapValue" in v)
-      obj[k] = fromFirestoreFields(v.mapValue.fields || {});
+    const val = fromFirestoreValue(v);
+    if (val !== undefined) obj[k] = val;
   }
   return obj;
 }
@@ -980,9 +1025,29 @@ async function handleTransportEstimate(request, env, corsHeaders) {
 const USSD_ROLES = { 1: "seller", 2: "buyer", 3: "transporter", 4: "vet" };
 
 const USSD_PROVINCES = [
-  "Harare", "Bulawayo", "Manicaland", "Mash Central", "Mash East",
-  "Mash West", "Masvingo", "Mat North", "Mat South", "Midlands",
+  "Harare",
+  "Bulawayo",
+  "Manicaland",
+  "Mash Central",
+  "Mash East",
+  "Mash West",
+  "Masvingo",
+  "Mat North",
+  "Mat South",
+  "Midlands",
 ];
+// Short USSD labels -> the full province names the app and website use
+const PROVINCE_FULL_NAMES = {
+  "Mash Central": "Mashonaland Central",
+  "Mash East": "Mashonaland East",
+  "Mash West": "Mashonaland West",
+  "Mat North": "Matabeleland North",
+  "Mat South": "Matabeleland South",
+};
+
+const MAX_PIN_ATTEMPTS = 3;
+const PIN_LOCK_MINUTES = 15;
+const MARKET_INFO = "Market days: update this text with your schedule.";
 
 const ussdCon = (m) => "CON " + m;
 const ussdEnd = (m) => "END " + m;
@@ -1010,18 +1075,31 @@ function ussdStepsFor(role) {
     {
       key: "province",
       prompt:
-        "Province:\n" + USSD_PROVINCES.map((p, i) => `${i + 1} ${p}`).join("\n"),
+        "Province:\n" +
+        USSD_PROVINCES.map((p, i) => `${i + 1} ${p}`).join("\n"),
       ok: (v) => /^\d+$/.test(v) && +v >= 1 && +v <= USSD_PROVINCES.length,
-      map: (v) => USSD_PROVINCES[+v - 1],
+      map: (v) => {
+        const short = USSD_PROVINCES[+v - 1];
+        return PROVINCE_FULL_NAMES[short] || short;
+      },
     },
   ];
 
   if (role === "seller") {
-    steps.push({ key: "village", prompt: "Village / farm name:", ok: (v) => v.length >= 2 });
+    steps.push({
+      key: "village",
+      prompt: "Village / farm name:",
+      ok: (v) => v.length >= 2,
+    });
   }
   if (role === "transporter") {
     steps.push(
-      { key: "vehicleReg", prompt: "Vehicle registration number:", ok: (v) => v.length >= 4, map: (v) => v.toUpperCase() },
+      {
+        key: "vehicleReg",
+        prompt: "Vehicle registration number:",
+        ok: (v) => v.length >= 4,
+        map: (v) => v.toUpperCase(),
+      },
       {
         key: "vehicleType",
         prompt: "Vehicle type:\n1 Pickup\n2 Small truck\n3 Large truck",
@@ -1031,33 +1109,66 @@ function ussdStepsFor(role) {
     );
   }
   if (role === "vet") {
-    steps.push({ key: "vetRegNo", prompt: "Veterinary registration number:", ok: (v) => v.length >= 3 });
+    steps.push({
+      key: "vetRegNo",
+      prompt: "Veterinary registration number:",
+      ok: (v) => v.length >= 3,
+    });
   }
 
   steps.push(
-    { key: "pin", prompt: "Choose a 4-digit PIN:", ok: (v) => /^\d{4}$/.test(v) },
-    { key: "pinConfirm", prompt: "Confirm your PIN:", ok: (v, a) => v === a.pin },
+    {
+      key: "pin",
+      prompt: "Choose a 4-digit PIN:",
+      ok: (v) => /^\d{4}$/.test(v),
+    },
+    {
+      key: "pinConfirm",
+      prompt: "Confirm your PIN:",
+      ok: (v, a) => v === a.pin,
+    },
   );
   return steps;
 }
 
 // PBKDF2 (scrypt isn't available in Workers). 100k is the Workers max.
 async function hashPin(pin, saltHex) {
-  const salt = Uint8Array.from(saltHex.match(/.{2}/g).map((h) => parseInt(h, 16)));
+  const salt = Uint8Array.from(
+    saltHex.match(/.{2}/g).map((h) => parseInt(h, 16)),
+  );
   const keyMat = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"],
+    "raw",
+    new TextEncoder().encode(pin),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMat, 256,
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMat,
+    256,
   );
-  return [...new Uint8Array(bits)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...new Uint8Array(bits)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function safeEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length)
+    return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 // ── Firebase Auth (Identity Toolkit REST) ────────────────────────────────────
 async function getOrCreateAuthUser(env, msisdn, displayName) {
   const token = await getAdminToken(env);
   const base = `https://identitytoolkit.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/accounts`;
-  const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
 
   const createRes = await fetch(base, {
     method: "POST",
@@ -1080,95 +1191,279 @@ async function getOrCreateAuthUser(env, msisdn, displayName) {
 }
 
 // ── Firestore helpers specific to USSD ───────────────────────────────────────
+// The WhatsApp flow (registration.js) stores numbers without the "+", so look
+// for both spellings. Prefer a Firebase-Auth-backed profile (has `uid`) if
+// the same person somehow has both.
 async function findUserByPhone(env, msisdn) {
   const token = await getAdminToken(env);
   const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery`;
   const res = await fetch(url, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       structuredQuery: {
         from: [{ collectionId: "users" }],
         where: {
           fieldFilter: {
             field: { fieldPath: "phone" },
-            op: "EQUAL",
-            value: { stringValue: msisdn },
+            op: "IN",
+            value: {
+              arrayValue: {
+                values: [
+                  { stringValue: msisdn },
+                  { stringValue: msisdn.replace(/^\+/, "") },
+                ],
+              },
+            },
           },
         },
-        limit: 1,
+        limit: 5,
       },
     }),
   });
   if (!res.ok) throw new Error("Firestore query failed: " + (await res.text()));
   const rows = await res.json();
-  const doc = rows.find((r) => r.document)?.document;
-  return doc?.fields ? fromFirestoreFields(doc.fields) : null;
+  const users = rows
+    .filter((r) => r.document?.fields)
+    .map((r) => fromFirestoreFields(r.document.fields));
+  return users.find((u) => u.uid) || users[0] || null;
 }
 
-// PATCH with updateMask = merge behaviour (won't wipe fields the website added)
-async function firestoreMerge(env, docPath, data) {
+// PATCH with updateMask = merge behaviour (won't wipe fields the app added).
+// Fields listed in `deleteKeys` are removed from the document.
+async function firestoreMerge(env, docPath, data, deleteKeys = []) {
   const token = await getAdminToken(env);
-  const mask = Object.keys(data)
+  const mask = [...Object.keys(data), ...deleteKeys]
     .map((k) => `updateMask.fieldPaths=${encodeURIComponent(k)}`)
     .join("&");
   const url = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${docPath}?${mask}`;
   const res = await fetch(url, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ fields: toFirestoreFields(data) }),
   });
   if (!res.ok) throw new Error("Firestore write failed: " + (await res.text()));
 }
 
+// ── Registration ─────────────────────────────────────────────────────────────
+// What gets written (all via the service account, so security rules don't
+// apply to these writes — but the documents are shaped to satisfy the rules so
+// the same person can later use the app, e.g. by phone-OTP sign-in):
+//   ussd_credentials/{uid}  PIN hash + lockout counters. NO client rule exists
+//                           for this collection, so the app can never read it.
+//   {role collection}/{uid} sellers / transporters / vets / buyers profile
+//                           (sellers + transporters are publicly readable, so
+//                           no National ID goes in here)
+//   users/{uid}             written LAST: its existence is what marks a phone
+//                           as registered, so a half-finished registration
+//                           can simply be retried.
 async function createUssdUser(env, msisdn, role, a) {
   const uid = await getOrCreateAuthUser(env, msisdn, a.name);
+  const now = new Date();
 
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-  const pinSalt = [...saltBytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const pinSalt = [...saltBytes]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
   const pinHash = await hashPin(a.pin, pinSalt);
-
-  const profile = {
-    uid,
-    role,
-    name: a.name,
-    phone: msisdn,
-    nationalId: a.nationalId,
-    province: a.province,
-    channel: "ussd",
-    verificationStatus: "pending",
+  await firestoreMerge(env, `ussd_credentials/${uid}`, {
     pinHash,
     pinSalt,
-    createdAt: new Date(),
+    failedAttempts: 0,
+    lockedUntil: 0,
+    updatedAt: now,
+  });
+
+  const city = a.village || "";
+  const common = {
+    uid,
+    email: "",
+    phone: msisdn,
+    role,
+    name: a.name,
+    displayName: a.name,
+    province: a.province,
+    city,
+    verified: false,
+    channel: "ussd",
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  // Matches validSellerProfile / validTransporterProfile in the Firestore rules
+  const business = { ...common, businessName: a.name, country: "Zimbabwe" };
+  if (role === "seller") {
+    await firestoreMerge(env, `sellers/${uid}`, {
+      ...business,
+      village: a.village,
+    });
+  } else if (role === "transporter") {
+    await firestoreMerge(env, `transporters/${uid}`, {
+      ...business,
+      vehicleReg: a.vehicleReg,
+      vehicleType: a.vehicleType,
+      available: true,
+      serviceProvinces: [a.province],
+    });
+  } else if (role === "vet") {
+    await firestoreMerge(env, `vets/${uid}`, {
+      ...business,
+      vetRegNo: a.vetRegNo,
+    });
+  } else {
+    await firestoreMerge(env, `buyers/${uid}`, common);
+  }
+
+  // users/{uid} — satisfies validUserDoc (uid, email, role)
+  const userDoc = {
+    ...common,
+    nationalId: a.nationalId,
+    verificationStatus: "pending",
   };
   for (const k of ["village", "vehicleReg", "vehicleType", "vetRegNo"]) {
-    if (a[k]) profile[k] = a[k];
+    if (a[k]) userDoc[k] = a[k];
   }
-  await firestoreMerge(env, `users/${uid}`, profile);
+  await firestoreMerge(env, `users/${uid}`, userDoc);
 }
 
-// ── Menu logic (same flow as before) ─────────────────────────────────────────
+// ── Sign-in (PIN) ────────────────────────────────────────────────────────────
+// Returns { ok: true } or { ok: false, message }.
+async function checkPin(env, user, pin) {
+  let creds = await firestoreGet(env, `ussd_credentials/${user.uid}`);
+  let legacy = false;
+
+  // Accounts registered before ussd_credentials existed kept the hash on users/{uid}
+  if (!creds?.pinHash && user.pinHash && user.pinSalt) {
+    creds = {
+      pinHash: user.pinHash,
+      pinSalt: user.pinSalt,
+      failedAttempts: 0,
+      lockedUntil: 0,
+    };
+    legacy = true;
+  }
+
+  if (!creds?.pinHash) {
+    return {
+      ok: false,
+      message:
+        "This number is registered on the Kraal app. Please sign in there.",
+    };
+  }
+
+  const now = Date.now();
+  if (creds.lockedUntil && creds.lockedUntil > now) {
+    const mins = Math.ceil((creds.lockedUntil - now) / 60000);
+    return {
+      ok: false,
+      message: `Too many wrong PINs. Try again in ${mins} min.`,
+    };
+  }
+
+  if (!/^\d{4}$/.test(pin)) return { ok: false, message: "Invalid PIN." };
+
+  const attempt = await hashPin(pin, creds.pinSalt);
+  if (!safeEqual(attempt, creds.pinHash)) {
+    const failed = (creds.failedAttempts || 0) + 1;
+    const locked = failed >= MAX_PIN_ATTEMPTS;
+    const update = {
+      failedAttempts: locked ? 0 : failed,
+      lockedUntil: locked ? now + PIN_LOCK_MINUTES * 60000 : 0,
+      updatedAt: new Date(),
+    };
+    // A legacy hash is moved to the private collection as soon as we track attempts
+    await firestoreMerge(env, `ussd_credentials/${user.uid}`, {
+      ...update,
+      pinHash: creds.pinHash,
+      pinSalt: creds.pinSalt,
+    });
+    if (legacy) {
+      await firestoreMerge(env, `users/${user.uid}`, {}, [
+        "pinHash",
+        "pinSalt",
+      ]);
+    }
+    return {
+      ok: false,
+      message: locked
+        ? `Too many wrong PINs. Locked for ${PIN_LOCK_MINUTES} min.`
+        : `Wrong PIN. ${MAX_PIN_ATTEMPTS - failed} ${MAX_PIN_ATTEMPTS - failed === 1 ? "try" : "tries"} left.`,
+    };
+  }
+
+  if (legacy) {
+    await firestoreMerge(env, `ussd_credentials/${user.uid}`, {
+      pinHash: creds.pinHash,
+      pinSalt: creds.pinSalt,
+      failedAttempts: 0,
+      lockedUntil: 0,
+      updatedAt: new Date(),
+    });
+    await firestoreMerge(env, `users/${user.uid}`, {}, ["pinHash", "pinSalt"]);
+  } else if (creds.failedAttempts || creds.lockedUntil) {
+    await firestoreMerge(env, `ussd_credentials/${user.uid}`, {
+      failedAttempts: 0,
+      lockedUntil: 0,
+      updatedAt: new Date(),
+    });
+  }
+  return { ok: true };
+}
+
+async function ussdSignIn(env, user, parts) {
+  const first = (user.name || user.displayName || "").split(" ")[0] || "there";
+
+  if (parts.length === 0) {
+    return ussdCon(`Welcome back ${first}\nEnter your 4-digit PIN:`);
+  }
+
+  const check = await checkPin(env, user, parts[0].trim());
+  if (!check.ok) return ussdEnd(check.message);
+
+  if (parts.length === 1)
+    return ussdCon(`Hello ${first}\n1 My account\n2 Market info`);
+
+  if (parts[1] === "1") {
+    return ussdEnd(
+      `${user.name || first}\nRole: ${user.role}\nProvince: ${user.province || "-"}\n` +
+        `Verification: ${user.verificationStatus || "pending"}`,
+    );
+  }
+  if (parts[1] === "2") return ussdEnd(MARKET_INFO);
+  return ussdEnd("Invalid option.");
+}
+
+// ── Menu logic ───────────────────────────────────────────────────────────────
 async function ussdFlow(env, msisdn, text) {
   const parts = text === "" ? [] : text.split("*");
   const existing = await findUserByPhone(env, msisdn);
 
   if (existing) {
-    if (parts.length === 0) {
-      return ussdCon(`Welcome back ${(existing.name || "").split(" ")[0]}\n1 My account\n2 Market info`);
+    // Profiles made through WhatsApp are keyed by phone number and have no
+    // Firebase login or PIN. Don't register a duplicate person on top of one.
+    if (!existing.uid) {
+      return ussdEnd(
+        "This number is already registered on Kraal via WhatsApp. USSD sign-in is not enabled for it yet.",
+      );
     }
-    if (parts[0] === "1") {
-      return ussdEnd(`Role: ${existing.role}\nVerification: ${existing.verificationStatus || "pending"}`);
-    }
-    if (parts[0] === "2") return ussdEnd("Market days: update this text with your schedule.");
-    return ussdEnd("Invalid option.");
+    return ussdSignIn(env, existing, parts);
   }
 
-  if (parts.length === 0) return ussdCon("Kraal Market\n1 Register\n2 Market info");
-  if (parts[0] === "2") return ussdEnd("Market days: update this text with your schedule.");
+  if (parts.length === 0)
+    return ussdCon("Kraal Market\n1 Register\n2 Market info");
+  if (parts[0] === "2") return ussdEnd(MARKET_INFO);
   if (parts[0] !== "1") return ussdEnd("Invalid option.");
 
   if (parts.length === 1) {
-    return ussdCon("I am a:\n1 Seller\n2 Buyer\n3 Transporter\n4 Veterinary officer");
+    return ussdCon(
+      "I am a:\n1 Seller\n2 Buyer\n3 Transporter\n4 Veterinary officer",
+    );
   }
 
   const role = USSD_ROLES[parts[1]];
@@ -1181,13 +1476,17 @@ async function ussdFlow(env, msisdn, text) {
   for (let i = 0; i < steps.length; i++) {
     if (i >= inputs.length) return ussdCon(steps[i].prompt);
     const v = inputs[i].trim();
-    if (!steps[i].ok(v, answers)) return ussdEnd("Invalid entry. Dial again to retry.");
+    if (!steps[i].ok(v, answers))
+      return ussdEnd("Invalid entry. Dial again to retry.");
     answers[steps[i].key] = steps[i].map ? steps[i].map(v) : v;
   }
 
   await createUssdUser(env, msisdn, role, answers);
-  const extra = role === "buyer" ? "" : " An admin will verify your details shortly.";
-  return ussdEnd(`Welcome ${answers.name}! You are registered as ${role}.${extra}`);
+  const extra =
+    role === "buyer" ? "" : " An admin will verify your details shortly.";
+  return ussdEnd(
+    `Welcome ${answers.name}! You are registered as ${role}.${extra} Dial again and enter your PIN to sign in.`,
+  );
 }
 
 // ── Route handler ────────────────────────────────────────────────────────────

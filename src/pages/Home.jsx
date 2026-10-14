@@ -374,9 +374,9 @@ useEffect(() => {
       <h1 className="hero-title">
         Your livestock,
         <br />
-        <em style={{ color: "#05c0c7", fontWeight: "bold" }}>Marketplace</em>
+        <em style={{ color: "#05c0c7", fontWeight: "bold" }}>Market</em>
         <br />
-        across Africa.
+        across Zimbabwe.
       </h1>
  
       <p className="hero-sub">
