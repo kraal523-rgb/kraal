@@ -1,5 +1,5 @@
 import { handleWebhookVerification, handleWebhookEvent } from "./Webhook.js";
-
+import { createEscrow } from "./escrow.js";
 // Keys under these prefixes are private: never served publicly, never deletable via the API.
 const PRIVATE_PREFIXES = ["verifications/"];
 const isPrivateKey = (key) =>
@@ -8,6 +8,10 @@ const isPrivateKey = (key) =>
 // Face++ confidence thresholds
 const FACE_APPROVE_AT = 74; // >= 74  -> auto-approve (~1 in 10,000 false positive)
 const FACE_REJECT_BELOW = 65; // <  65  -> reject; 65-74 -> manual review
+const escrow = createEscrow({
+  requireAuth, jsonResponse, getAdminToken,
+  toFirestoreFields, fromFirestoreFields,
+});
 
 export default {
   // eslint-disable-next-line no-unused-vars
@@ -30,7 +34,8 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
-
+const escrowRes = await escrow.route(request, env, url, corsHeaders);
+if (escrowRes) return escrowRes;
     const url = new URL(request.url);
 
     try {

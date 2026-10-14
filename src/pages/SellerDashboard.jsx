@@ -12,7 +12,6 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./SellerDashboard.css";
 import UserMenu from "../components/UserMenu";
@@ -122,7 +121,7 @@ function getCategoryEmoji(categoryId) {
 export default function SellerDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-     const { requestPost, verifyModal, checking } = useSellerVerification({
+     const { requestPost, verifyModal } = useSellerVerification({
      onVerified: () => requestPost(),
    });
   const WORKER_URL =

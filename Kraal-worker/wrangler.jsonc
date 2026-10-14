@@ -7,7 +7,8 @@
     "ALLOWED_ORIGINS": "https://kraalmarket.com,https://www.kraalmarket.com,http://localhost:5173",
     "FIREBASE_PROJECT_ID": "kraal-ea0b0",
     "R2_PUBLIC_URL": "https://media.kraalmarket.com",
-    "WHATSAPP_VERIFY_TOKEN": "your_verify_token_here"
+    "WHATSAPP_VERIFY_TOKEN": "your_verify_token_here",
+    "triggers": { "crons": ["*/10 * * * *"] }
     // Secrets — set via wrangler secret put:
     // FACEPP_API_KEY
     // FACEPP_API_SECRET

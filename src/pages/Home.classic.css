@@ -969,14 +969,36 @@
   color: var(--forest-deep);
 }
 .kraal-section .hero-app {
+  display: flex;
+  flex-direction: column;   /* heading on top, badges below */
   align-items: center;
   margin: 0 auto;
   padding: 0;
   gap: 14px;
 }
-.kraal-section .hero-app img {
-  height: 56px;
+
+.kraal-section .app-badges {
+  display: flex;
+  flex-direction: row;      /* side by side */
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.kraal-section .app-badges img {
+  height: 60px;             /* 180px is very large for a store badge */
   width: auto;
+  display: block;
+}
+
+/* Stack on small screens if they don't fit */
+@media (max-width: 480px) {
+  .kraal-section .app-badges {
+    flex-wrap: wrap;
+  }
+  .kraal-section .app-badges img {
+    height: 50px;
+  }
 }
 
 /* ── Unlocking Zimbabwe (dark band) ─────────────────────── */

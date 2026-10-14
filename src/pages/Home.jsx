@@ -19,6 +19,7 @@ import imgDog from "../assets/pngegg__4.png";
 import fish from "../assets/fish.png";
 import bees from "../assets/bee.jpg";
 import google from "../assets/google-play.png"
+import apple from "../assets/app-store.png";
 import honey from "../assets/honey.png"
 import eggs from "../assets/eggs.jpg";
 import imgDonkey from "../assets/pngegg__3.png"
@@ -948,11 +949,17 @@ useEffect(() => {
      
 
       <div className="hero-app">
-        <h2 className="section-eyebrow light">
-        Download the KraalMarket app
-      </h2>
-        <img className="app-badge" src={google} alt="" />
-      </div>
+  <h2 className="section-eyebrow light">Download the KraalMarket app</h2>
+
+  <div className="app-badges">
+    <a href="https://play.google.com/store/apps/details?id=YOUR_APP_ID" target="_blank" rel="noopener noreferrer">
+      <img className="app-badge" src={google} alt="Get it on Google Play" />
+    </a>
+    <a href="https://apps.apple.com/app/YOUR_APP_ID" target="_blank" rel="noopener noreferrer">
+      <img className="app-badge" src={apple} alt="Download on the App Store" />
+    </a>
+  </div>
+</div>
        
    
   </div>
