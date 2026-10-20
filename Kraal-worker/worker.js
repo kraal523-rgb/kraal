@@ -1,10 +1,14 @@
 import { handleWebhookVerification, handleWebhookEvent } from "./Webhook.js";
 import { createEscrow } from "./escrow.js";
+import { createCoins } from "./coins.js";
 // Keys under these prefixes are private: never served publicly, never deletable via the API.
 const PRIVATE_PREFIXES = ["verifications/"];
 const isPrivateKey = (key) =>
   PRIVATE_PREFIXES.some((p) => key.toLowerCase().startsWith(p));
-
+const coins = createCoins({
+  requireAuth, jsonResponse, getAdminToken,
+  toFirestoreFields, fromFirestoreFields,
+});
 // Face++ confidence thresholds
 const FACE_APPROVE_AT = 74; // >= 74  -> auto-approve (~1 in 10,000 false positive)
 const FACE_REJECT_BELOW = 65; // <  65  -> reject; 65-74 -> manual review
@@ -34,11 +38,12 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
-const escrowRes = await escrow.route(request, env, url, corsHeaders);
-if (escrowRes) return escrowRes;
+
     const url = new URL(request.url);
 
     try {
+      const escrowRes = await escrow.route(request, env, url, corsHeaders);
+if (escrowRes) return escrowRes;
       // ── POST /upload ─────────────────────────────────────────────────────────
       if (url.pathname === "/upload" && request.method === "POST") {
         return await handleUpload(request, env, url, corsHeaders);
@@ -120,6 +125,8 @@ if (escrowRes) return escrowRes;
       if (url.pathname === "/ussd" && request.method === "POST") {
         return await handleUSSD(request, env);
       }
+      const coinsRes = await coins.route(request, env, url, corsHeaders);
+if (coinsRes) return coinsRes;
       // ── GET /:key  (R2 file serving) ─────────────────────────────────────────
       if (request.method === "GET") {
         let key;
