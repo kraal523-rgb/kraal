@@ -42,7 +42,8 @@ export const ROLES = [
   desc: "Provide health certificates and inspections for livestock",
 },
 ];
-
+export const STARTER_COINS = 5;
+export const COIN_ROLES = ["seller", "transporter"];
 const INITIAL_FORM = {
   // Step 0 - Account
   email: "",
@@ -103,7 +104,7 @@ export function useRegister() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
- const [firebaseUser, setFirebaseUser] = useState(null);
+ const [ setFirebaseUser] = useState(null);
 
   const { registerWithEmail, signInWithGoogle, createSellerProfile } =
     useAuthStore();
@@ -252,6 +253,7 @@ export function useRegister() {
         available: form.role === "transporter",
         vehicleType: form.vehicleType || "",   
         capacity: form.capacity || "", 
+        coins: COIN_ROLES.includes(form.role) ? STARTER_COINS : 0,
       });
 
       setStep(STEPS.DONE);

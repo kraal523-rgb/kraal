@@ -6,7 +6,7 @@ import StepLocation from '../../components/auth/StepLocation';
 import StepPhoto from '../../components/auth/StepPhoto';
 import StepDone from '../../components/auth/StepDone';
 import { useNavigate } from 'react-router-dom';
-import logo from "../../assets/kraal-logo-black.svg";
+//import logo from "../../assets/kraal-logo-black.svg";
 import './Register.css';
 
 export default function Register() {

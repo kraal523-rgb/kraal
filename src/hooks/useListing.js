@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc,  getDoc,  runTransaction,  serverTimestamp, } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import { uploadImage } from "../lib/cloudflare";
+import useAuthStore from "../store/useAuthStore";
 
 export const LISTING_STEPS = {
   ANIMAL: 0,
@@ -217,9 +218,6 @@ const submitListing = async () => {
     if (!user) throw new Error("Please sign in to post a listing");
 
     const token = await user.getIdToken();
-
-    // Fetch seller profile to get location and business name
-    const { getDoc, doc } = await import("firebase/firestore");
     const sellerSnap = await getDoc(doc(db, "users", user.uid));
     const sellerData = sellerSnap.exists() ? sellerSnap.data() : {};
 
@@ -272,12 +270,34 @@ const submitListing = async () => {
       updatedAt: serverTimestamp(),
     };
 
-    const ref = await addDoc(collection(db, "listings"), listing);
-    setListingId(ref.id);
-    setStep(LISTING_STEPS.DONE);
+   const userRef = doc(db, "users", user.uid);
+const listingRef = doc(collection(db, "listings")); // pre-generated id
+
+const newBalance = await runTransaction(db, async (tx) => {
+  const snap = await tx.get(userRef);
+  const coins = snap.data()?.coins ?? 0;
+  if (coins < 1) throw new Error("OUT_OF_COINS");
+  tx.update(userRef, { coins: coins - 1 });
+  tx.set(listingRef, listing);
+  return coins - 1;
+});
+
+// Keep the UI balance in sync
+const prev = useAuthStore.getState().userProfile;
+useAuthStore.setState({
+  userProfile: { ...prev, coins: newBalance },
+  sellerProfile: { ...(useAuthStore.getState().sellerProfile ?? prev), coins: newBalance },
+});
+
+setListingId(listingRef.id);
+setStep(LISTING_STEPS.DONE);
   } catch (e) {
-    setError(e.message);
-  } finally {
+  setError(
+    e.message === "OUT_OF_COINS"
+      ? "You're out of coins. Top up to publish this listing."
+      : e.message,
+  );
+} finally {
     setLoading(false);
   }
 };
