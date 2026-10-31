@@ -1,0 +1,23 @@
+/* Account & data deletion section */
+.contact-delete { padding: 72px 24px; border-top: 1px solid rgba(0,0,0,.08); }
+.contact-delete-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1.1fr .9fr; gap: 56px; align-items: start;
+}
+.cd-statement h2 { margin: 6px 0 14px; }
+.cd-statement h3 { font-size: 1rem; margin: 24px 0 8px; }
+.cd-statement p, .cd-statement li { line-height: 1.65; opacity: .85; }
+.cd-statement ul { padding-left: 20px; margin: 0; }
+.cd-statement a { text-decoration: underline; }
+.cd-form-wrap {
+  border: 1px solid rgba(0,0,0,.12); border-radius: 16px; padding: 28px;
+  background: #fff;
+}
+.cd-form-title { margin: 0 0 16px; }
+.cd-confirm { display: flex; gap: 10px; align-items: flex-start; font-size: .9rem; line-height: 1.5; margin: 4px 0 16px; cursor: pointer; }
+.cd-confirm input { margin-top: 3px; flex-shrink: 0; }
+.cd-error { color: #b42318; font-size: .9rem; margin: 0 0 12px; }
+.cd-submit { width: 100%; }
+@media (max-width: 860px) {
+  .contact-delete-inner { grid-template-columns: 1fr; gap: 32px; }
+}
