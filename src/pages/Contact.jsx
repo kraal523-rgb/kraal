@@ -1,10 +1,12 @@
-import  { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import emailjs from "@emailjs/browser";
+// eslint-disable-next-line no-unused-vars
 import UserMenu from "../components/UserMenu";
 import "./Contact.css";
+import "./ContactDeletion.css";
 import ProfileSheet from "../components/ProfileSheet";
 import logo from "../assets/kraal-logo-black.svg";
 import HomeNav from "../components/HomeNav";
@@ -53,6 +55,10 @@ const FAQS = [
     q: "How do I delete a listing?",
     a: "Go to your Seller Dashboard → My Listings → click the 🗑 delete button on the listing. It is removed immediately.",
   },
+  {
+    q: "How do I delete my account and data?",
+    a: "Use the “Delete your account & data” section further down this page and submit a request. We'll verify it's you, then delete your account and personal data.",
+  },
 ];
 
 export default function Contact() {
@@ -62,39 +68,107 @@ export default function Contact() {
     subject: "",
     message: "",
   });
-   const [menuOpen, setMenuOpen] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [menuOpen, setMenuOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
-const [profileOpen, setProfileOpen] = useState(false);
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    // Save to Firestore
-    await addDoc(collection(db, "contact_messages"), {
-      ...form,
-      createdAt: serverTimestamp(),
-      read: false,
-    });
-   await emailjs.send(
-  import.meta.env.VITE_EMAILJS_SERVICE_ID,
-  import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-  {
-    from_name: form.name,
-    from_email: form.email,
-    subject: form.subject,
-    message: form.message,
-  },
-  import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-);
-    setSent(true);
-  } catch (err) {
-    console.error("Failed:", err);
-  }
-};
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  /* ── Account & data deletion request ── */
+  const [delForm, setDelForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    reason: "",
+    confirm: false,
+  });
+  const [delSending, setDelSending] = useState(false);
+  const [delSent, setDelSent] = useState(false);
+  const [delError, setDelError] = useState("");
+
+  // Make /contact#delete-account scroll to the section (needed for app-store deletion URLs)
+  useEffect(() => {
+    if (window.location.hash === "#delete-account") {
+      const t = setTimeout(
+        () =>
+          document
+            .getElementById("delete-account")
+            ?.scrollIntoView({ behavior: "smooth" }),
+        150,
+      );
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  const handleDeleteRequest = async (e) => {
+    e.preventDefault();
+    setDelError("");
+    setDelSending(true);
+    try {
+      // Firestore is the source of truth for the request
+      await addDoc(collection(db, "deletion_requests"), {
+        name: delForm.name,
+        email: delForm.email,
+        phone: delForm.phone,
+        reason: delForm.reason,
+        status: "pending",
+        createdAt: serverTimestamp(),
+      });
+      // Email notification is best-effort — don't fail the request if it errors
+      try {
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          {
+            from_name: delForm.name,
+            from_email: delForm.email,
+            subject: "Account & data deletion request",
+            message: `Deletion request.\nPhone: ${delForm.phone || "n/a"}\nReason: ${delForm.reason || "n/a"}`,
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+        );
+      } catch (mailErr) {
+        console.error("Deletion email notice failed:", mailErr);
+      }
+      setDelSent(true);
+    } catch (err) {
+      console.error("Deletion request failed:", err);
+      setDelError(
+        "Something went wrong sending your request. Please try again or email hello@kraalmarket.com.",
+      );
+    } finally {
+      setDelSending(false);
+    }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Save to Firestore
+      await addDoc(collection(db, "contact_messages"), {
+        ...form,
+        createdAt: serverTimestamp(),
+        read: false,
+      });
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          from_name: form.name,
+          from_email: form.email,
+          subject: form.subject,
+          message: form.message,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+      );
+      setSent(true);
+    } catch (err) {
+      console.error("Failed:", err);
+    }
+  };
 
   return (
     <div className="contact-page">
-    <HomeNav />
+      <HomeNav />
 
       {/* ── HERO ── */}
       <section className="contact-hero">
@@ -203,6 +277,7 @@ const handleSubmit = async (e) => {
                     <option>Listing a problem</option>
                     <option>Payment / Fees</option>
                     <option>Report a user</option>
+                    <option>Delete my account / data</option>
                     <option>Partnership inquiry</option>
                     <option>Other</option>
                   </select>
@@ -258,83 +333,239 @@ const handleSubmit = async (e) => {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-        <footer className="home-footer">
-              <div className="footer-inner">
-                <div className="footer-brand">
-                  <div className="footer-logo">
-                    <img
-                      src={logo}
-                      style={{ width: "120px", filter: "brightness(0) invert(0)" }}
-                      alt="Kraal"
-                    />
-                    <span>Market</span>
-                  </div>
-                  <p>
-                    Zimbabwe's livestock marketplace,
-                    <br />
-                    going pan-African.
+      {/* ── DELETE ACCOUNT / DATA REQUEST ── */}
+      <section className="contact-delete" id="delete-account">
+        <div className="contact-delete-inner">
+          <div className="cd-statement">
+            <p className="contact-eyebrow">Your data, your choice</p>
+            <h2>Delete your account &amp; data</h2>
+            <p>
+              You can ask us to permanently delete your Kraal account and the
+              personal data linked to it at any time. Submit a request using the
+              form and we will confirm it's you, then process it.
+            </p>
+
+            <h3>What gets deleted</h3>
+            <ul>
+              <li>
+                Your profile and login details (name, email, phone number)
+              </li>
+              <li>Your seller profile, listings and uploaded photos</li>
+              <li>Saved items, messages and preferences</li>
+            </ul>
+
+            <h3>What we may keep</h3>
+            <p>
+              Where the law requires it, or to prevent fraud and resolve
+              disputes, we may retain limited records such as completed
+              transaction and payment details. Anything we keep is only used for
+              those purposes and is not used to identify you for marketing.
+            </p>
+
+            <h3>How long it takes</h3>
+            <p>
+              We aim to complete verified requests within 30 days. Deletion is
+              permanent and cannot be undone, so download anything you need
+              first. You can also email{" "}
+              <a href="mailto:hello@kraalmarket.com?subject=Account%20and%20data%20deletion%20request">
+                hello@kraalmarket.com
+              </a>{" "}
+              from the address registered on your account.
+            </p>
+          </div>
+
+          <div className="cd-form-wrap">
+            {delSent ? (
+              <div className="contact-sent">
+                <div className="sent-check">✓</div>
+                <h3>Request received</h3>
+                <p>
+                  We've logged your deletion request for{" "}
+                  <strong>{delForm.email}</strong>. We may email you to verify
+                  your identity before we delete anything.
+                </p>
+              </div>
+            ) : (
+              <form
+                className="contact-form"
+                onSubmit={handleDeleteRequest}
+                noValidate
+              >
+                <h3 className="cd-form-title">Request deletion</h3>
+                <div className="cf-group">
+                  <label htmlFor="del-name">Full name</label>
+                  <input
+                    id="del-name"
+                    type="text"
+                    placeholder="Tendai Moyo"
+                    value={delForm.name}
+                    onChange={(e) =>
+                      setDelForm((f) => ({ ...f, name: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="cf-group">
+                  <label htmlFor="del-email">Account email</label>
+                  <input
+                    id="del-email"
+                    type="email"
+                    placeholder="The email you signed up with"
+                    value={delForm.email}
+                    onChange={(e) =>
+                      setDelForm((f) => ({ ...f, email: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="cf-group">
+                  <label htmlFor="del-phone">Phone number (optional)</label>
+                  <input
+                    id="del-phone"
+                    type="tel"
+                    placeholder="+263 77 123 4567"
+                    value={delForm.phone}
+                    onChange={(e) =>
+                      setDelForm((f) => ({ ...f, phone: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="cf-group">
+                  <label htmlFor="del-reason">Reason (optional)</label>
+                  <textarea
+                    id="del-reason"
+                    rows={3}
+                    placeholder="Help us improve — why are you leaving?"
+                    value={delForm.reason}
+                    onChange={(e) =>
+                      setDelForm((f) => ({ ...f, reason: e.target.value }))
+                    }
+                  />
+                </div>
+                <label className="cd-confirm">
+                  <input
+                    type="checkbox"
+                    checked={delForm.confirm}
+                    onChange={(e) =>
+                      setDelForm((f) => ({ ...f, confirm: e.target.checked }))
+                    }
+                  />
+                  <span>
+                    I understand my account and data will be permanently deleted
+                    and this can't be undone.
+                  </span>
+                </label>
+                {delError && (
+                  <p className="cd-error" role="alert">
+                    {delError}
                   </p>
-                  <div className="footer-socials">
-                   <Link to="https://www.facebook.com/profile.php?id=61589812884808" aria-label="Facebook">
-                      f
-                    </Link>
-                   <Link to="https://www.x.com/@Kraalmarketzim" aria-label="Twitter">
-                      𝕏
-                    </Link>
-                   <Link to="https://wa.me/263776109275" aria-label="WhatsApp">
-                      W
-                    </Link>
-                  </div>
-                </div>
-                <div className="footer-links">
-                   <div className="footer-col">
-                    <strong>Socials</strong>
-                    <Link to="https://www.x.com/@Kraalmarketzim">X / Twitter</Link>
-                    <Link to="https://www.linkedin.com/company/kraal">LinkedIn</Link>
-                    <Link to="https://www.youtube.com/channel/UCq0f7mTpFuPRDNCVkgpdyYw">Youtube</Link>
-                    <Link to="https://www.instagram.com/kraalmarket?utm_source=qr">Instagram</Link>
-                    <Link to="https://www.facebook.com/profile.php?id=61589812884808">Facebook</Link>
-                  </div>
-                  <div className="footer-col">
-                    <strong>Marketplace</strong>
-                    <Link to="/marketplace">Browse all</Link>
-                    <Link to="/marketplace?category=cattle">Cattle</Link>
-                    <Link to="/marketplace?category=goats">Goats</Link>
-                    <Link to="/marketplace?category=chicken">Road Runners</Link>
-                    <Link to="/marketplace?category=sheep">Sheep</Link>
-                  </div>
-                  <div className="footer-col">
-                    <strong>Sellers</strong>
-                   <Link to="/register">Start selling</Link>
-                    <Link to="/seller/dashboard">Dashboard</Link>
-                   <Link to="/sell">Post listing</Link>
-                   <Link to="/pricing">Pricing</Link>
-                  </div>
-                  <div className="footer-col">
-                    <strong>Company</strong>
-                   <Link to="/about">About Kraal</Link>
-                   <Link to="/blog/:slug">Blog Posts</Link>
-                   <Link to="/blog">Blog</Link>
-                    <Link to="/contact">Contact</Link>
-                    <Link to="/blog">Farming Tips</Link>
-                   <Link to="/terms">Terms</Link>
-                    <Link to="/privacy">Privacy</Link>
-                  </div>
-                </div>
-              </div>
-              <div className="footer-bottom">
-                <span>
-                  © {new Date().getFullYear()} Kraal. Built with Love in Zimbabwe 🇿🇼
-                </span>
-                <span className="footer-tagline">
-                  From the farm gate to the world.
-                </span>
-              </div>
-            </footer>
-      <ProfileSheet isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
-      
+                )}
+                <button
+                  type="submit"
+                  className="contact-send-btn cd-submit"
+                  disabled={
+                    delSending ||
+                    !delForm.name ||
+                    !delForm.email ||
+                    !delForm.confirm
+                  }
+                >
+                  {delSending ? "Sending…" : "Request account deletion"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="home-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <img
+                src={logo}
+                style={{ width: "120px", filter: "brightness(0) invert(0)" }}
+                alt="Kraal"
+              />
+              <span>Market</span>
+            </div>
+            <p>
+              Zimbabwe's livestock marketplace,
+              <br />
+              going pan-African.
+            </p>
+            <div className="footer-socials">
+              <Link
+                to="https://www.facebook.com/profile.php?id=61589812884808"
+                aria-label="Facebook"
+              >
+                f
+              </Link>
+              <Link to="https://www.x.com/@Kraalmarketzim" aria-label="Twitter">
+                𝕏
+              </Link>
+              <Link to="https://wa.me/263776109275" aria-label="WhatsApp">
+                W
+              </Link>
+            </div>
+          </div>
+          <div className="footer-links">
+            <div className="footer-col">
+              <strong>Socials</strong>
+              <Link to="https://www.x.com/@Kraalmarketzim">X / Twitter</Link>
+              <Link to="https://www.linkedin.com/company/kraal">LinkedIn</Link>
+              <Link to="https://www.youtube.com/channel/UCq0f7mTpFuPRDNCVkgpdyYw">
+                Youtube
+              </Link>
+              <Link to="https://www.instagram.com/kraalmarket?utm_source=qr">
+                Instagram
+              </Link>
+              <Link to="https://www.facebook.com/profile.php?id=61589812884808">
+                Facebook
+              </Link>
+            </div>
+            <div className="footer-col">
+              <strong>Marketplace</strong>
+              <Link to="/marketplace">Browse all</Link>
+              <Link to="/marketplace?category=cattle">Cattle</Link>
+              <Link to="/marketplace?category=goats">Goats</Link>
+              <Link to="/marketplace?category=chicken">Road Runners</Link>
+              <Link to="/marketplace?category=sheep">Sheep</Link>
+            </div>
+            <div className="footer-col">
+              <strong>Sellers</strong>
+              <Link to="/register">Start selling</Link>
+              <Link to="/seller/dashboard">Dashboard</Link>
+              <Link to="/sell">Post listing</Link>
+              <Link to="/pricing">Pricing</Link>
+            </div>
+            <div className="footer-col">
+              <strong>Company</strong>
+              <Link to="/about">About Kraal</Link>
+              <Link to="/blog/:slug">Blog Posts</Link>
+              <Link to="/blog">Blog</Link>
+              <Link to="/contact">Contact</Link>
+              <Link to="/blog">Farming Tips</Link>
+              <Link to="/terms">Terms</Link>
+              <Link to="/privacy">Privacy</Link>
+              <Link to="/contact#delete-account">Delete account</Link>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>
+            © {new Date().getFullYear()} Kraal. Built with Love in Zimbabwe 🇿🇼
+          </span>
+          <span className="footer-tagline">
+            From the farm gate to the world.
+          </span>
+        </div>
+      </footer>
+      <ProfileSheet
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
     </div>
   );
 }
-
