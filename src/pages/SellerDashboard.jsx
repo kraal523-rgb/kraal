@@ -122,7 +122,7 @@ export default function SellerDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
      const { requestPost, verifyModal } = useSellerVerification({
-     onVerified: () => requestPost(),
+     onVerified: () => navigate("/sell"),
    });
   const WORKER_URL =
     import.meta.env.VITE_UPLOAD_WORKER_URL ||
