@@ -1,71 +1,52 @@
+// Expo exposes env vars prefixed with EXPO_PUBLIC_ at build time.
+import { postFormData } from "./postForm";
 
-const WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL;
+// Expo replaces this public env reference at build time.
+// eslint-disable-next-line no-undef
+const WORKER_URL = process.env.EXPO_PUBLIC_UPLOAD_WORKER_URL;
 
 /**
  * Upload a single image to R2 through the Worker proxy.
  *
- * @param {File}   file     - Image File from <input> or drag-and-drop
+ * @param {string} uri      - Local file URI from expo-image-picker
  * @param {string} folder   - 'sellers' | 'listings'
  * @param {string} idToken  - Firebase ID token from user.getIdToken()
  * @returns {Promise<{ url: string, key: string }>}
  */
-export async function uploadImage(file, folder, idToken) {
+export async function uploadImage(uri, folder, idToken) {
   if (!WORKER_URL) {
-    throw new Error('VITE_UPLOAD_WORKER_URL is not defined in your .env file.');
+    throw new Error("EXPO_PUBLIC_UPLOAD_WORKER_URL is not defined in your .env file.");
   }
+
+  // Work out the file name and MIME type from the URI
+  const name = uri.split("/").pop() || `photo-${Date.now()}.jpg`;
+  const ext = (name.split(".").pop() || "jpg").toLowerCase();
+  const type =
+    ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
 
   const body = new FormData();
-  body.append('file', file);
-  body.append('folder', folder);
+  // React Native's FormData accepts { uri, name, type } in place of a File
+  body.append("file", { uri, name, type });
+  body.append("folder", folder);
 
-  const res = await fetch(`${WORKER_URL}/upload`, {
-    method: 'POST',
-    headers: {
-      // Do NOT set Content-Type — browser sets it automatically with the
-      // multipart boundary when body is FormData
-      Authorization: `Bearer ${idToken}`,
-    },
-    body,
+  const res = await postFormData(`${WORKER_URL}/upload`, body, {
+    Authorization: `Bearer ${idToken}`,
   });
-
-  const data = await res.json();
-
-  if (!res.ok) {
+  const data = res.data || {};
+  if (!res.ok || !data.url) {
     throw new Error(data.error || `Upload failed (${res.status})`);
   }
-
-  // data.url  — full public URL to store in Firestore
-  // data.key  — R2 object key (useful for deletion later)
   return { url: data.url, key: data.key };
 }
 
 /**
- * Upload multiple listing photos in parallel.
- * Returns URLs in the same order as the input files array.
- *
- * @param {File[]}  files    - Array of image files (max 10)
- * @param {string}  idToken  - Firebase ID token
- * @returns {Promise<string[]>} - Ordered array of public URLs
+ * Upload multiple listing photos in parallel (same order as input).
+ * @param {string[]} uris
  */
-export async function uploadListingPhotos(files, idToken) {
-  if (files.length > 10) {
-    throw new Error('Maximum 10 photos per listing.');
-  }
-
+export async function uploadListingPhotos(uris, idToken) {
+  if (uris.length > 10) throw new Error("Maximum 10 photos per listing.");
   const results = await Promise.all(
-    files.map(file => uploadImage(file, 'listings', idToken))
+    uris.map((uri) => uploadImage(uri, "listings", idToken)),
   );
-
-  return results.map(r => r.url);
-}
-
-/**
- * Delete an object from R2 (optional — call from a trusted backend or
- * Cloud Function, not directly from the client, unless your Worker has
- * a DELETE /media/:key route protected by Firebase auth).
- *
- * Placeholder — implement server-side deletion as needed.
- */
-export async function deleteImage(_key, _idToken) {
-  console.warn('deleteImage: implement a DELETE route in your Worker if needed.');
+  return results.map((r) => r.url);
 }

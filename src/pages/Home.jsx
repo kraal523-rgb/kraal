@@ -541,13 +541,6 @@ useEffect(() => {
      
  
 </section>
-
-<ProvinceMapFilter />
-      {/* ── STATS ── */}
-      
-
-      {/* ── CATEGORIES ── */}
-     {/* ── CATEGORIES ── */}
 <section className="categories-section" id="categories" data-observe>
   <div className="section-inner">
 
@@ -620,7 +613,6 @@ useEffect(() => {
 
   </div>
 </section>
-
       {/* ── FEATURED LISTINGS ── */}
     <section className="featured-section" id="featured" data-observe>
   <div className="section-inner">
@@ -639,7 +631,7 @@ useEffect(() => {
   </p>
 ) : featuredListings.length === 0 ?  (
         // Skeleton loading cards
-        Array.from({ length: 3 }).map((_, i) => (
+        Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="listing-card skeleton">
             <div className="lc-media lc-media-skeleton" />
             <div className="lc-body">
@@ -725,6 +717,10 @@ useEffect(() => {
     </div>
   </div>
 </section>
+<ProvinceMapFilter />
+
+
+
 
       {/* ── TRUST STRIP ── */}
       <section className="trust-section">

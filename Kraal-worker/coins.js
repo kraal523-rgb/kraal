@@ -31,9 +31,9 @@ const LISTING_DAYS = 30;
 
 // Your collection / field names (adjust if yours differ)
 const LISTINGS = "listings"; // needs: sellerId, status ("draft" -> "active")
-const JOBS = "transportOrders"; // needs: status ("open" -> "assigned"), driverId
+const JOBS = "transport_requests"; // the mobile + web apps use this collection; status "open" -> "quoted", driverUid
 const JOB_OPEN_STATUS = "open";
-const JOB_ASSIGNED_STATUS = "assigned";
+const JOB_ASSIGNED_STATUS = "quoted"; // what the apps show as "driver accepted"
 
 function listingCost(listing) {
   const qty = Number(listing.quantity) || 1;
@@ -46,7 +46,8 @@ function jobCost(job) {
 }
 
 // ─── Paynow ──────────────────────────────────────────────────────────────────
-const PAYNOW_INITIATE = "https://www.paynow.co.zw/interface/initiatetransaction";
+const PAYNOW_INITIATE =
+  "https://www.paynow.co.zw/interface/initiatetransaction";
 const PAYNOW_REMOTE = "https://www.paynow.co.zw/interface/remotetransaction";
 const PAID_STATUSES = new Set(["paid", "awaiting delivery", "delivered"]);
 const FAILED_STATUSES = new Set(["cancelled", "failed"]);
@@ -90,7 +91,9 @@ async function paynowInitiate(env, fields, express) {
   if ((params.get("status") || "").toLowerCase() !== "ok") {
     throw new Error(params.get("error") || "Paynow rejected the request");
   }
-  return Object.fromEntries([...params.entries()].map(([k, v]) => [k.toLowerCase(), v]));
+  return Object.fromEntries(
+    [...params.entries()].map(([k, v]) => [k.toLowerCase(), v]),
+  );
 }
 
 // ─── Module factory ──────────────────────────────────────────────────────────
@@ -162,7 +165,10 @@ export function createCoins({
   }
 
   // ── Credit coins (purchase, welcome bonus, refund) ─────────────────────────
-  async function credit(env, { uid, amount, type, ref, meta = {}, extraWrites = [] }) {
+  async function credit(
+    env,
+    { uid, amount, type, ref, meta = {}, extraWrites = [] },
+  ) {
     const ledgerId = `${type}_${ref}`;
     const writes = [
       ledgerWrite(env, ledgerId, { uid, type, amount, ref, ...meta }),
@@ -170,7 +176,10 @@ export function createCoins({
         transform: {
           document: docName(env, `wallets/${uid}`),
           fieldTransforms: [
-            { fieldPath: "balance", increment: { integerValue: String(amount) } },
+            {
+              fieldPath: "balance",
+              increment: { integerValue: String(amount) },
+            },
             { fieldPath: "updatedAt", setToServerValue: "REQUEST_TIME" },
           ],
         },
@@ -197,7 +206,10 @@ export function createCoins({
       }
       const prep = await prepare();
       if (prep.error) {
-        return { status: prep.error.status, body: { error: prep.error.message } };
+        return {
+          status: prep.error.status,
+          body: { error: prep.error.message },
+        };
       }
       const cost = prep.cost;
       const wallet = await fsGet(env, walletPath);
@@ -275,7 +287,11 @@ export function createCoins({
       ["resulturl", `${apiOrigin}/api/coins/paynow/webhook`],
       ["authemail", email],
     ];
-    if (express) fields.push(["phone", String(body.phone)], ["method", String(body.method)]);
+    if (express)
+      fields.push(
+        ["phone", String(body.phone)],
+        ["method", String(body.method)],
+      );
     fields.push(["status", "Message"]);
 
     const r = await paynowInitiate(env, fields, express);
@@ -309,7 +325,9 @@ export function createCoins({
     if (PAID_STATUSES.has(status)) {
       if (Number(params.get("amount")) !== Number(p.data.amount)) {
         console.error("Paynow amount mismatch for", reference);
-        await fsUpdate(env, `coinPurchases/${reference}`, { status: "amount_mismatch" });
+        await fsUpdate(env, `coinPurchases/${reference}`, {
+          status: "amount_mismatch",
+        });
         return;
       }
       await credit(env, {
@@ -317,7 +335,10 @@ export function createCoins({
         amount: p.data.coins,
         type: "purchase",
         ref: reference,
-        meta: { packId: p.data.packId, paynowReference: params.get("paynowreference") || "" },
+        meta: {
+          packId: p.data.packId,
+          paynowReference: params.get("paynowreference") || "",
+        },
         extraWrites: [
           updateWrite(env, `coinPurchases/${reference}`, {
             status: "paid",
@@ -345,32 +366,38 @@ export function createCoins({
 
   async function postListing(env, uid, listingId) {
     const path = `${LISTINGS}/${listingId}`;
-    return spendAndApply(env, uid, `listing_${listingId}`, "post_listing", async () => {
-      const l = await fsGet(env, path);
-      if (!l || l.data.sellerId !== uid) {
-        return { error: { status: 404, message: "Listing not found" } };
-      }
-      if (l.data.status !== "draft") {
-        return { error: { status: 409, message: "Listing is not a draft" } };
-      }
-      const now = new Date();
-      return {
-        cost: listingCost(l.data),
-        meta: { listingId },
-        writes: [
-          updateWrite(
-            env,
-            path,
-            {
-              status: "active",
-              publishedAt: now,
-              expiresAt: new Date(now.getTime() + LISTING_DAYS * 86400000),
-            },
-            { currentDocument: { updateTime: l.updateTime } },
-          ),
-        ],
-      };
-    });
+    return spendAndApply(
+      env,
+      uid,
+      `listing_${listingId}`,
+      "post_listing",
+      async () => {
+        const l = await fsGet(env, path);
+        if (!l || l.data.sellerId !== uid) {
+          return { error: { status: 404, message: "Listing not found" } };
+        }
+        if (l.data.status !== "draft") {
+          return { error: { status: 409, message: "Listing is not a draft" } };
+        }
+        const now = new Date();
+        return {
+          cost: listingCost(l.data),
+          meta: { listingId },
+          writes: [
+            updateWrite(
+              env,
+              path,
+              {
+                status: "active",
+                publishedAt: now,
+                expiresAt: new Date(now.getTime() + LISTING_DAYS * 86400000),
+              },
+              { currentDocument: { updateTime: l.updateTime } },
+            ),
+          ],
+        };
+      },
+    );
   }
 
   async function acceptJob(env, uid, jobId) {
@@ -381,7 +408,7 @@ export function createCoins({
     return spendAndApply(env, uid, `job_${jobId}`, "accept_job", async () => {
       const j = await fsGet(env, path);
       if (!j) return { error: { status: 404, message: "Job not found" } };
-      if (j.data.status !== JOB_OPEN_STATUS || j.data.driverId) {
+      if (j.data.status !== JOB_OPEN_STATUS || j.data.driverUid) {
         return { error: { status: 409, message: "Job already taken" } };
       }
       return {
@@ -393,8 +420,11 @@ export function createCoins({
             path,
             {
               status: JOB_ASSIGNED_STATUS,
-              driverId: uid,
-              acceptedAt: new Date(),
+              driverUid: uid,
+              driverName:
+                driver.data?.businessName || driver.data?.email || "Driver",
+              quotedAt: new Date(),
+              updatedAt: new Date(),
             },
             // two drivers racing: only the first commit wins
             { currentDocument: { updateTime: j.updateTime } },
@@ -408,7 +438,10 @@ export function createCoins({
     const profile = await fsGet(env, `users/${uid}`);
     const role = profile?.data?.role;
     if (role !== "seller" && role !== "transporter") {
-      return { status: 403, body: { error: "Only sellers and drivers get bonus coins" } };
+      return {
+        status: 403,
+        body: { error: "Only sellers and drivers get bonus coins" },
+      };
     }
     const r = await credit(env, {
       uid,
@@ -416,7 +449,10 @@ export function createCoins({
       type: "welcome",
       ref: uid,
     });
-    return { status: 200, body: { ok: true, coins: WELCOME_COINS, duplicate: !!r.duplicate } };
+    return {
+      status: 200,
+      body: { ok: true, coins: WELCOME_COINS, duplicate: !!r.duplicate },
+    };
   }
 
   // ── Router ─────────────────────────────────────────────────────────────────
@@ -440,19 +476,27 @@ export function createCoins({
 
     if (p === "/api/coins/purchase-status" && request.method === "GET") {
       const ref = url.searchParams.get("reference") || "";
-      if (!SAFE_ID.test(ref)) return jsonResponse({ error: "Bad reference" }, 400, corsHeaders);
+      if (!SAFE_ID.test(ref))
+        return jsonResponse({ error: "Bad reference" }, 400, corsHeaders);
       const pur = await fsGet(env, `coinPurchases/${ref}`);
-      if (!pur || pur.data.uid !== uid) return jsonResponse({ error: "Not found" }, 404, corsHeaders);
+      if (!pur || pur.data.uid !== uid)
+        return jsonResponse({ error: "Not found" }, 404, corsHeaders);
       // Poll Paynow if still pending, in case the webhook hasn't landed yet
       if (pur.data.status === "pending") await settlePurchase(env, ref);
       const fresh = await fsGet(env, `coinPurchases/${ref}`);
-      return jsonResponse({ status: fresh?.data?.status || "unknown" }, 200, corsHeaders);
+      return jsonResponse(
+        { status: fresh?.data?.status || "unknown" },
+        200,
+        corsHeaders,
+      );
     }
 
     if (request.method !== "POST") return null;
 
-    if (p === "/api/coins/buy") return send(await buyCoins(request, env, uid, url));
-    if (p === "/api/coins/welcome-bonus") return send(await welcomeBonus(env, uid));
+    if (p === "/api/coins/buy")
+      return send(await buyCoins(request, env, uid, url));
+    if (p === "/api/coins/welcome-bonus")
+      return send(await welcomeBonus(env, uid));
 
     if (p === "/api/coins/post-listing" || p === "/api/coins/accept-job") {
       const body = await request.json().catch(() => ({}));
@@ -461,7 +505,9 @@ export function createCoins({
         return jsonResponse({ error: "Invalid id" }, 400, corsHeaders);
       }
       return send(
-        p.endsWith("listing") ? await postListing(env, uid, id) : await acceptJob(env, uid, id),
+        p.endsWith("listing")
+          ? await postListing(env, uid, id)
+          : await acceptJob(env, uid, id),
       );
     }
 
