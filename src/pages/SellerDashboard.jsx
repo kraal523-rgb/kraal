@@ -82,6 +82,7 @@ const INITIAL_ORDERS = [
 
 const STATUS_META = {
   active: { label: "Active", cls: "sd-pill-active" },
+  draft: { label: "Draft", cls: "sd-pill-pending" },
   low_stock: { label: "Low Stock", cls: "sd-pill-low" },
   sold_out: { label: "Sold Out", cls: "sd-pill-sold" },
   pending: { label: "Pending", cls: "sd-pill-pending" },
@@ -121,14 +122,16 @@ function getCategoryEmoji(categoryId) {
 export default function SellerDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-     const { requestPost, verifyModal } = useSellerVerification({
-     onVerified: () => navigate("/sell"),
-   });
+  // When the seller is verified, go to the sell page. (It used to call
+  // requestPost() again, which re-ran the check forever, so nothing happened.)
+  const { requestPost, verifyModal } = useSellerVerification({
+    onVerified: () => navigate("/sell"),
+  });
   const WORKER_URL =
     import.meta.env.VITE_UPLOAD_WORKER_URL ||
     "https://kraal-upload.kraal523.workers.dev";
-    const [userProfile, setUserProfile] = useState(null);
-const { openVetRequest, vetRequestModal } = useVetRequest(user, userProfile)
+  const [userProfile, setUserProfile] = useState(null);
+  const { openVetRequest, vetRequestModal } = useVetRequest(user, userProfile);
   const [activeTab, setActiveTab] = useState("Overview");
   const [listings, setListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
@@ -224,12 +227,12 @@ const { openVetRequest, vetRequestModal } = useVetRequest(user, userProfile)
         : orders.filter((o) => o.status === orderFilter),
     [orders, orderFilter],
   );
-useEffect(() => {
-  if (!user?.uid) return;
-  getDoc(doc(db, "users", user.uid)).then((snap) => {
-    if (snap.exists()) setUserProfile(snap.data());
-  });
-}, [user?.uid]);
+  useEffect(() => {
+    if (!user?.uid) return;
+    getDoc(doc(db, "users", user.uid)).then((snap) => {
+      if (snap.exists()) setUserProfile(snap.data());
+    });
+  }, [user?.uid]);
   const filteredListings = useMemo(
     () =>
       listingSearch.trim()
@@ -243,9 +246,34 @@ useEffect(() => {
   // ── Listing actions ───────────────────────────────────────────────────────
   const toggleListingStatus = async (id) => {
     const listing = listings.find((l) => l.id === id);
-    await updateDoc(doc(db, "listings", id), {
-      status: listing.status === "active" ? "pending" : "active",
-    });
+    try {
+      if (listing.status === "draft") {
+        // Publishing a draft costs a coin and is done by the Worker only
+        const token = await getIdToken();
+        const res = await fetch(`${WORKER_URL}/api/coins/post-listing`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ listingId: id }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(
+            data.code === "INSUFFICIENT_COINS"
+              ? "You don't have enough coins to publish this listing. Buy coins first."
+              : data.error || "Could not publish this listing.",
+          );
+        }
+        return;
+      }
+      await updateDoc(doc(db, "listings", id), {
+        status: listing.status === "active" ? "pending" : "active",
+      });
+    } catch (e) {
+      alert(e?.message || "Could not update the listing.");
+    }
   };
 
   const removeListing = async (id) => {
@@ -369,7 +397,12 @@ useEffect(() => {
           >
             + New Listing
           </button>
-           <button onClick={() => openVetRequest()}>🩺 Request Vet Certificate</button>
+          <button
+            className="sd-topbar-btn sd-topbar-btn-ghost"
+            onClick={() => openVetRequest()}
+          >
+            🩺 Request Vet Certificate
+          </button>
           {pendingCount > 0 && (
             <button
               className="sd-topbar-icon-btn"
@@ -735,7 +768,9 @@ useEffect(() => {
                             >
                               {listing.status === "active"
                                 ? "⏸ Pause"
-                                : "▶ Activate"}
+                                : listing.status === "draft"
+                                  ? "🚀 Publish"
+                                  : "▶ Activate"}
                             </button>
                             <button
                               className="sd-btn-sm sd-btn-sm-danger"
@@ -986,8 +1021,8 @@ useEffect(() => {
           )}
         </main>
       </div>
- {vetRequestModal}
- {verifyModal}
+      {vetRequestModal}
+      {verifyModal}
       {/* ══ EDIT LISTING MODAL ═════════════════════════════════════════════ */}
       {editListing && (
         <div className="sd-modal-overlay" onClick={() => setEditListing(null)}>
@@ -1177,10 +1212,7 @@ useEffect(() => {
             <i>📋</i>
             <span>Listings</span>
           </button>
-          <button
-            className="sd-bottom-nav-post"
-            onClick={() => requestPost()}
-          >
+          <button className="sd-bottom-nav-post" onClick={() => requestPost()}>
             +
           </button>
           <button
