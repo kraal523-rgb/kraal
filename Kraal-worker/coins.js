@@ -26,7 +26,7 @@ const PACKS = {
   standard: { coins: 15, price: 5 },
   pro: { coins: 40, price: 12 },
 };
-const WELCOME_COINS = 2;
+const WELCOME_COINS = 5;
 const LISTING_DAYS = 30;
 
 // Your collection / field names (adjust if yours differ)

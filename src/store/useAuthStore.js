@@ -9,12 +9,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp, runTransaction  } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp  } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 
 const googleProvider = new GoogleAuthProvider();
-export const STARTER_COINS = 5;
-const COIN_ROLES = ['seller', 'transporter'];
 const useAuthStore = create(
   persist(
     (set, get) => ({
@@ -57,72 +55,67 @@ const useAuthStore = create(
         return cred.user;
       },
 
+
 createSellerProfile: async (uid, profileData) => {
   const now = serverTimestamp();
   const role = profileData.role || 'buyer';
-
-  const roleCollection = role === 'seller'      ? 'sellers'
+  const roleCollection =
+    role === 'seller' ? 'sellers'
     : role === 'transporter' ? 'transporters'
-    : role === 'vet'         ? 'vets'
+    : role === 'vet' ? 'vets'
     : 'buyers';
 
-  // Coins never go into the role doc. users/{uid} is the single source of truth.
+  const userRef = doc(db, 'users', uid);
+  const existing = await getDoc(userRef);
+  const isNew = !existing.exists();
+
+  // Re-running registration for the same role is fine (retry / resume).
+  // Switching an existing account to a different role is not.
+  if (!isNew && existing.data().role && existing.data().role !== role) {
+    const err = new Error('This account is already registered. Please sign in.');
+    err.code = 'app/account-exists';
+    throw err;
+  }
+
+  // Coins are NOT stored here any more: wallets/{uid} (Worker) is the only
+  // source of truth. Strip any stray coins field from the role doc too.
   // eslint-disable-next-line no-unused-vars
   const { coins: _ignored, ...roleData } = profileData;
 
-  // Keep an existing balance (USSD migration / retry / re-run registration)
-  // so nobody can collect the 5 starter coins twice.
-  const userRef = doc(db, 'users', uid);
-  const existing = await getDoc(userRef);
-  const existingCoins =
-    existing.exists() && typeof existing.data().coins === 'number'
-      ? existing.data().coins
-      : null;
-  const coins = existingCoins ?? (COIN_ROLES.includes(role) ? STARTER_COINS : 0);
-
-  const userDoc = {
+  const common = {
     uid,
-    email:       profileData.email,
-    displayName: profileData.businessName || profileData.email,
+    email: profileData.email || '',
     role,
-    province:    profileData.province || "",
-    city:        profileData.city || "",
-    verified:    false,
-    createdAt:   now,
-    updatedAt:   now,
-    ...(role === 'transporter' && { available: true }),
+    province: profileData.province || '',
+    city: profileData.city || '',
+    updatedAt: now,
+    // Only on first creation, so a re-run can't reset verification or the join date
+    ...(isNew && { verified: false, createdAt: now }),
+  };
+
+  // STEP 1: users/{uid} first so rules can resolve isRole().
+  // merge:true keeps fields from the USSD migration.
+  await setDoc(userRef, common, { merge: true });
+
+  // STEP 2: role collection
+  const roleDoc = {
+    ...roleData,
+    ...common,
+    displayName: profileData.businessName || profileData.email,
     ...(role === 'transporter' && {
+      available: true,
       serviceProvinces: profileData.province ? [profileData.province] : [],
     }),
   };
+  await setDoc(doc(db, roleCollection, uid), roleDoc, { merge: true });
 
-  // STEP 1: write users/{uid} first so rules can resolve isRole().
-  // merge:true keeps any fields copied over by the USSD migration.
-  await setDoc(
-    userRef,
-    {
-      uid,
-      email:    profileData.email,
-      role,
-      province: profileData.province || "",
-      city:     profileData.city || "",
-      verified: false,
-      coins,
-      createdAt: now,
-      updatedAt: now,
-    },
-    { merge: true },
-  );
-
-  // STEP 2: role collection (no coins field)
-  await setDoc(doc(db, roleCollection, uid), { ...roleData, ...userDoc });
-
-  const profile = { ...userDoc, coins };
+  // Plain, serialisable copy for state (no server-timestamp sentinels)
+  const { createdAt, updatedAt, ...rest } = roleDoc; // eslint-disable-line no-unused-vars
+  const profile = { ...rest, createdAt: Date.now(), updatedAt: Date.now() };
   set({
     userProfile: profile,
     sellerProfile: role === 'seller' ? profile : null,
   });
-
   return profile;
 },
 
@@ -142,9 +135,7 @@ createSellerProfile: async (uid, profileData) => {
   : 'buyers';
 
         const profileSnap = await getDoc(doc(db, roleCollection, uid));
-        const profile = profileSnap.exists()
-          ? { ...profileSnap.data(), coins: userSnap.data().coins ?? 0 }
-  : userSnap.data();
+        const profile = profileSnap.exists() ? profileSnap.data() : userSnap.data();
 
         set({
           userProfile: profile,
@@ -177,27 +168,7 @@ createSellerProfile: async (uid, profileData) => {
         await signOut(auth);
         set({ user: null, userProfile: null, sellerProfile: null });
       },
-// ── Coins ────────────────────────────────────────────────────────────────
-spendCoin: async (amount = 1) => {
-  const uid = get().user?.uid;
-  if (!uid) throw new Error('NOT_SIGNED_IN');
-  const ref = doc(db, 'users', uid);
 
-  const newBalance = await runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    const coins = snap.data()?.coins ?? 0;
-    if (coins < amount) throw new Error('OUT_OF_COINS');
-    tx.update(ref, { coins: coins - amount });
-    return coins - amount;
-  });
-
-  const prev = get().userProfile;
-  set({
-    userProfile: { ...prev, coins: newBalance },
-    sellerProfile: prev?.role === 'seller' ? { ...prev, coins: newBalance } : get().sellerProfile,
-  });
-  return newBalance;
-},
       // ── Helpers ──────────────────────────────────────────────────────────────
       // Convenience getter — use anywhere you need the current role
       getRole: () => get().userProfile?.role ?? null,

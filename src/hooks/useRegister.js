@@ -4,7 +4,7 @@ import { uploadImage } from "../lib/cloudflare";
 import { getDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
 import useAuthStore from "../store/useAuthStore";
 import { updateProfile, onAuthStateChanged } from "firebase/auth";
-
+import { claimWelcomeBonus } from "../lib/coinsApi";
 export const STEPS = {
   ACCOUNT: 0,
   BUSINESS: 1,
@@ -42,7 +42,7 @@ export const ROLES = [
   desc: "Provide health certificates and inspections for livestock",
 },
 ];
-export const STARTER_COINS = 5;
+
 export const COIN_ROLES = ["seller", "transporter"];
 const INITIAL_FORM = {
   // Step 0 - Account
@@ -104,10 +104,11 @@ export function useRegister() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
- const [ setFirebaseUser] = useState(null);
+const [firebaseUser, setFirebaseUser] = useState(null); // eslint-disable-line no-unused-vars
+const [bonusCoins, setBonusCoins] = useState(0);
 
-  const { registerWithEmail, signInWithGoogle, createSellerProfile } =
-    useAuthStore();
+const { registerWithEmail, signIn, signInWithGoogle, createSellerProfile } =
+  useAuthStore();
 
   const update = (fields) => setForm((f) => ({ ...f, ...fields }));
 
@@ -156,7 +157,16 @@ export function useRegister() {
           throw new Error("Passwords do not match");
         if (form.password.length < 8)
           throw new Error("Password must be at least 8 characters");
-        const user = await registerWithEmail(form.email, form.password);
+        let user;
+try {
+  user = await registerWithEmail(form.email, form.password);
+} catch (err) {
+  if (err?.code !== "auth/email-already-in-use") throw err;
+  // An earlier attempt created the account but never finished the profile.
+  // createSellerProfile refuses to switch an existing account's role, so this is safe.
+  user = await signIn(form.email, form.password);
+}
+
         if (form.phone) {
   try {
     const ussdRef  = doc(db, "users", form.phone);   // USSD doc uses phone as ID
@@ -219,51 +229,68 @@ export function useRegister() {
 
   // Step 3: Upload photo + save full profile to Firestore
   const submitFinal = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const user = await getAuthenticatedUser();
-      const token = await user.getIdToken(true);
+  setError(null);
+  setLoading(true);
+  try {
+    const user = await getAuthenticatedUser();
 
+    try {
       if (form.businessName) {
         await updateProfile(user, { displayName: form.businessName });
       }
+    } catch (e) {
+      console.warn("updateProfile failed (non-fatal):", e.message);
+    }
 
-      let photoUrl = null;
-      if (form.profilePhoto) {
+    let photoUrl = null;
+    if (form.profilePhoto) {
+      try {
+        const token = await user.getIdToken(true);
         const result = await uploadImage(form.profilePhoto, "sellers", token);
         photoUrl = result.url;
+      } catch (e) {
+        console.warn("Photo upload failed (non-fatal):", e.message);
       }
-
-      // createSellerProfile now receives role — update that function in
-      // useAuthStore to write role into the Firestore users/{uid} document
-      await createSellerProfile(user.uid, {
-        email: form.email || user.email,
-        businessName: form.businessName,
-        phone: form.phone,
-        whatsapp: form.whatsapp || form.phone,
-        livestockTypes: form.livestockTypes,
-        description: form.description || "",
-        country: form.country,
-        province: form.province,
-        city: form.city,
-        address: form.address || "",
-        photoUrl,
-        role: form.role, 
-        available: form.role === "transporter",
-        vehicleType: form.vehicleType || "",   
-        capacity: form.capacity || "", 
-        coins: COIN_ROLES.includes(form.role) ? STARTER_COINS : 0,
-      });
-
-      setStep(STEPS.DONE);
-    } catch (e) {
-      console.error("submitFinal error:", e.message);
-      setError(e.message);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    await createSellerProfile(user.uid, {
+      email: form.email || user.email,
+      businessName: form.businessName,
+      phone: form.phone,
+      whatsapp: form.whatsapp || form.phone,
+      livestockTypes: form.livestockTypes,
+      description: form.description || "",
+      country: form.country,
+      province: form.province,
+      city: form.city,
+      address: form.address || "",
+      photoUrl,
+      role: form.role,
+      available: form.role === "transporter",
+      vehicleType: form.vehicleType || "",
+      capacity: form.capacity || "",
+      // no coins here: the Worker wallet is the only source of truth
+    });
+
+    // Must come AFTER createSellerProfile: the Worker reads users/{uid}.role.
+    // Not fatal if it fails: useCoins() retries it quietly on the dashboard.
+    if (COIN_ROLES.includes(form.role)) {
+      try {
+        const r = await claimWelcomeBonus();
+        if (r?.ok && !r.duplicate) setBonusCoins(r.coins || 0);
+      } catch (e) {
+        console.warn("Welcome bonus failed:", e.message);
+      }
+    }
+
+    setStep(STEPS.DONE);
+  } catch (e) {
+    console.error("submitFinal error:", e.message);
+    setError(e.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Expose role so StepDone can redirect correctly
   return {
@@ -272,6 +299,7 @@ export function useRegister() {
     loading,
     error,
     update,
+    bonusCoins,
     toggleLivestock,
     submitAccount,
     nextStep,
