@@ -800,42 +800,7 @@ const tickerItems =
         </div>
       </section>
 
-      {/* ── REGIONS ── */}
-      <section className="regions-section">
-        <div className="section-inner">
-          <div className="regions-inner">
-            <div className="regions-text">
-              <p className="section-eyebrow">Coverage</p>
-              <h2 className="section-title">
-                Buyers from Every Corner of Zimbabwe
-              </h2>
-              <p className="regions-sub">
-                Kraal connects sellers to active buyers in all major towns and
-                rural districts — and increasingly from across Southern Africa.
-              </p>
-             <Link to="/marketplace" className="btn-regions">
-                Browse Your Region →
-              </Link>
-            </div>
-            <div className="regions-tags">
-              {REGIONS.map((r, i) => (
-                <button
-                  key={i}
-                  className="region-tag"
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                  onClick={() =>
-                    navigate(`/marketplace?location=${encodeURIComponent(r)}`)
-                  }
-                >
-                  📍 {r}
-                </button>
-              ))}
-              <span className="region-tag more">+ Many more</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
+    
       {/* ── TESTIMONIALS ── */}
       <section className="testimonials-section">
         <div className="section-inner">

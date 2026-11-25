@@ -175,55 +175,7 @@ const [profileOpen, setProfileOpen] = useState(false);
           </div>
         </div>
       </section>
-
-      {/* ── TEAM ── */}
-      <section className="about-team">
-        <div className="about-team-inner">
-          <p className="section-eyebrow" data-reveal>
-            The people
-          </p>
-          <h2 data-reveal>Who's behind Kraal</h2>
-          <div className="team-grid">
-            {TEAM.map((member, i) => (
-              <div
-                key={member.name}
-                className="team-card"
-                data-reveal
-                style={{ transitionDelay: `${i * 0.12}s` }}
-              >
-                <div
-                  className="team-avatar"
-                  style={{ background: member.color }}
-                >
-                  {member.initials}
-                </div>
-                <h3>{member.name}</h3>
-                <span className="team-role">{member.role}</span>
-                <p>{member.bio}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="about-cta" data-reveal>
-        <div className="about-cta-inner">
-          <h2>Ready to reach more buyers?</h2>
-          <p>
-            Join thousands of farmers already selling on Kraal. It's free to
-            list.
-          </p>
-          <div className="about-cta-btns">
-            <Link to="/register" className="cta-btn-primary">
-              Start selling free →
-            </Link>
-            <Link to="/marketplace" className="cta-btn-ghost">
-              Browse listings
-            </Link>
-          </div>
-        </div>
-      </section>
+     
 
       {/* ── FOOTER ── */}
       <footer className="home-footer">
