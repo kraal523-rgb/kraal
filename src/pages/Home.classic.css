@@ -58,6 +58,7 @@
 
 /* ── Price ticker ───────────────────────────────────────── */
 .price-ticker-band {
+  margin-top: 20px;
   background: var(--forest-deep);
   height: 36px;
 }
@@ -97,7 +98,7 @@
 
 /* ── Navigation ─────────────────────────────────────────── */
 .home-nav {
-  background: var(--ivory);
+  background: var(--forest);
   border-bottom: 1px solid var(--line);
   backdrop-filter: none;
 }
@@ -119,13 +120,30 @@
 }
 
 /* ── Hero ───────────────────────────────────────────────── */
+
 .hero {
-  background: var(--ivory);
-  border-bottom: 0px solid var(--line);
+  background-color: var(--forest);          
+  background-image: url("../assets/heifers-2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-bottom: 0;
+  position: relative;
+}
+
+/* Overlay so text stays readable over the photo */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #1f3b2bcb;        /* cream tint */
+  z-index: 0;
+  pointer-events: none;
 }
 .hero-inner {
   gap: 80px;
   padding: 80px 48px 88px;
+ 
 }
 .hero-title {
   font-family: var(--font-display);
@@ -133,7 +151,7 @@
   font-size: clamp(2.4rem, 4.6vw, 3.8rem);
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: var(--forest-deep);
+  color: var(--ivory);
 }
 /* one even headline, no highlighted phrase */
 .hero-title em {
@@ -146,7 +164,7 @@
 .hero-sub {
   font-size: 1.12rem;
   line-height: 1.75;
-  color: var(--muted);
+  color: var(--ivory);
   max-width: 30em;
 }
 
@@ -162,7 +180,7 @@
   margin-top: 4px;
 }
 .hero-quick-cat {
-  background: transparent;
+  background: --forest;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   font-family: var(--font-text);
@@ -253,25 +271,7 @@
 .hero-video-view-btn:hover {
   background: var(--white);
 }
-.hero-video-frame video,
-.hero-video-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 
-  --gap: 4px;
-  -webkit-mask-image:
-    linear-gradient(to right,  #000 calc(100% - var(--gap)), transparent 0),
-    linear-gradient(to bottom, #000 calc(100% - var(--gap)), transparent 0);
-  mask-image:
-    linear-gradient(to right,  #000 calc(100% - var(--gap)), transparent 0),
-    linear-gradient(to bottom, #000 calc(100% - var(--gap)), transparent 0);
-  -webkit-mask-size: 12.5% 16.6667%;
-  mask-size: 12.5% 16.6667%;
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-}
 .hero-right {
   gap: 28px;
 }
@@ -394,14 +394,14 @@
 /* ── Categories ─────────────────────────────────────────── */
 .categories-section {
   background: var(--ivory);
-  padding: 96px 0;
+  padding: 96px 120px 64px;
 }
 .categories-grid {
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 32px 24px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 25px 25px;
 }
 .cat-card {
-  width: 100%;
+  width: 280px;
   height: auto;
   min-height: 0;
   display: flex;
@@ -465,7 +465,25 @@
 .cat-arrow {
   display: none;
 }
-
+a.price-ticker-item {
+  text-decoration: none;
+  color: inherit;
+}
+a.price-ticker-item:hover .pt-label {
+  text-decoration: underline;
+}
+.price-ticker-track:hover {
+  animation-play-state: paused;   /* pause on hover so people can click */
+}
+.pt-new {
+  font-size: 0.55rem;
+  font-weight: 700;
+  background: var(--hero-amber);
+  color: #1A1200;
+  padding: 1px 5px;
+  border-radius: 100px;
+  margin-left: 4px;
+}
 /* Farm products */
 .farm-products-divider {
   margin: 64px 0 14px;
@@ -506,7 +524,7 @@
 /* ── Featured listings ──────────────────────────────────── */
 .featured-section {
   background: var(--parchment);
-  padding: 96px 0;
+  padding: 96px 120px;
 }
 .featured-section .mp-card {
   background: var(--white);
@@ -986,7 +1004,7 @@
 }
 
 .kraal-section .app-badges img {
-  height: 60px;             /* 180px is very large for a store badge */
+  height: 100px;             /* 180px is very large for a store badge */
   width: auto;
   display: block;
 }
@@ -1223,4 +1241,104 @@
   .cat-card {
     transition: none;
   }
+}
+/* ═══════════════════════════════════════
+   TIGHTER SECTION SPACING
+═══════════════════════════════════════ */
+:root {
+  --section-pad: 48px;
+}
+
+.categories-section,
+.featured-section,
+.trust-section,
+.how-section,
+.regions-section,
+.testimonials-section,
+.kraal-section {
+  padding-top: var(--section-pad);
+  padding-bottom: var(--section-pad);
+}
+
+.uzim-section { padding: var(--section-pad) 32px; }
+.cta-section  { padding: var(--section-pad) 36px; }
+.alert-section { padding: 24px 36px; }
+
+/* Hero: stop forcing a full-screen height and trim inner padding */
+.hero { min-height: auto; }
+.hero-inner { padding: 48px 48px 40px; }
+
+/* Smaller gaps inside sections */
+.section-header { margin-bottom: 24px; }
+.section-sub { margin-bottom: 32px; }
+.farm-products-divider { margin: 32px 0 8px; }
+.testimonials-wrap { margin-top: 24px; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  :root { --section-pad: 32px; }
+
+  .hero-inner { padding: 20px 20px 32px; }
+  .alert-section { padding: 20px; }
+  .cta-section { padding: var(--section-pad) 20px; }
+  .uzim-section { padding: var(--section-pad) 20px; }
+  .section-sub { margin-bottom: 24px; }
+}
+/* ── Keep category pills inside the clip-path shape ── */
+.hero-float-pills {
+  z-index: 4;               /* above the frame's ::after vignette */
+}
+
+.hero-pill {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+/* Positions are % of the frame, so they track the shape as it resizes */
+.hero-pill-tl { top: 14%;    left: 50%;   right: auto; bottom: auto; }  /* Cattle */
+.hero-pill-tr { top: 32%;    right: 6%;   left: auto;  bottom: auto; }  /* Goats */
+.hero-pill-bl { top: 56%;    left: 40%;   right: auto; bottom: auto; }  /* Road Runners */
+.hero-pill-br { top: 72%;    right: 12%;  left: auto;  bottom: auto; }  /* Pigs */
+/* Give the video column more room */
+.hero-inner {
+  grid-template-columns: 0.85fr 1.35fr;   /* was 1fr 1fr */
+  max-width: 1280px;                       /* was 1240px */
+}
+
+.hero-video-frame {
+  width: 115%;                 /* let it grow past its column */
+  max-width: none;
+  margin-left: -15%;           /* grow leftward, into the empty upper-left of the shape */
+}
+.hero-video-frame {
+  clip-path: url(#zim-clip);
+  -webkit-clip-path: url(#zim-clip);
+  aspect-ratio: var(--zim-ratio, 11 / 10);   /* set automatically by JS */
+  height: auto;
+  outline: 0;
+  box-shadow: none;       /* clip-path would cut it off anyway */
+}
+
+.zim-borders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;      /* the svg itself ignores clicks... */
+}
+
+.zim-province {
+  fill: transparent;         /* needed so the inside of the shape is clickable */
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.5;
+  pointer-events: all;       /* ...but each province catches them */
+  cursor: pointer;
+  transition: fill 0.2s;
+  outline: none;
+}
+
+.zim-province:hover,
+.zim-province:focus-visible {
+  fill: rgba(212, 130, 10, 0.35);   /* amber highlight */
 }

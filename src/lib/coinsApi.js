@@ -2,7 +2,6 @@
 // Same Worker and same routes as the mobile app's services/coinsApi.js.
 import { auth } from "./firebase";
 
-// Vite shown here. Use process.env.REACT_APP_... if you're on CRA.
 const API = (
   import.meta.env.VITE_UPLOAD_WORKER_URL ||
   "https://kraal-upload.kraal523.workers.dev"

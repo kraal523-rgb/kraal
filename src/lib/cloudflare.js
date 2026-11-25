@@ -3,7 +3,7 @@ import { postFormData } from "./postForm";
 
 // Expo replaces this public env reference at build time.
 // eslint-disable-next-line no-undef
-const WORKER_URL = process.env.EXPO_PUBLIC_UPLOAD_WORKER_URL;
+const WORKER_URL = import.meta.env.EXPO_PUBLIC_UPLOAD_WORKER_URL;
 
 /**
  * Upload a single image to R2 through the Worker proxy.

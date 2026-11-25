@@ -346,7 +346,7 @@ body,
 ═══════════════════════════════════════ */
 .hero {
   position: relative;
-  background: var(--hero-cream);
+  background: var(--hero-grass);
   overflow: hidden;
   padding: 0;
   min-height: 100svh;
@@ -410,6 +410,7 @@ body,
   grid-template-columns: 1fr 1fr;
   gap: 48px;
   align-items: center;
+  background: transparent;
   max-width: 1240px;
   margin: 0 auto;
   padding: 96px 48px 80px;
@@ -1186,7 +1187,7 @@ body,
    SHARED SECTION ATOMS
 ═══════════════════════════════════════ */
 .section-inner {
-  max-width: 1920px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 36px;
 }

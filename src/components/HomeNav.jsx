@@ -51,18 +51,7 @@ export default function HomeNav() {
   return (
      <>
     <header className="home-nav">
-      {/* 1. Utility bar (desktop) */}
-      <div className="nav-util">
-        <div className="nav-util-inner">
-          <span>🇿🇼 {t("tagline")}</span>
-          <div className="nav-util-right">
-            <LanguageSwitcher />
-            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-              💬 {t("help")}
-            </a>
-          </div>
-        </div>
-      </div>
+      
 
       {/* 2. Main bar */}
       <nav className="nav-main" aria-label="Main">

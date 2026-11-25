@@ -26,6 +26,7 @@ import imgDonkey from "../assets/pngegg__3.png"
 import harareCoat from "../assets/harare-coat.svg"
 import imgGeese from "../assets/geese.png";
 import imgCats from "../assets/cat.jpg";
+import { ZimClip, ZimBorders } from "../components/ZimClip";
 import imgPigeons from "../assets/pigeon.png";
 import imgGuineaPig from "../assets/guineapig.png";
 import imgOstrich from "../assets/ostrich.png";
@@ -198,6 +199,7 @@ export default function Home() {
 const footerRef = useRef(null);
 const [footerH, setFooterH] = useState(0);
 const [curtain, setCurtain] = useState(true);
+const [tickerListings, setTickerListings] = useState([]);
 
 useEffect(() => {
   const el = footerRef.current;
@@ -274,6 +276,7 @@ useEffect(() => {
       });
 
       // Sort by listing count, take top 8
+      // eslint-disable-next-line no-unused-vars
       const sorted = Object.values(sellerMap)
         .sort((a, b) => b.listingCount - a.listingCount)
         .slice(0, 8)
@@ -285,7 +288,7 @@ useEffect(() => {
           color: nameToColor(s.name),
         }));
 
-      setTopFarmers(sorted);
+      //setTopFarmers(sorted);
     } catch (err) {
       console.error("Failed to fetch top farmers:", err);
     }
@@ -294,30 +297,30 @@ useEffect(() => {
   fetchTopFarmers();
 }, []);
 const fetchFeatured = useCallback(async () => {
-    try {
-      const q = query(
-        collection(db, "listings"),
-        where("status", "==", "active"),
-        orderBy("createdAt", "desc"),
-        limit(6)
-      );
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setFeaturedListings(data);
-    } catch (err) {
-      console.error("Failed to fetch listings:", err);
-      setFetchError(true); 
-    }
-  },[]);
+  try {
+    const q = query(
+      collection(db, "listings"),
+      where("status", "==", "active"),
+      orderBy("createdAt", "desc"),
+      limit(20)                                  // was 6
+    );
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    setFeaturedListings(data.slice(0, 6));       // grid still shows 6
+    setTickerListings(data);                     // ticker gets all 20
+  } catch (err) {
+    console.error("Failed to fetch listings:", err);
+    setFetchError(true);
+  }
+}, []);
   // Intersection observer for scroll reveals
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+           // eslint-disable-next-line no-undef
            setVisibleSections((prev) => {
   const next = new Set(prev);
   next.add(entry.target.id);
@@ -352,7 +355,25 @@ useEffect(() => {
     console.error("Alert signup failed:", err);
   }
 };
-
+const tickerItems =
+  tickerListings.length > 0
+    ? tickerListings
+        .filter((l) => l.price)
+        .map((l) => {
+          const isNew =
+            l.createdAt?.seconds &&
+            // eslint-disable-next-line react-hooks/purity
+            Date.now() / 1000 - l.createdAt.seconds < 86400;
+          return {
+            id: l.id,
+            label: l.title,
+            price: `${l.currency || "USD"} ${l.price.toLocaleString()}${
+              l.pricePerHead ? " /head" : ""
+            }`,
+            isNew,
+          };
+        })
+    : PRICE_TICKER.map((p) => ({ ...p, id: null }));  // fallback
   return (
     <div className="home">
       {/* ── NAV ── */}
@@ -423,7 +444,7 @@ useEffect(() => {
     <div className="hero-right">
 
       {/* Farm-window video frame */}
-      
+     <ZimClip /> 
    <div className="hero-video-frame">
         <div className="hero-video-track">
           {heroVideos.map((video, index) => (
@@ -444,7 +465,7 @@ useEffect(() => {
             />
           ))}
         </div>
-
+<ZimBorders />
         {/* Live badge */}
         <div className="hero-video-live-badge" aria-hidden="true">
           <span className="live-dot" />
@@ -518,35 +539,51 @@ useEffect(() => {
     
   </div>
   
-<div className="price-ticker-band" aria-label="Live market prices">
-        <div className="price-ticker-label">📊 Live Prices</div>
-        <img src={navIcon} alt="" className="price-ticker-icon" />
-        <div className="price-ticker-scroll">
-          <div className="price-ticker-track">
-            {[...PRICE_TICKER, ...PRICE_TICKER].map((item, i) => (
-              <span key={i} className="price-ticker-item">
-                <span className="pt-label">{item.label}</span>
-                <span className={`pt-price ${item.trend}`}>
-                  {item.price}
-                  <span className="pt-arrow">
-                    {item.trend === "up" ? "↑" : "↓"}
-                  </span>
-                </span>
-                <span className="pt-sep">·</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+
      
  
 </section>
 <section className="categories-section" id="categories" data-observe>
-  <div className="section-inner">
+  <div className="price-ticker-band" aria-label="Latest listings">
+  <div className="price-ticker-label">📊 Latest Listings</div>
+  <img src={navIcon} alt="" className="price-ticker-icon" />
+  <div className="price-ticker-scroll">
+    <div
+      className="price-ticker-track"
+      style={{ animationDuration: `${Math.max(tickerItems.length * 4, 20)}s` }}
+    >
+      {[...tickerItems, ...tickerItems].map((item, i) => {
+        const content = (
+          <>
+            <span className="pt-label">{item.label}</span>
+            <span className={`pt-price ${item.trend || "up"}`}>
+              {item.price}
+              {item.isNew ? (
+                <span className="pt-new">NEW</span>
+              ) : item.trend ? (
+                <span className="pt-arrow">{item.trend === "up" ? "↑" : "↓"}</span>
+              ) : null}
+            </span>
+            <span className="pt-sep">·</span>
+          </>
+        );
+
+        return item.id ? (
+          <Link key={i} to={`/listings/${item.id}`} className="price-ticker-item">
+            {content}
+          </Link>
+        ) : (
+          <span key={i} className="price-ticker-item">{content}</span>
+        );
+      })}
+    </div>
+  </div>
+</div>
+  
 
     {/* --- Livestock --- */}
     <div className="section-header">
-      <div>
+      <div style={{ maxWidth: "calc(100% - 120px)", marginTop: "20px" }}>
         <p className="section-eyebrow">What are you looking for?</p>
         <h2 className="section-title">Browse by Animal</h2>
       </div>
@@ -611,11 +648,10 @@ useEffect(() => {
       ))}
     </div>
 
-  </div>
 </section>
       {/* ── FEATURED LISTINGS ── */}
     <section className="featured-section" id="featured" data-observe>
-  <div className="section-inner">
+ 
     <div className="section-header">
       <div>
         <p className="section-eyebrow">Fresh on the market</p>
@@ -715,7 +751,7 @@ useEffect(() => {
         })
       )}
     </div>
-  </div>
+ 
 </section>
 <ProvinceMapFilter />
 
@@ -900,7 +936,7 @@ useEffect(() => {
       </section>
 
       {/* ── CTA BAND ── */}
-      <section className="cta-section">
+    {/*--  <section className="cta-section">
         <div className="cta-grain" aria-hidden="true" />
         <div className="cta-inner">
           <div className="cta-text">
@@ -938,7 +974,7 @@ useEffect(() => {
         </div>
       </div>
         </div>
-      </section>
+      </section> ---*/}
 <section className="kraal-section">
   <div className="section-inner">
    
