@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import phoneImg from "../assets/8.png";
+import phoneImg2 from "../assets/3.png";
 import "./ProvinceMapFilter.css";
 
 const PROVINCES_BASE = [
@@ -132,6 +134,7 @@ export default function ProvinceMapFilter() {
     PROVINCES_BASE.map((p) => ({ ...p, listings: 0, animals: [] })),
   );
   const [hoveredProvince, setHoveredProvince] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -205,6 +208,15 @@ export default function ProvinceMapFilter() {
   return (
     <section className="pmf-section">
       <div className="section-inner">
+        <div className="pmf-with-phone">
+
+      {/* LEFT: phone */}
+      <aside className="pmf-phone-col" aria-hidden="true">
+        <img src={phoneImg} alt="" className="pmf-phone" />
+      </aside>
+
+      {/* RIGHT: everything that was already here */}
+      <div className="pmf-main">
         {/* Header */}
         <div className="pmf-header">
           <div>
@@ -349,48 +361,15 @@ onMouseLeave={() => { setTooltip(null); setHoveredProvince(null); }}
 
           {/* ── PROVINCE LIST ── */}
           <div className="pmf-panel">
-            <p className="pmf-panel-head">All provinces</p>
-            {loading
-              ? Array.from({ length: 10 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="pmf-chip skeleton"
-                    style={{ height: 36, marginBottom: 4 }}
-                  />
-                ))
-              : provinces.map((p) => (
-                  <button
-                    key={p.id}
-                    className={`pmf-chip ${active === p.id ? "pmf-chip--active" : ""}`}
-                    onClick={() => toggle(p.id)}
-                  >
-                    <span className="pmf-chip-name">{p.name}</span>
-                    <span className="pmf-chip-count">{p.listings}</span>
-                  </button>
-                ))}
+            <img src={phoneImg2} alt="" className="pmf-phone" />
           </div>
         </div>
 
-        {/* ── RESULTS BAR ── */}
-        {activeProv && (
-          <div className="pmf-results">
-            <div>
-              <p className="pmf-results-label">
-                Showing listings in {activeProv.name}
-              </p>
-              <p className="pmf-results-count">
-                <strong>{activeProv.listings} listings</strong>
-                {activeProv.animals?.length > 0 && (
-                  <> · {activeProv.animals.join(", ")}</>
-                )}
-              </p>
-            </div>
-            <button className="pmf-browse-btn" onClick={handleBrowse}>
-              Browse {activeProv.name} →
-            </button>
-          </div>
-        )}
-      </div>
+      
+       </div>
+
+    </div>
+ </div>
     </section>
   );
 }

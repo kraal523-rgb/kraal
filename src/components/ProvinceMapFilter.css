@@ -292,3 +292,34 @@
 .pmf-browse-btn:active {
   transform: scale(0.97);
 }
+.pmf-with-phone {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr); /* minmax(0,…) stops the SVG from overflowing */
+  gap: 32px;
+  align-items: stretch;      /* column is as tall as the map + list */
+}
+
+.pmf-phone-col {
+  position: relative;
+}
+
+/* Slides down with the scroll, stops at the bottom of the section */
+.pmf-phone {
+  position: sticky;
+  top: 90px;                 /* clear your sticky nav, adjust as needed */
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.3));
+}
+
+/* Hide on tablets and phones, stack the layout */
+@media (max-width: 1100px) {
+  .pmf-with-phone {
+    grid-template-columns: 1fr;
+  }
+  .pmf-phone-col {
+    display: none;
+  }
+}

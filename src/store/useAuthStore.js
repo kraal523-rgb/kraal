@@ -87,6 +87,10 @@ createSellerProfile: async (uid, profileData) => {
     email: profileData.email || '',
     role,
     province: profileData.province || '',
+    provinceId: profileData.provinceId || '',
+    district: profileData.district || '',
+    districtId: profileData.districtId || '',
+    ward: profileData.ward || '',
     city: profileData.city || '',
     updatedAt: now,
     // Only on first creation, so a re-run can't reset verification or the join date

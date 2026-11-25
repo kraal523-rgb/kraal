@@ -129,9 +129,32 @@
   background-repeat: no-repeat;
   border-bottom: 0;
   position: relative;
+  overflow: clip; 
 }
 
-/* Overlay so text stays readable over the photo */
+.hero .phone-track {
+  position: absolute;
+  top: 0;
+  bottom: 0;                
+  left: 16px;
+  width: 350px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero .phone {
+  position: sticky;
+  top: 16px;                 
+  display: block;
+  width: 350px;
+  height: auto;
+  margin-top: 75px;         
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.35));
+}
+
+@media (max-width: 1100px) {
+  .hero .phone-track { display: none; }
+}
 .hero::before {
   content: "";
   position: absolute;
@@ -142,7 +165,7 @@
 }
 .hero-inner {
   gap: 80px;
-  padding: 80px 48px 88px;
+  padding: 30px 48px 8px;
  
 }
 .hero-title {
@@ -400,8 +423,106 @@
   padding: 96px 120px 64px;
 }
 .categories-grid {
+  display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 25px 25px;
+  gap: 25px;
+}
+
+.cat-tile {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border: 0;
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  color: #000000;
+  background: radial-gradient(circle at 50% 35%, #acadad 0%, #f8f8eb 75%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cat-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.ct-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;          
+  object-position: center;
+  padding: 14px 14px 92px;
+  transition: transform 0.5s ease;
+}
+
+.cat-tile:hover .ct-bg {
+  transform: scale(1.04);
+}
+
+/* dark gradient so text is readable on any photo */
+.cat-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+ background: linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.4) 35%, rgba(0,0,0,0) 55%);
+  pointer-events: none;
+}
+
+.ct-count {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.ct-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 18px 20px;
+}
+
+.ct-title {
+  margin: 0 0 4px;
+  font-family: "Playfair Display", Georgia, serif; /* swap for your heading font */
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ct-desc {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ct-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9be7a8;
+}
+
+.ct-link span {
+  transition: transform 0.2s ease;
+}
+
+.cat-tile:hover .ct-link span {
+  transform: translateX(4px);
 }
 .cat-card {
   width: 280px;
@@ -1269,7 +1390,7 @@ a.price-ticker-item:hover .pt-label {
 
 /* Hero: stop forcing a full-screen height and trim inner padding */
 .hero { min-height: auto; }
-.hero-inner { padding: 48px 48px 40px; }
+
 
 /* Smaller gaps inside sections */
 .section-header { margin-bottom: 24px; }
@@ -1344,4 +1465,116 @@ a.price-ticker-item:hover .pt-label {
 .zim-province:hover,
 .zim-province:focus-visible {
   fill: rgba(212, 130, 10, 0.35);   /* amber highlight */
+}
+@media (max-width: 1100px) {
+  .hero .phone {
+    display: none;            /* decorative on small screens; the app badges cover it */
+  }
+
+  .hero .hero-inner {
+    display: flex;
+    flex-direction: column;   /* copy first, video frame below */
+    padding-left: 0;          /* remove the desktop offset I suggested earlier */
+    gap: 24px;
+  }
+
+  .hero .hero-left,
+  .hero .hero-right {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: clamp(2rem, 9vw, 2.75rem);
+    line-height: 1.1;
+  }
+
+  /* Keep the video/map frame inside the screen and in normal flow */
+  .hero-video-frame {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    margin: 0 auto;
+  }
+
+  /* Buttons stack and stay below the frame */
+  .hero-actions {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .hero-actions a {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  /* Floating pills can crowd a small frame */
+  .hero-float-pills {
+    display: none;
+  }
+
+  .app-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .app-badge {
+    height: 44px;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 12px;
+  }
+
+  .cat-tile {
+    aspect-ratio: 3 / 4; /* taller, so text has room in a narrow tile */
+    border-radius: 14px;
+  }
+.ct-bg { padding: 10px 10px 84px; }
+  .ct-content {
+    padding: 12px;
+  }
+
+  .ct-title {
+    font-size: 1.1rem;
+  }
+
+  .ct-desc {
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+    /* keep long descriptions from overflowing */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ct-link {
+    font-size: 0.75rem;
+  }
+
+  .ct-count {
+    top: 8px;
+    right: 8px;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+  }
+
+  .trust-grid {
+    gap: 32px;
+  }
 }

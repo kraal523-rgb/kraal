@@ -33,7 +33,7 @@
   max-width: 1280px; margin: 0 auto; padding: 10px 24px;
   display: flex; align-items: center; gap: 20px;
 }
-.nav-logo img { width: 280px; display: block; }
+.nav-logo img { width: 200px; display: block; }
 
 .nav-search {
   flex: 1; max-width: 560px;

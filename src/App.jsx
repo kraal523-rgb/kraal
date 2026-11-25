@@ -80,6 +80,7 @@ function RoleGuard({ allowedRoles, redirectTo = "/marketplace", children }) {
 
   useEffect(() => {
     if (!user?.uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("denied");
       return;
     }

@@ -34,6 +34,7 @@ import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
 import CookieConsent from "../components/CookieConsent";
 import HomeNav from "../components/HomeNav";
+import phoneImg from "../assets/1.png";
 import "./Home.css";
 import "./Marketplace.css";
 import "./Home.classic.css";
@@ -44,24 +45,24 @@ import goatsVideo from "../assets/videos/goats.mp4";
 import roadRunner from "../assets/videos/roadrunner.mp4";
 import zimCoat from "../assets/Coat_of_arms_of_Zimbabwe.png"
 const CATEGORIES = [
-  { id: "cattle",     img: imgCattle,    label: "Cattle",        count: "1,240+" },
-  { id: "goats",      img: imgGoats,     label: "Goats",         count: "890+"   },
-  { id: "sheep",      img: imgSheep,     label: "Sheep",         count: "560+"   },
-  { id: "chicken",    img: imghen,       label: "Road Runner",   count: "2,100+" },
-  { id: "guinea",     img: imgGuinea,    label: "Guinea Fowl",   count: "340+"   },
-  { id: "ducks",      img: imgDucks,     label: "Ducks",         count: "280+"   },
-  { id: "geese",      img: imgGeese,     label: "Geese",         count: "120+"   },
-  { id: "pigeons",    img: imgPigeons,   label: "Pigeons",       count: "95+"    },
-  { id: "quail",      img: imgQuail,     label: "Quail",         count: "160+"   },
-  { id: "rabbits",    img: imgRabbits,   label: "Rabbits",       count: "410+"   },
-  { id: "guineapig",  img: imgGuineaPig, label: "Mbira (Cavia)", count: "75+"    },
-  { id: "turkey",     img: imgTurkey,    label: "Turkey",        count: "190+"   },
-  { id: "pigs",       img: imgPig,       label: "Pigs",          count: "320+"   },
-  { id: "horses",     img: imgHorse,     label: "Horses",        count: "95+"    },
-  { id: "donkeys",    img: imgDonkey,    label: "Donkeys",       count: "210+"   },
-  { id: "dogs",       img: imgDog,       label: "Dogs",          count: "150+"   },
-  { id: "cats",       img: imgCats,      label: "Cats",          count: "85+"    },
-  { id: "ostrich",    img: imgOstrich,   label: "Ostrich",       count: "40+"    },
+  { id: "cattle",    img: imgCattle,    label: "Cattle",        desc: "Brahman, Mashona, Tuli & more" },
+  { id: "goats",     img: imgGoats,     label: "Goats",         desc: "Boer, Matebele & indigenous" },
+  { id: "sheep",     img: imgSheep,     label: "Sheep",         desc: "Dorper, Sabi & crossbreeds" },
+  { id: "chicken",   img: imghen,       label: "Road Runner",   desc: "Free-range indigenous chickens" },
+  { id: "guinea",    img: imgGuinea,    label: "Guinea Fowl",   desc: "Live birds, keets & breeding stock" },
+  { id: "ducks",     img: imgDucks,     label: "Ducks",         desc: "Muscovy, Pekin & Khaki Campbell" },
+  { id: "geese",     img: imgGeese,     label: "Geese",         desc: "Embden, Toulouse & Chinese geese" },
+  { id: "pigeons",   img: imgPigeons,   label: "Pigeons",       desc: "Racing, fancy & meat pigeons" },
+  { id: "quail",     img: imgQuail,     label: "Quail",         desc: "Japanese quail, eggs & chicks" },
+  { id: "rabbits",   img: imgRabbits,   label: "Rabbits",       desc: "New Zealand White, Californian & more" },
+  { id: "guineapig", img: imgGuineaPig, label: "Mbira (Cavia)", desc: "Breeding pairs & young stock" },
+  { id: "turkey",    img: imgTurkey,    label: "Turkey",        desc: "Bronze, White & heritage breeds" },
+  { id: "pigs",      img: imgPig,       label: "Pigs",          desc: "Large White, Landrace & more" },
+  { id: "horses",    img: imgHorse,     label: "Horses",        desc: "Riding, working & breeding horses" },
+  { id: "donkeys",   img: imgDonkey,    label: "Donkeys",       desc: "Draught and working donkeys" },
+  { id: "dogs",      img: imgDog,       label: "Dogs",          desc: "Guard, herding & companion dogs" },
+  { id: "cats",      img: imgCats,      label: "Cats",          desc: "Kittens and farm cats" },
+  { id: "ostrich",   img: imgOstrich,   label: "Ostrich",       desc: "Chicks, breeders & slaughter birds" },
 ];
 const heroVideos = [
   {
@@ -133,12 +134,7 @@ const TESTIMONIALS = [
   },
 ];
 
-const STATS = [
-  { value: "12,000+", label: "Active Sellers", icon: "👨‍🌾" },
-  { value: "45,000+", label: "Animals Listed", icon: "🐄" },
-  { value: "5", label: "Countries Served", icon: "🌍" },
-  { value: "48h", label: "Avg. First Enquiry", icon: "⚡" },
-];
+
 
 const TRUST_ITEMS = [
   {
@@ -162,16 +158,7 @@ const TRUST_ITEMS = [
     desc: "Buyers from Zimbabwe, Zambia, Mozambique, SA, and Botswana on one platform.",
   },
 ];
-const RECENTLY_SOLD = [
-  { time: "2h ago",  qty: "15",  animal: "Boer Goats",      location: "Gweru"      },
-  { time: "4h ago",  qty: "3",   animal: "Brahman Bulls",   location: "Marondera"  },
-  { time: "5h ago",  qty: "200", animal: "Road Runners",    location: "Mutare"     },
-  { time: "6h ago",  qty: "8",   animal: "Duroc Piglets",   location: "Chinhoyi"   },
-  { time: "9h ago",  qty: "12",  animal: "Merino Ewes",     location: "Bulawayo"   },
-  { time: "11h ago", qty: "1",   animal: "Thoroughbred Mare", location: "Harare"   },
-  { time: "1d ago",  qty: "50",  animal: "Guinea Fowl",     location: "Masvingo"   },
-  { time: "1d ago",  qty: "6",   animal: "Nguni Cows",      location: "Bindura"    },
-];
+
 const REGIONS = [
   "Harare",
   "Bulawayo",
@@ -386,7 +373,9 @@ const tickerItems =
       {/* ── HERO ── */}
     <section className="hero">
   {/* Texture layers */}
-
+<div className="phone-track" aria-hidden="true">
+    <img src={phoneImg} alt="" className="phone" />
+  </div>
   <div className="hero-inner">
  
     {/* ── LEFT — copy + search + CTAs ── */}
@@ -580,30 +569,24 @@ const tickerItems =
       </div>
       <Link to="/marketplace" className="section-link">View all listings →</Link>
     </div>
-   <div className="categories-grid">
+  <div className="categories-grid">
   {CATEGORIES.map((cat, i) => (
-    <div key={cat.id} className="cat-cell">
-      <button
-        className="cat-card"
-        style={{ animationDelay: `${i * 0.06}s` }}
-        onClick={() => navigate(`/marketplace?category=${cat.id}`)}
-      >
-        <div className="cat-img-wrap">
-          {cat.img ? (
-            <img src={cat.img} alt={cat.label} className="cat-animal-img" loading="lazy" />
-          ) : (
-            <span className="cat-emoji">{cat.emoji}</span>
-          )}
-        </div>
-      </button>
-
-      {/* Now outside the card, below it */}
-      <div className="cat-info">
-        <span className="cat-label">{cat.label}</span>
-        <span className="cat-count">{cat.count} listings</span>
-        <span className="cat-arrow">→</span>
+    <button
+      key={cat.id}
+      className="cat-tile"
+      style={{ animationDelay: `${i * 0.06}s` }}
+      onClick={() => navigate(`/marketplace?category=${cat.id}`)}
+    >
+      <img src={cat.img} alt="" className="ct-bg" loading="lazy" />
+     
+      <div className="ct-content">
+        <h3 className="ct-title">{cat.label}</h3>
+        <p className="ct-desc">{cat.desc}</p>
+        <span className="ct-link">
+          Browse listings <span aria-hidden="true">→</span>
+        </span>
       </div>
-    </div>
+    </button>
   ))}
 </div>
 
@@ -1132,6 +1115,7 @@ const tickerItems =
         ✕
       </button>
       <KraalOnboardingForm
+        // eslint-disable-next-line no-unused-vars
         onComplete={({ role, profile }) => {
           setJoinModalOpen(false);
           navigate("/dashboard");

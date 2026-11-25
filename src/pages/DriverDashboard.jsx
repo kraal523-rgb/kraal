@@ -289,14 +289,7 @@ export default function DriverDashboard() {
     [myDeliveries, deliveryFilter],
   );
 
-  const initials = user?.displayName
-    ? user.displayName
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : (user?.email?.[0] || "?").toUpperCase();
+ 
 
   // ── RENDER ────────────────────────────────────────────────────────────────
   return (

@@ -15,6 +15,7 @@ import breeds from "../assets/breeds.jpg";
 import records from "../assets/records.jpg";
 import UserMenu from "../components/UserMenu";
 import online1 from "../assets/online-1.jpg";
+import online from "../assets/online.avif"
 import { Helmet } from "react-helmet-async";
 import "./Blog.css";
 import HomeNav from "../components/HomeNav";
@@ -669,7 +670,7 @@ If drought is coming, sell early whatever the calendar says. Prices collapse whe
     title: "How to Write an Online Livestock Listing That Sells Fast",
     excerpt:
       "Two sellers list the same bull. One sells in 3 days, the other in 3 weeks. The difference is usually the listing. Here's the formula.",
-    cover: online1,
+    cover: online,
     emoji: "✍️",
     category: "Selling Tips",
     date: "September 28, 2026",

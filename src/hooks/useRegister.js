@@ -60,9 +60,14 @@ const INITIAL_FORM = {
   livestockTypes: [],
   vehicleType: "",  
   capacity: "",     
-  // Step 2 - Location
+ // Step 2 - Location
   country: "Zimbabwe",
   province: "",
+  provinceId: "",
+  district: "",
+  districtId: "",
+  ward: "",
+  hasWards: false, // UI-only flag used by StepLocation validation, never saved
   city: "",
   address: "",
 
@@ -185,10 +190,12 @@ try {
       });
 
       // Pre-fill the registration form with what we already know
-      update({
+           update({
         role:          ussdData.role        || form.role,
         businessName:  ussdData.businessName || form.businessName,
         province:      ussdData.province    || form.province,
+        district:      ussdData.district    || form.district,
+        ward:          ussdData.ward        || form.ward,
         city:          ussdData.city        || form.city,
         whatsapp:      ussdData.whatsapp    || form.whatsapp,
         livestockTypes: ussdData.livestockTypes || [],
@@ -253,7 +260,7 @@ try {
       }
     }
 
-    await createSellerProfile(user.uid, {
+        await createSellerProfile(user.uid, {
       email: form.email || user.email,
       businessName: form.businessName,
       phone: form.phone,
@@ -262,6 +269,10 @@ try {
       description: form.description || "",
       country: form.country,
       province: form.province,
+      provinceId: form.provinceId || "",
+      district: form.district || "",
+      districtId: form.districtId || "",
+      ward: form.ward || "",
       city: form.city,
       address: form.address || "",
       photoUrl,
@@ -269,7 +280,6 @@ try {
       available: form.role === "transporter",
       vehicleType: form.vehicleType || "",
       capacity: form.capacity || "",
-      // no coins here: the Worker wallet is the only source of truth
     });
 
     // Must come AFTER createSellerProfile: the Worker reads users/{uid}.role.
