@@ -345,6 +345,9 @@
   color: var(--brass-text);
   margin-bottom: 6px;
 }
+.hero-app .section-eyebrow {
+  color: var(--brass-lt);
+}
 .section-eyebrow.light {
   color: var(--brass-text);
 }

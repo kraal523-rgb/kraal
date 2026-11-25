@@ -1699,7 +1699,7 @@ body,
 }
 .app-badge{
   width: auto;
-  height: 450px;
+  height: 100px;
 }
 .hero-live-feed {
   display: flex;

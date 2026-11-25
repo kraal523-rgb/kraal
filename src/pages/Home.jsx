@@ -410,33 +410,24 @@ const tickerItems =
       
 
 
-<div className="hero-stats-row">
-  {STATS.map((s, i) => (
-    <div key={i} className="hero-stat">
-      <span className="hero-stat-icon">{s.icon}</span>
-      <strong className="hero-stat-value">{s.value}</strong>
-      <span className="hero-stat-label">{s.label}</span>
-    </div>
-  ))}
-</div>
-     <div className="hero-quick-cats">
-  {[
-    { id: "cattle",  emoji: "🐄", label: "Cattle",       count: "1,240+" },
-    { id: "goats",   emoji: "🐐", label: "Goats",        count: "890+"   },
-    { id: "chicken", emoji: "🐓", label: "Road Runners", count: "2,100+" },
-    { id: "sheep",   emoji: "🐑", label: "Sheep",        count: "560+"   },
-    { id: "pigs",    emoji: "🐖", label: "Pigs",         count: "320+"   },
-  ].map((c) => (
-    <button
-      key={c.id}
-      className="hero-quick-cat"
-      onClick={() => navigate(`/marketplace?category=${c.id}`)}
+<div className="hero-app">
+  <h2 className="section-eyebrow">Download the KraalMarket app</h2>
+  <div className="app-badges">
+    <a
+      href="https://play.google.com/store/apps/details?id=com.gerbo.kraalmarket&pcampaignid=web_share"
+      target="_blank"
+      rel="noopener noreferrer"
     >
-      <span>{c.emoji}</span>
-      <span>{c.label}</span>
-      <span className="hqc-count">{c.count}</span>
-    </button>
-  ))}
+      <img className="app-badge" src={google} alt="Get it on Google Play" />
+    </a>
+    <a
+      href="https://apps.apple.com/app/YOUR_APP_ID"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img className="app-badge" src={apple} alt="Download on the App Store" />
+    </a>
+  </div>
 </div>
     </div>
  
