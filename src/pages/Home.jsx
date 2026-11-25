@@ -8,7 +8,7 @@ import navIcon from "../assets/kraal-logo.svg"
 import imgCattle from "../assets/pngegg__5.png";   
 import imgGoats from "../assets/pngegg__6.png";    
 import imgSheep from "../assets/pngegg__7.png";    
-import imgDucks from "../assets/duck-1.webp";   
+import imgDucks from "../assets/duck-1.png";   
 import imgGuinea from "../assets/pngegg__13.png";  
 import imgRabbits from "../assets/pngegg__14.png"; 
 import imghen from "../assets/pngegg__9.png"; 
@@ -25,7 +25,7 @@ import eggs from "../assets/eggs.jpg";
 import imgDonkey from "../assets/pngegg__3.png"
 import harareCoat from "../assets/harare-coat.svg"
 import imgGeese from "../assets/geese.png";
-import imgCats from "../assets/cat.jpg";
+import imgCats from "../assets/cat.png";
 import { ZimClip, ZimBorders } from "../components/ZimClip";
 import imgPigeons from "../assets/pigeon.png";
 import imgGuineaPig from "../assets/guineapig.png";
