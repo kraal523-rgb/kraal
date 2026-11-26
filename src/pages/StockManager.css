@@ -1308,3 +1308,102 @@
   color: #374151;
   border: 1px solid #9ca3af;
 }
+/* ════════════════════════════════════════════════════
+   Quote / Invoice popup
+   Paste at the END of StockManager.css
+   (after modal-and-form-fix.css)
+   ════════════════════════════════════════════════════ */
+
+.dp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dp-modal {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 860px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px;
+  background: #f8fafc;
+  border-bottom: 1px solid #d1d5db;
+  flex-shrink: 0;
+}
+
+.dp-modal-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.dp-modal-close {
+  background: #ffffff;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  color: #4b5563;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dp-modal-close:hover {
+  background: #fdecea;
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+.dp-modal-body {
+  padding: 18px 22px;
+  overflow-y: auto;
+  flex: 1;
+  background: #f4f6f8;
+}
+
+.dp-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  background: #f8fafc;
+  border-top: 1px solid #d1d5db;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .dp-overlay {
+    padding: 0;
+  }
+  .dp-modal {
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+  .dp-modal-footer {
+    flex-wrap: wrap;
+  }
+}

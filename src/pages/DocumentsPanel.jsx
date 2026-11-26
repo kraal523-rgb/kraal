@@ -85,7 +85,7 @@ export default function DocumentsPanel() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("all");
-  const [mode, setMode] = useState("list"); // list | edit | preview
+  const [mode, setMode] = useState("list"); // list | edit (modal over list) | preview
   const [currentDoc, setCurrentDoc] = useState(null);
   const [form, setForm] = useState(EMPTY_DOC);
   const [saving, setSaving] = useState(false);
@@ -199,6 +199,21 @@ export default function DocumentsPanel() {
     setMode("preview");
   }
 
+  function closeModal() {
+    setMode("list");
+    setCurrentDoc(null);
+  }
+
+  // Close the popup with the Escape key
+  useEffect(() => {
+    if (mode !== "edit") return;
+    const onKey = (e) => {
+      if (e.key === "Escape") closeModal();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mode]);
+
   // ── Print ────────────────────────────────────────────────────────────────
   function handlePrint() {
     const content = printRef.current?.innerHTML;
@@ -249,9 +264,9 @@ export default function DocumentsPanel() {
       : documents.filter((d) => d.type === typeFilter);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // LIST VIEW
+  // LIST VIEW  (+ edit popup rendered on top of it)
   // ─────────────────────────────────────────────────────────────────────────
-  if (mode === "list") {
+  if (mode === "list" || mode === "edit") {
     return (
       <div className="dp-root">
         <div className="dp-toolbar">
@@ -382,378 +397,439 @@ export default function DocumentsPanel() {
             })}
           </div>
         )}
-      </div>
-    );
-  }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // EDIT VIEW
-  // ─────────────────────────────────────────────────────────────────────────
-  if (mode === "edit") {
-    return (
-      <div className="dp-root">
-        <div className="dp-edit-header">
-          <button className="dp-back-btn" onClick={() => setMode("list")}>
-            ← Back
-          </button>
-          <h2>
-            {currentDoc ? `Edit ${form.type}` : `New ${form.type}`}{" "}
-            {form.ref ? `— ${form.ref}` : ""}
-          </h2>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              className="dp-preview-btn"
-              onClick={() => setMode("preview")}
+        {/* ══ QUOTE / INVOICE POPUP ══ */}
+        {mode === "edit" && (
+          <div className="dp-overlay">
+            <div
+              className="dp-modal"
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
             >
-              👁 Preview
-            </button>
-            <button
-              className="dp-save-btn"
-              onClick={saveDocument}
-              disabled={saving}
-            >
-              {saving ? "Saving…" : "Save"}
-            </button>
-          </div>
-        </div>
-
-        <div className="dp-edit-body">
-          {/* Document type + status */}
-          <div className="dp-section">
-            <div className="dp-section-title">Document info</div>
-            <div className="dp-form-grid">
-              <div className="dp-fg">
-                <label>Type</label>
-                <select
-                  value={form.type}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, type: e.target.value }))
-                  }
+              <div className="dp-modal-header">
+                <h2>
+                  {currentDoc ? "✏️ Edit" : "➕ New"}{" "}
+                  {form.type === "invoice" ? "invoice" : "quote"}
+                  {form.ref ? ` — ${form.ref}` : ""}
+                </h2>
+                <button
+                  className="dp-modal-close"
+                  onClick={closeModal}
+                  title="Close"
                 >
-                  <option value="quote">Quote</option>
-                  <option value="invoice">Invoice</option>
-                </select>
+                  ✕
+                </button>
               </div>
-              <div className="dp-fg">
-                <label>Status</label>
-                <select
-                  value={form.status}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, status: e.target.value }))
-                  }
-                >
-                  {Object.keys(STATUS_STYLES).map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="dp-fg">
-                <label>Currency</label>
-                <select
-                  value={form.currency}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, currency: e.target.value }))
-                  }
-                >
-                  <option>USD</option>
-                  <option>ZWG</option>
-                  <option>ZAR</option>
-                  <option>BWP</option>
-                </select>
-              </div>
-              <div className="dp-fg">
-                <label>Issue date</label>
-                <input
-                  type="date"
-                  value={form.issueDate}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, issueDate: e.target.value }))
-                  }
-                />
-              </div>
-              {form.type === "invoice" ? (
-                <div className="dp-fg">
-                  <label>Due date</label>
-                  <input
-                    type="date"
-                    value={form.dueDate}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, dueDate: e.target.value }))
-                    }
-                  />
-                </div>
-              ) : (
-                <div className="dp-fg">
-                  <label>Valid until</label>
-                  <input
-                    type="date"
-                    value={form.validUntil}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, validUntil: e.target.value }))
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Parties */}
-          <div className="dp-two-col">
-            <div className="dp-section">
-              <div className="dp-section-title">From (your details)</div>
-              <div className="dp-form-stack">
-                <div className="dp-fg">
-                  <label>Your name / farm name</label>
-                  <input
-                    value={form.sellerName}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, sellerName: e.target.value }))
-                    }
-                    placeholder="Takudzwa Moyo Farms"
-                  />
-                </div>
-                <div className="dp-fg">
-                  <label>Phone / WhatsApp</label>
-                  <input
-                    value={form.sellerPhone}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, sellerPhone: e.target.value }))
-                    }
-                    placeholder="+263 71 234 5678"
-                  />
-                </div>
-                <div className="dp-fg">
-                  <label>Address</label>
-                  <textarea
-                    rows={2}
-                    value={form.sellerAddress}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, sellerAddress: e.target.value }))
-                    }
-                    placeholder="Marondera, Mashonaland East"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="dp-section">
-              <div className="dp-section-title">Bill to (client)</div>
-              <div className="dp-form-stack">
-                <div className="dp-fg">
-                  <label>Client name *</label>
-                  <input
-                    value={form.clientName}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, clientName: e.target.value }))
-                    }
-                    placeholder="Farai Chikwanda"
-                  />
-                </div>
-                <div className="dp-fg">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={form.clientEmail}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, clientEmail: e.target.value }))
-                    }
-                    placeholder="farai@example.com"
-                  />
-                </div>
-                <div className="dp-fg">
-                  <label>Phone</label>
-                  <input
-                    value={form.clientPhone}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, clientPhone: e.target.value }))
-                    }
-                    placeholder="+263 77 987 6543"
-                  />
-                </div>
-                <div className="dp-fg">
-                  <label>Address</label>
-                  <textarea
-                    rows={2}
-                    value={form.clientAddress}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, clientAddress: e.target.value }))
-                    }
-                    placeholder="Gweru, Midlands"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Line items */}
-          <div className="dp-section">
-            <div className="dp-section-title">Line items</div>
-            <div className="dp-line-table-wrap">
-              <table className="dp-line-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: "45%" }}>Description</th>
-                    <th style={{ width: "12%" }}>Qty</th>
-                    <th style={{ width: "18%" }}>Unit price</th>
-                    <th style={{ width: "18%" }}>Total</th>
-                    <th style={{ width: "7%" }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {form.lines.map((line, idx) => (
-                    <tr key={idx}>
-                      <td>
+              <div className="dp-modal-body">
+                <div className="dp-edit-body">
+                  {/* Document type + status */}
+                  <div className="dp-section">
+                    <div className="dp-section-title">Document info</div>
+                    <div className="dp-form-grid">
+                      <div className="dp-fg">
+                        <label>Type</label>
+                        <select
+                          value={form.type}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, type: e.target.value }))
+                          }
+                        >
+                          <option value="quote">Quote</option>
+                          <option value="invoice">Invoice</option>
+                        </select>
+                      </div>
+                      <div className="dp-fg">
+                        <label>Status</label>
+                        <select
+                          value={form.status}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, status: e.target.value }))
+                          }
+                        >
+                          {Object.keys(STATUS_STYLES).map((s) => (
+                            <option key={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="dp-fg">
+                        <label>Currency</label>
+                        <select
+                          value={form.currency}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, currency: e.target.value }))
+                          }
+                        >
+                          <option>USD</option>
+                          <option>ZWG</option>
+                          <option>ZAR</option>
+                          <option>BWP</option>
+                        </select>
+                      </div>
+                      <div className="dp-fg">
+                        <label>Issue date</label>
                         <input
-                          className="dp-inline-input"
-                          placeholder="e.g. 5× Brahman Bulls – Grade A"
-                          value={line.description}
+                          type="date"
+                          value={form.issueDate}
                           onChange={(e) =>
                             setForm((f) => ({
                               ...f,
-                              lines: recalcLine(
-                                f.lines,
-                                idx,
-                                "description",
-                                e.target.value,
-                              ),
+                              issueDate: e.target.value,
                             }))
                           }
                         />
-                      </td>
-                      <td>
-                        <input
-                          className="dp-inline-input dp-num-input"
-                          type="number"
-                          min="0"
-                          value={line.qty}
-                          onChange={(e) =>
-                            setForm((f) => ({
-                              ...f,
-                              lines: recalcLine(
-                                f.lines,
-                                idx,
-                                "qty",
-                                e.target.value,
-                              ),
-                            }))
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          className="dp-inline-input dp-num-input"
-                          type="number"
-                          min="0"
-                          value={line.unitPrice}
-                          onChange={(e) =>
-                            setForm((f) => ({
-                              ...f,
-                              lines: recalcLine(
-                                f.lines,
-                                idx,
-                                "unitPrice",
-                                e.target.value,
-                              ),
-                            }))
-                          }
-                        />
-                      </td>
-                      <td className="dp-line-total">
-                        {(line.total || 0).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td>
-                        {form.lines.length > 1 && (
-                          <button
-                            className="dp-remove-line"
-                            onClick={() => removeLine(idx)}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <button className="dp-add-line-btn" onClick={addLine}>
-              + Add line
-            </button>
+                      </div>
+                      {form.type === "invoice" ? (
+                        <div className="dp-fg">
+                          <label>Due date</label>
+                          <input
+                            type="date"
+                            value={form.dueDate}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                dueDate: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="dp-fg">
+                          <label>Valid until</label>
+                          <input
+                            type="date"
+                            value={form.validUntil}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                validUntil: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-            <div className="dp-totals-block">
-              <div className="dp-total-row">
-                <span>Subtotal</span>
-                <span>
-                  {form.currency}{" "}
-                  {subtotal.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
+                  {/* Parties */}
+                  <div className="dp-two-col">
+                    <div className="dp-section">
+                      <div className="dp-section-title">
+                        From (your details)
+                      </div>
+                      <div className="dp-form-stack">
+                        <div className="dp-fg">
+                          <label>Your name / farm name</label>
+                          <input
+                            value={form.sellerName}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                sellerName: e.target.value,
+                              }))
+                            }
+                            placeholder="Takudzwa Moyo Farms"
+                          />
+                        </div>
+                        <div className="dp-fg">
+                          <label>Phone / WhatsApp</label>
+                          <input
+                            value={form.sellerPhone}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                sellerPhone: e.target.value,
+                              }))
+                            }
+                            placeholder="+263 71 234 5678"
+                          />
+                        </div>
+                        <div className="dp-fg">
+                          <label>Address</label>
+                          <textarea
+                            rows={2}
+                            value={form.sellerAddress}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                sellerAddress: e.target.value,
+                              }))
+                            }
+                            placeholder="Marondera, Mashonaland East"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="dp-section">
+                      <div className="dp-section-title">Bill to (client)</div>
+                      <div className="dp-form-stack">
+                        <div className="dp-fg">
+                          <label>Client name *</label>
+                          <input
+                            value={form.clientName}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                clientName: e.target.value,
+                              }))
+                            }
+                            placeholder="Farai Chikwanda"
+                          />
+                        </div>
+                        <div className="dp-fg">
+                          <label>Email</label>
+                          <input
+                            type="email"
+                            value={form.clientEmail}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                clientEmail: e.target.value,
+                              }))
+                            }
+                            placeholder="farai@example.com"
+                          />
+                        </div>
+                        <div className="dp-fg">
+                          <label>Phone</label>
+                          <input
+                            value={form.clientPhone}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                clientPhone: e.target.value,
+                              }))
+                            }
+                            placeholder="+263 77 987 6543"
+                          />
+                        </div>
+                        <div className="dp-fg">
+                          <label>Address</label>
+                          <textarea
+                            rows={2}
+                            value={form.clientAddress}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                clientAddress: e.target.value,
+                              }))
+                            }
+                            placeholder="Gweru, Midlands"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Line items */}
+                  <div className="dp-section">
+                    <div className="dp-section-title">Line items</div>
+                    <div className="dp-line-table-wrap">
+                      <table className="dp-line-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: "45%" }}>Description</th>
+                            <th style={{ width: "12%" }}>Qty</th>
+                            <th style={{ width: "18%" }}>Unit price</th>
+                            <th style={{ width: "18%" }}>Total</th>
+                            <th style={{ width: "7%" }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {form.lines.map((line, idx) => (
+                            <tr key={idx}>
+                              <td>
+                                <input
+                                  className="dp-inline-input"
+                                  placeholder="e.g. 5× Brahman Bulls – Grade A"
+                                  value={line.description}
+                                  onChange={(e) =>
+                                    setForm((f) => ({
+                                      ...f,
+                                      lines: recalcLine(
+                                        f.lines,
+                                        idx,
+                                        "description",
+                                        e.target.value,
+                                      ),
+                                    }))
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="dp-inline-input dp-num-input"
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={line.qty}
+                                  onChange={(e) =>
+                                    setForm((f) => ({
+                                      ...f,
+                                      lines: recalcLine(
+                                        f.lines,
+                                        idx,
+                                        "qty",
+                                        e.target.value,
+                                      ),
+                                    }))
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="dp-inline-input dp-num-input"
+                                  type="number"
+                                  min="0"
+                                  placeholder="0.00"
+                                  value={line.unitPrice}
+                                  onChange={(e) =>
+                                    setForm((f) => ({
+                                      ...f,
+                                      lines: recalcLine(
+                                        f.lines,
+                                        idx,
+                                        "unitPrice",
+                                        e.target.value,
+                                      ),
+                                    }))
+                                  }
+                                />
+                              </td>
+                              <td className="dp-line-total">
+                                {(line.total || 0).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                })}
+                              </td>
+                              <td>
+                                {form.lines.length > 1 && (
+                                  <button
+                                    className="dp-remove-line"
+                                    onClick={() => removeLine(idx)}
+                                  >
+                                    ✕
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <button className="dp-add-line-btn" onClick={addLine}>
+                      + Add line
+                    </button>
+
+                    <div className="dp-totals-block">
+                      <div className="dp-total-row">
+                        <span>Subtotal</span>
+                        <span>
+                          {form.currency}{" "}
+                          {subtotal.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                      <div className="dp-total-row">
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          Tax
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={form.taxRate}
+                            className="dp-tax-input"
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                taxRate: e.target.value,
+                              }))
+                            }
+                          />
+                          %
+                        </span>
+                        <span>
+                          {form.currency}{" "}
+                          {taxAmount.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                      <div className="dp-grand-total-row">
+                        <span>Total</span>
+                        <span>
+                          {form.currency}{" "}
+                          {grandTotal.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes + Terms */}
+                  <div className="dp-two-col">
+                    <div className="dp-section">
+                      <div className="dp-section-title">Notes</div>
+                      <textarea
+                        className="dp-textarea"
+                        rows={4}
+                        placeholder="Delivery instructions, special conditions, thank you message…"
+                        value={form.notes}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, notes: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="dp-section">
+                      <div className="dp-section-title">
+                        Terms &amp; conditions
+                      </div>
+                      <textarea
+                        className="dp-textarea"
+                        rows={4}
+                        value={form.terms}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, terms: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="dp-total-row">
-                <span
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+
+              <div className="dp-modal-footer">
+                <button className="dp-back-btn" onClick={closeModal}>
+                  Cancel
+                </button>
+                <button
+                  className="dp-preview-btn"
+                  onClick={() => setMode("preview")}
                 >
-                  Tax
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={form.taxRate}
-                    className="dp-tax-input"
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, taxRate: e.target.value }))
-                    }
-                  />
-                  %
-                </span>
-                <span>
-                  {form.currency}{" "}
-                  {taxAmount.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-              </div>
-              <div className="dp-grand-total-row">
-                <span>Total</span>
-                <span>
-                  {form.currency}{" "}
-                  {grandTotal.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
+                  👁 Preview
+                </button>
+                <button
+                  className="dp-save-btn"
+                  onClick={saveDocument}
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Saving…"
+                    : currentDoc
+                      ? "Save changes"
+                      : `Create ${form.type}`}
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Notes + Terms */}
-          <div className="dp-two-col">
-            <div className="dp-section">
-              <div className="dp-section-title">Notes</div>
-              <textarea
-                className="dp-textarea"
-                rows={4}
-                placeholder="Delivery instructions, special conditions, thank you message…"
-                value={form.notes}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, notes: e.target.value }))
-                }
-              />
-            </div>
-            <div className="dp-section">
-              <div className="dp-section-title">Terms &amp; conditions</div>
-              <textarea
-                className="dp-textarea"
-                rows={4}
-                value={form.terms}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, terms: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     );
   }
