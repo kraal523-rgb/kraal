@@ -22,63 +22,7 @@ import "./StockManager.css";
 import { useVetRequest } from "../hooks/useVetRequest.jsx";
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const INITIAL_ORDERS = [
-  {
-    id: "KRL-4421",
-    buyer: "Farai C.",
-    buyerInitials: "FC",
-    listing: "10× Brahman Bulls",
-    qty: 2,
-    amount: 2400,
-    status: "pending",
-    date: "Today",
-    location: "Gweru",
-  },
-  {
-    id: "KRL-4418",
-    buyer: "Rudo T.",
-    buyerInitials: "RT",
-    listing: "200× Road Runners",
-    qty: 50,
-    amount: 400,
-    status: "confirmed",
-    date: "Yesterday",
-    location: "Masvingo",
-  },
-  {
-    id: "KRL-4411",
-    buyer: "Chipo M.",
-    buyerInitials: "CM",
-    listing: "30× Dorper Lambs",
-    qty: 10,
-    amount: 1200,
-    status: "completed",
-    date: "3 days ago",
-    location: "Mutare",
-  },
-  {
-    id: "KRL-4399",
-    buyer: "Admire K.",
-    buyerInitials: "AK",
-    listing: "25× Boer Goats",
-    qty: 25,
-    amount: 4375,
-    status: "completed",
-    date: "5 days ago",
-    location: "Beitbridge",
-  },
-  {
-    id: "KRL-4388",
-    buyer: "Joseph M.",
-    buyerInitials: "JM",
-    listing: "8× Duroc Piglets",
-    qty: 4,
-    amount: 380,
-    status: "cancelled",
-    date: "1 week ago",
-    location: "Chinhoyi",
-  },
-];
+
 
 const STATUS_META = {
   active: { label: "Active", cls: "sd-pill-active" },
@@ -135,7 +79,7 @@ export default function SellerDashboard() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [listings, setListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
-  const [orders] = useState(INITIAL_ORDERS);
+  const [orders, setOrders] = useState([]);
   const [orderFilter, setOrderFilter] = useState("all");
   const [listingSearch, setListingSearch] = useState("");
   const [editListing, setEditListing] = useState(null);
@@ -172,7 +116,41 @@ export default function SellerDashboard() {
       setListingsLoading(false);
     });
   }, [user?.uid]);
-
+// ── Firestore: real orders ────────────────────────────────────────────────
+useEffect(() => {
+  if (!user?.uid) return;
+  const q = query(
+    collection(db, "orders"),
+    where("sellerId", "==", user.uid),
+  );
+  return onSnapshot(q, (snapshot) => {
+    const rows = snapshot.docs.map((d) => {
+      const o = d.data();
+      const buyer = o.buyerName || o.buyer || "Buyer";
+      return {
+        id: d.id,
+        buyer,
+        buyerInitials: buyer
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase(),
+        listing: o.listingTitle || o.listing || "Listing",
+        qty: o.quantity || o.qty || 1,
+        amount: Number(o.amount || o.total || 0),
+        status: o.status || "pending",
+        location: o.location || "—",
+        createdAt: o.createdAt?.toMillis?.() || 0,
+        date: o.createdAt?.toDate
+          ? o.createdAt.toDate().toLocaleDateString()
+          : "—",
+      };
+    });
+    rows.sort((a, b) => b.createdAt - a.createdAt);
+    setOrders(rows);
+  });
+}, [user?.uid]);
   // ── KPIs ─────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
     const activeListings = listings.filter((l) => l.status === "active");
