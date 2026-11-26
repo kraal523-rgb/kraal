@@ -1235,49 +1235,7 @@ export default function Marketplace() {
   />
 )}
 {/* ── TOP FARMERS ── */}
-{/* ── TOP FARMERS ── */}
-<section className="spotlight-section">
-  <div className="section-inner">
-    <div className="section-header">
-      <div>
-        <p className="section-eyebrow">Community</p>
-        <h2 className="section-title">Top Farmers on Kraal</h2>
-      </div>
-    </div>
-    <div className="spotlight-track-wrap">
-      <div className="spotlight-track">
-        {TOP_FARMERS.map((farmer, i) => (
-          <div key={i} className="spotlight-card">
-            <div className="sp-header">
-              <div className="sp-avatar" style={{ background: farmer.color }}>
-                {farmer.initials}
-              </div>
-              <div className="sp-meta">
-                <strong className="sp-name">{farmer.name}</strong>
-                <span className="sp-farm">{farmer.farm}</span>
-              </div>
-              {farmer.verified && (
-                <span className="sp-verified" title="Verified seller">✅</span>
-              )}
-            </div>
-            <div className="sp-location">📍 {farmer.location}</div>
-            <div className="sp-sells">🐾 {farmer.sells}</div>
-            <div className="sp-stats">
-              <span className="sp-rating">★ {farmer.rating}</span>
-              <span className="sp-sales">{farmer.sales} sold</span>
-            </div>
-            <button
-              className="sp-cta"
-              onClick={() => setSearch(farmer.name)}
-            >
-              View Listings →
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
+
       {/* ── FOOTER ── */}
        <footer className="home-footer">
              <div className="footer-inner">
