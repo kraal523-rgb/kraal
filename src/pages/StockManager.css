@@ -1144,3 +1144,167 @@
   .dp-totals-block { width: 100%; }
   .dp-preview-paper { padding: 20px; }
 }
+/* ════════════════════════════════════════════════════
+   FIX: visible modals + clear textboxes
+   Paste at the END of StockManager.css
+   (covers Stock modals and the Quote / Invoice forms)
+   ════════════════════════════════════════════════════ */
+
+/* 1. Define the variables these components use but that were never defined */
+.sm-root,
+.dp-root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f4f6f8;
+  --color-background-info: #e8f1fb;
+  --color-background-success: #eaf5ef;
+  --color-background-warning: #fef3c7;
+  --color-background-danger: #fdecea;
+
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #4b5563;
+  --color-text-info: #1e40af;
+  --color-text-success: #14532d;
+  --color-text-warning: #92400e;
+  --color-text-danger: #991b1b;
+
+  --color-border-primary: #374151;
+  --color-border-secondary: #9ca3af;
+  --color-border-tertiary: #d1d5db;
+  --color-border-warning: #f2d48a;
+  --color-border-danger: #f5c5c5;
+}
+
+/* 2. Stock modals: always on top, solid card */
+.sm-overlay {
+  z-index: 1100;
+  background: rgba(15, 23, 42, 0.6);
+  align-items: center;
+}
+
+.sm-modal {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.sm-modal-header {
+  background: #f8fafc;
+  border-radius: 12px 12px 0 0;
+}
+
+.sm-modal-footer {
+  background: #f8fafc;
+  border-radius: 0 0 12px 12px;
+}
+
+/* 3. Clear textboxes everywhere (stock modals + quote/invoice forms) */
+.sm-fg input,
+.sm-fg select,
+.sm-fg textarea,
+.dp-fg input,
+.dp-fg select,
+.dp-fg textarea,
+.dp-textarea,
+.dp-inline-input,
+.dp-tax-input {
+  background: #ffffff;
+  color: #111827;
+  border: 1.5px solid #9ca3af;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 14px;
+  line-height: 1.4;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.14s, box-shadow 0.14s;
+}
+
+.sm-fg input::placeholder,
+.sm-fg textarea::placeholder,
+.dp-fg input::placeholder,
+.dp-fg textarea::placeholder,
+.dp-textarea::placeholder,
+.dp-inline-input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.sm-fg input:hover,
+.sm-fg select:hover,
+.sm-fg textarea:hover,
+.dp-fg input:hover,
+.dp-fg select:hover,
+.dp-fg textarea:hover,
+.dp-textarea:hover,
+.dp-inline-input:hover {
+  border-color: #6b7280;
+}
+
+.sm-fg input:focus,
+.sm-fg select:focus,
+.sm-fg textarea:focus,
+.dp-fg input:focus,
+.dp-fg select:focus,
+.dp-fg textarea:focus,
+.dp-textarea:focus,
+.dp-inline-input:focus,
+.dp-tax-input:focus {
+  border-color: #0059b3;
+  box-shadow: 0 0 0 3px rgba(0, 89, 179, 0.18);
+}
+
+.sm-fg label,
+.dp-fg label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #374151;
+}
+
+/* 4. Quote / invoice sections: solid cards so fields stand out */
+.dp-section {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.dp-section-title {
+  color: #374151;
+}
+
+.dp-line-table th {
+  color: #374151;
+  border-bottom: 1px solid #9ca3af;
+}
+
+.dp-totals-block {
+  background: #f4f6f8;
+  border: 1px solid #d1d5db;
+}
+
+.dp-preview-paper {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+}
+
+/* 5. Buttons that relied on the same missing variables */
+.sm-add-btn,
+.sm-btn-save,
+.dp-save-btn,
+.dp-print-btn {
+  background: #0059b3;
+  color: #ffffff;
+}
+
+.sm-btn-cancel,
+.dp-back-btn,
+.dp-preview-btn,
+.dp-action-btn-lg {
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #9ca3af;
+}
