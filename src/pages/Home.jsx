@@ -1010,6 +1010,7 @@ const tickerItems =
               <br />
               going pan-African.
             </p>
+            <p>Gerbo Atlas (Private) Limited</p>
             <div className="footer-socials">
              <Link to="https://www.facebook.com/profile.php?id=61589812884808" aria-label="Facebook">
                 f
@@ -1060,7 +1061,7 @@ const tickerItems =
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} Kraal. Built with Love in Zimbabwe 🇿🇼
+            © {new Date().getFullYear()} Kraal Market by Gerbo Atlas (Private) Limited. Built with Love in Zimbabwe 🇿🇼
           </span>
           <span className="footer-tagline">
             From the farm gate to the world.
