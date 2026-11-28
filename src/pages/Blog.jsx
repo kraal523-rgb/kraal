@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/kraal-logo-black.svg";
 import brahman from "../assets/brahman.jpg";
 import tuli from "../assets/tuli-cattle.webp";
 import vaccination from "../assets/vaccination.webp";
 import roadrunner from "../assets/chicken-1.jpg";
-import drought  from "../assets/tuli-cattle.webp";
+
 import goat from "../assets/goats-2.jpg";
 import goat1 from "../assets/pngegg__6.png";
 import drought2 from "../assets/drought.png";
@@ -13,7 +13,7 @@ import transport from "../assets/transport-1.jpg";
 import cow from "../assets/cow.png";
 import breeds from "../assets/breeds.jpg";
 import records from "../assets/records.jpg";
-import UserMenu from "../components/UserMenu";
+
 import online1 from "../assets/online-1.jpg";
 import online from "../assets/online.avif"
 import { Helmet } from "react-helmet-async";
@@ -1731,7 +1731,6 @@ export default function Blog() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const categories = ["All", ...new Set(BLOG_POSTS.map((p) => p.category))];
-  const [menuOpen, setMenuOpen] = useState(false);
   const filtered =
     activeCategory === "All"
       ? BLOG_POSTS

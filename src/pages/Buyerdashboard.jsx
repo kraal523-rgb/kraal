@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,10 +16,9 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./Buyerdashboard.css";
-import UserMenu from "../components/UserMenu";
+import HomeNav from "../components/HomeNav";
 import ProfileSheet from "../components/ProfileSheet";
 import { useVetRequest } from "../hooks/useVetRequest.jsx";
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -289,7 +289,7 @@ useEffect(() => {
         });
         const data = await res.json();
         setBuyerInsights(data);
-      } catch {}
+      } catch { /* empty */ }
       finally { setInsightsLoading(false); }
     })();
   }, [ordersLoading, savedLoading, transportLoading]); // eslint-disable-line
@@ -313,7 +313,7 @@ useEffect(() => {
         });
         const data = await res.json();
         setTransportEstimate(data);
-      } catch {}
+      } catch { /* empty */ }
       finally { setEstimateLoading(false); }
     }, 600);
     return () => clearTimeout(timer);
@@ -337,7 +337,7 @@ useEffect(() => {
         });
         const data = await res.json();
         setReplySuggestions(data.suggestions || []);
-      } catch {}
+      } catch { /* empty */ }
       finally { setSuggestionsLoading(false); }
     })();
   }, [convoMessages.length, activeConvo?.id]); // eslint-disable-line
@@ -345,6 +345,7 @@ useEffect(() => {
   // ── Active conversation messages ─────────────────────────────────────────
   useEffect(() => {
     if (msgUnsubRef.current) { msgUnsubRef.current(); msgUnsubRef.current = null; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!activeConvo?.id) { setConvoMessages([]); return; }
     const q = query(collection(db, "conversations", activeConvo.id, "messages"), orderBy("createdAt", "asc"));
     msgUnsubRef.current = onSnapshot(q, (snap) => {
@@ -376,7 +377,7 @@ useEffect(() => {
       });
       const data = await res.json();
       setPriceChecks((p) => ({ ...p, [listing.id]: data }));
-    } catch {}
+    } catch { /* empty */ }
     finally { setPriceCheckLoading((p) => ({ ...p, [listing.id]: false })); }
   }, [priceChecks, priceCheckLoading]); // eslint-disable-line
 
@@ -416,7 +417,10 @@ useEffect(() => {
     () => conversations.reduce((n, c) => n + (c.unreadCount?.[user?.uid] || 0), 0),
     [conversations, user?.uid],
   );
-
+const pendingCount = useMemo(
+  () => orders.filter((o) => o.status === "pending").length,
+  [orders],
+);
   const filteredOrders = useMemo(
     () => orderFilter === "all" ? orders : orders.filter((o) => o.status === orderFilter),
     [orders, orderFilter],
@@ -530,56 +534,40 @@ useEffect(() => {
     <div className="bd">
 
       {/* ── TOPBAR ── */}
-      <header className="bd-topbar">
-        <div className="bd-topbar-logo">
-         
-          <div>
-            <img src={logo} width={100} alt="" />
-          </div>
-        </div>
+<HomeNav
+  variant="dashboard"
+  actions={
+    <>
+      <button className="nav-btn" onClick={() => openVetRequest()}>
+        🩺 <span className="nav-btn-label">Vet Certificate</span>
+      </button>
 
-        <div className="bd-topbar-left">
-          <span className="bd-topbar-title">
-            Welcome, {user?.displayName?.split(" ")[0] || "Buyer"} 👋
-          </span>
-          <div className="bd-topbar-search">
-            <span>🔍</span>
-            <input placeholder="Search…" readOnly onClick={() => setTab("Saved Listings")} />
-          </div>
-        </div>
+      {totalUnread > 0 && (
+        <button
+          className="nav-btn"
+          onClick={() => setTab("Messages")}
+          title={`${totalUnread} unread messages`}
+          aria-label={`${totalUnread} unread messages`}
+        >
+          💬
+          <span className="nav-btn-notif">{totalUnread}</span>
+        </button>
+      )}
 
-        <div className="bd-topbar-right">
-          <button onClick={() => openVetRequest()}>🩺 Request Vet Certificate</button>
-          <button
-            className="bd-topbar-btn bd-topbar-btn-ghost"
-            onClick={() => navigate("/marketplace")}
-          >
-            🐄 Browse Market
-          </button>
-          <button
-            className="bd-topbar-btn bd-topbar-btn-primary"
-            onClick={() => { setTab("Transport"); setShowTransportModal(true); }}
-          >
-            🚛 Request Transport
-          </button>
-          {totalUnread > 0 && (
-            <button
-              className="bd-topbar-icon-btn"
-              onClick={() => setTab("Messages")}
-            >
-              💬
-              <span className="bd-topbar-notif">{totalUnread}</span>
-            </button>
-          )}
-          <div
-            className="bd-topbar-avatar"
-            onClick={() => setProfileOpen(true)}
-            title="Profile"
-          >
-            {(user?.displayName || user?.email || "B").charAt(0).toUpperCase()}
-          </div>
-        </div>
-      </header>
+      {pendingCount > 0 && (
+        <button
+          className="nav-btn"
+          onClick={() => setTab("My Orders")}
+          title={`${pendingCount} pending orders`}
+          aria-label={`${pendingCount} pending orders`}
+        >
+          📦
+          <span className="nav-btn-notif">{pendingCount}</span>
+        </button>
+      )}
+    </>
+  }
+/>
 
       {/* ── SHELL: sidebar + main ── */}
       <div className="bd-shell">

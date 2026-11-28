@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
-import UserMenu from "../components/UserMenu";
+import HomeNav from "../components/HomeNav";
 import ProfileSheet from "../components/ProfileSheet";
 import {
   TemplateSelector,
@@ -22,20 +23,7 @@ import {
 } from "../components/CertificateTemplates";
 import "./VetDashboard.css";
 
-// ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 
-const PROVINCES = [
-  "Harare",
-  "Bulawayo",
-  "Manicaland",
-  "Mashonaland Central",
-  "Mashonaland East",
-  "Mashonaland West",
-  "Masvingo",
-  "Matabeleland North",
-  "Matabeleland South",
-  "Midlands",
-];
 
 const ANIMAL_TYPES = [
   "Cattle",
@@ -594,67 +582,58 @@ export default function VetDashboard() {
       setMsgSending(false);
     }
   }, [msgInput, activeConvo, user, msgSending]);
-
+const activeAlerts = useMemo(
+  () => diseaseAlerts.filter((a) => a.status === "active").length,
+  [diseaseAlerts],
+);
   // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
     <div className="vd">
       {/* ── TOPBAR ── */}
-      <header className="vd-topbar">
-        <div className="vd-topbar-brand">
-          <div className="vd-topbar-brand-icon">🩺</div>
-          <div>
-            <div className="vd-topbar-brand-name">Kraal</div>
-            <div className="vd-topbar-brand-sub">Vet Portal</div>
-          </div>
-        </div>
-        <div className="vd-topbar-center">
-          <span className="vd-topbar-greeting">
-            Dr. {user?.displayName?.split(" ")[0] || "Veterinarian"} 👋
+    <HomeNav
+  variant="dashboard"
+  actions={
+    <>
+      {openRequests.length > 0 && (
+        <button
+          className="nav-btn nav-btn-warn"
+          onClick={() => setActiveTab("Requests")}
+          title={`${openRequests.length} open requests`}
+          aria-label={`${openRequests.length} open requests`}
+        >
+          📋 <span className="nav-btn-label">
+            {openRequests.length} Open
           </span>
-          {vetProfile?.province && (
-            <span className="vd-topbar-province">📍 {vetProfile.province}</span>
-          )}
-        </div>
-        <div className="vd-topbar-right">
-          {openRequests.length > 0 && (
-            <button
-              className="vd-topbar-btn vd-topbar-btn-warn"
-              onClick={() => setActiveTab("Requests")}
-            >
-              📋 {openRequests.length} Open{" "}
-              {openRequests.length === 1 ? "Request" : "Requests"}
-            </button>
-          )}
-          {diseaseAlerts.filter((a) => a.status === "active").length > 0 && (
-            <button
-              className="vd-topbar-btn vd-topbar-btn-danger"
-              onClick={() => setActiveTab("Analytics")}
-            >
-              🦠 {diseaseAlerts.filter((a) => a.status === "active").length}{" "}
-              Disease Alert
-              {diseaseAlerts.filter((a) => a.status === "active").length > 1
-                ? "s"
-                : ""}
-            </button>
-          )}
-          {totalUnread > 0 && (
-            <button
-              className="vd-topbar-icon-btn"
-              onClick={() => setActiveTab("Messages")}
-            >
-              💬<span className="vd-topbar-notif">{totalUnread}</span>
-            </button>
-          )}
-          <div
-            className="vd-topbar-avatar"
-            onClick={() => setProfileOpen(true)}
-            title="Profile"
-          >
-            {(user?.displayName || user?.email || "V").charAt(0).toUpperCase()}
-          </div>
-        </div>
-      </header>
+        </button>
+      )}
 
+      {activeAlerts > 0 && (
+        <button
+          className="nav-btn nav-btn-danger"
+          onClick={() => setActiveTab("Analytics")}
+          title={`${activeAlerts} active disease alerts`}
+          aria-label={`${activeAlerts} active disease alerts`}
+        >
+          🦠 <span className="nav-btn-label">
+            {activeAlerts} Alert{activeAlerts > 1 ? "s" : ""}
+          </span>
+        </button>
+      )}
+
+      {totalUnread > 0 && (
+        <button
+          className="nav-btn"
+          onClick={() => setActiveTab("Messages")}
+          title={`${totalUnread} unread messages`}
+          aria-label={`${totalUnread} unread messages`}
+        >
+          💬
+          <span className="nav-btn-notif">{totalUnread}</span>
+        </button>
+      )}
+    </>
+  }
+/>
       {/* ── SHELL ── */}
       <div className="vd-shell">
         {/* ── SIDEBAR ── */}
@@ -713,10 +692,13 @@ export default function VetDashboard() {
             <>
               <div className="vd-page-bar">
                 <div>
-                  <div className="vd-page-bar-title">Overview</div>
-                  <div className="vd-page-bar-sub">
-                    Your veterinary activity at a glance
-                  </div>
+                  <div className="vd-page-bar-title">
+  Welcome, Dr. {user?.displayName?.split(" ")[0] || "Veterinarian"} 👋
+</div>
+<div className="vd-page-bar-sub">
+  {vetProfile?.province ? `📍 ${vetProfile.province} · ` : ""}
+  Your veterinary activity at a glance
+</div>
                 </div>
               </div>
               <div className="vd-content">

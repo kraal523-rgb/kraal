@@ -274,7 +274,24 @@
     transform: none;
   }
 }
+.home-nav .dd-availability-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 40px; padding: 0 14px;
+  border-radius: 999px; font-weight: 600; font-size: 0.88rem;
+  cursor: pointer; background: transparent;
+  border: 1.5px solid rgba(20, 38, 28, 0.2);
+  color: var(--forest-deep);
+}
+.home-nav .dd-avail-on  { border-color: #2d8a4e; background: rgba(45, 138, 78, 0.1); }
+.home-nav .dd-avail-off { border-color: rgba(20, 38, 28, 0.2); opacity: 0.8; }
+.home-nav .dd-avail-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: #9aa5a0;
+}
+.home-nav .dd-avail-on .dd-avail-dot { background: #2d8a4e; }
 
+@media (max-width: 640px) {
+  .home-nav .dd-availability-btn { padding: 0 12px; }
+}
 /* ─────────────────────────────────────────────────────────────
    AVAILABLE JOBS
 ───────────────────────────────────────────────────────────── */

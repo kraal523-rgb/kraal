@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSellerVerification } from "../hooks/useSellerVerification.jsx";
+import HomeNav from "../components/HomeNav";
 import {
   collection,
   query,
@@ -14,7 +15,6 @@ import {
 import { db } from "../lib/firebase";
 import useAuthStore from "../store/useAuthStore";
 import "./SellerDashboard.css";
-import UserMenu from "../components/UserMenu";
 import RequestTransportButton from "../components/RequestTransportButton";
 import StockManager from "./StockManager";
 import DocumentsPanel from "./DocumentsPanel";
@@ -347,43 +347,27 @@ useEffect(() => {
   return (
     <div className="sd">
       {/* ── TOPBAR ── */}
-      <header className="sd-topbar">
-        <div className="sd-topbar-logo">
-          <div className="sd-topbar-logo-icon">K</div>
-          <div>
-            <div className="sd-topbar-logo-text">Kraal</div>
-            <div className="sd-topbar-logo-sub">Seller Hub</div>
-          </div>
-        </div>
-
-        <div className="sd-topbar-left">
-          <span className="sd-topbar-title">
-            Welcome, {user?.displayName?.split(" ")[0] || "Seller"} 👋
-          </span>
-        </div>
-
-        <div className="sd-topbar-right">
-        
-         
-          <button
-            className="sd-topbar-btn sd-topbar-btn-ghost"
-            onClick={() => openVetRequest()}
-          >
-            🩺 Request Vet Certificate
-          </button>
-          {pendingCount > 0 && (
-            <button
-              className="sd-topbar-icon-btn"
-              onClick={() => setActiveTab("Orders")}
-              title={`${pendingCount} pending orders`}
-            >
-              📦
-              <span className="sd-topbar-notif">{pendingCount}</span>
-            </button>
-          )}
-          <UserMenu />
-        </div>
-      </header>
+    <HomeNav
+  variant="dashboard"
+  actions={
+    <>
+      <button className="nav-btn" onClick={() => openVetRequest()}>
+        🩺 <span className="nav-btn-label">Vet Certificate</span>
+      </button>
+      {pendingCount > 0 && (
+        <button
+          className="nav-btn"
+          onClick={() => setActiveTab("Orders")}
+          title={`${pendingCount} pending orders`}
+          aria-label={`${pendingCount} pending orders`}
+        >
+          📦
+          <span className="nav-btn-notif">{pendingCount}</span>
+        </button>
+      )}
+    </>
+  }
+/>
 
       {/* ── SHELL ── */}
       <div className="sd-shell">

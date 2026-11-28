@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   collection,
   query,
@@ -10,10 +9,9 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import logo from "../assets/kraal-logo.svg";
 import useAuthStore from "../store/useAuthStore";
 import "./DriverDashboard.css";
-import UserMenu from "../components/UserMenu";
+import HomeNav from "../components/HomeNav";
 import ProfileSheet from "../components/ProfileSheet";
 
 // ─── STATUS META ──────────────────────────────────────────────────────────────
@@ -134,8 +132,6 @@ function isUrgent(ts) {
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function DriverDashboard() {
   const { user } = useAuthStore();
-  const navigate = useNavigate();
-
   const [activeTab, setActiveTab] = useState("Available Jobs");
   const [openJobs, setOpenJobs] = useState([]);
   const [myDeliveries, setMyDeliveries] = useState([]);
@@ -295,28 +291,22 @@ export default function DriverDashboard() {
   return (
     <div className="dd">
       {/* ── TOP NAV ── */}
-      <nav className="dd-nav">
-        <button
-          className="dd-nav-back"
-          onClick={() => navigate("/marketplace")}
-        >
-          ← Back to Market
-        </button>
-        <div className="dd-nav-brand">
-          <img src={logo} style={{ width: "140px" }} alt="Kraal" />
-          <span className="dd-nav-sub">Driver Dashboard</span>
-        </div>
-        <div className="dd-nav-right">
-          <button
-            className={`dd-availability-btn ${isAvailable ? "dd-avail-on" : "dd-avail-off"}`}
-            onClick={toggleAvailability}
-          >
-            <span className="dd-avail-dot" />
-            {isAvailable ? "Available" : "Off Duty"}
-          </button>
-          <UserMenu />
-        </div>
-      </nav>
+  <HomeNav
+  variant="dashboard"
+  actions={
+    
+    <button
+      className={`dd-availability-btn ${isAvailable ? "dd-avail-on" : "dd-avail-off"}`}
+      onClick={toggleAvailability}
+      aria-pressed={isAvailable}
+    >
+      <span className="dd-avail-dot" />
+      <span className="nav-btn-label">
+        {isAvailable ? "Available" : "Off Duty"}
+      </span>
+    </button>
+  }
+/>
 
       {/* ── PAGE HEADER ── */}
       <div className="dd-page-header">

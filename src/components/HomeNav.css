@@ -6,7 +6,14 @@
   box-shadow: 0 1px 0 rgba(20, 38, 28, 0.1);
 }
 
-/* ── 1. Utility bar ── */
+:root { --nav-h: 64px; }
+@media (max-width: 1024px) { :root { --nav-h: 60px; } }
+
+.home-nav--dash .nav-logo img { height: 36px; width: auto; }
+
+/* UserMenu pill was styled for a dark bar (white border); fix for ivory */
+.home-nav .um-trigger { border-color: rgba(20, 38, 28, 0.2); color: var(--forest-deep); }
+.home-nav .um-trigger:hover { background: rgba(181, 146, 70, 0.15); border-color: var(--brass); }
 .nav-util { background: var(--forest-deep); color: var(--ivory); font-size: 0.78rem; }
 .nav-util-inner {
   max-width: 1280px; margin: 0 auto; padding: 6px 24px;
@@ -164,3 +171,31 @@
 
   .nav-drawer .drawer-wa { margin-top: auto; justify-content: center; background: #25d366; color: #fff; }
 }
+/* Buttons that sit in the nav-actions row */
+.nav-btn {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 14px;
+  background: transparent; color: var(--forest-deep);
+  border: 1.5px solid rgba(20, 38, 28, 0.2);
+  border-radius: 999px; font-weight: 600; font-size: 0.88rem;
+  cursor: pointer; transition: background .15s, border-color .15s;
+}
+.nav-btn:hover { background: rgba(181, 146, 70, 0.15); border-color: var(--brass); }
+.nav-btn-notif {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  display: grid; place-items: center;
+  background: #c0392b; color: #fff; border-radius: 999px;
+  font-size: 0.7rem; font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .nav-btn-label { display: none; }
+  .nav-btn { padding: 0; width: 40px; justify-content: center; }
+}
+.nav-btn-warn   { border-color: #d4a017; background: rgba(212, 160, 23, 0.12); }
+.nav-btn-warn:hover { background: rgba(212, 160, 23, 0.25); border-color: #b8860b; }
+
+.nav-btn-danger { border-color: #c0392b; background: rgba(192, 57, 43, 0.1); color: #a93226; }
+.nav-btn-danger:hover { background: rgba(192, 57, 43, 0.2); border-color: #a93226; }

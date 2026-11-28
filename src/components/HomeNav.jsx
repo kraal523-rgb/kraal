@@ -19,7 +19,8 @@ const CATEGORIES = [
 const WHATSAPP =
   "https://wa.me/263776109275?text=" + encodeURIComponent("Hi Kraal, I need help with...");
 
-export default function HomeNav() {
+export default function HomeNav({ variant = "default", actions = null }) {
+   const isDash = variant === "dashboard";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useLang();
@@ -50,8 +51,8 @@ export default function HomeNav() {
 
   return (
      <>
-    <header className="home-nav">
-      {/* 1. Utility bar (desktop) */}
+    <header className={`home-nav ${isDash ? "home-nav--dash" : ""}`}>
+     {!isDash && (
       <div className="nav-util">
         <div className="nav-util-inner">
           <span>🇿🇼 {t("tagline")}</span>
@@ -63,14 +64,14 @@ export default function HomeNav() {
           </div>
         </div>
       </div>
-
+)}
       {/* 2. Main bar */}
       <nav className="nav-main" aria-label="Main">
         <div className="nav-inner">
           <Link to="/" className="nav-logo" aria-label="Kraal home">
             <img src={logo} alt="Kraal" />
           </Link>
-
+{!isDash && (
           <form className="nav-search" onSubmit={handleSearch} role="search">
             <span className="search-icon"><SearchIcon /></span>
             <input
@@ -83,14 +84,17 @@ export default function HomeNav() {
             />
             <button type="submit">{t("search")}</button>
           </form>
-
+)}
           <div className="nav-actions">
+            {actions}
             <InstallButton />
             <UserMenu />
+            {!isDash && (
             <Link to="/sell" className="nav-cta" aria-label={t("sell")}>
               <span className="nav-cta-plus">+</span>
               <span className="nav-cta-label">{t("sell")}</span>
             </Link>
+)}
             <button
               className={`nav-hamburger ${menuOpen ? "is-open" : ""}`}
               onClick={() => setMenuOpen((o) => !o)}
@@ -105,6 +109,7 @@ export default function HomeNav() {
       </nav>
 
       {/* 3. Category strip (desktop) */}
+      {!isDash && (
       <div className="nav-cats">
         <div className="nav-cats-inner">
           <NavLink to="/marketplace" end className="nav-cat nav-cat-all">
@@ -121,7 +126,7 @@ export default function HomeNav() {
           <NavLink to="/contact" className="nav-cat nav-cat-minor">{t("contact")}</NavLink>
         </div>
       </div>
-
+)}
       {/* Mobile drawer */}
       
     </header>
