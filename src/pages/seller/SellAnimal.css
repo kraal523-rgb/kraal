@@ -4,7 +4,7 @@
    ============================================ */
 
 .sell-page {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--nav-h));
   background: #F5F1EA;
   font-family: 'Segoe UI', system-ui, sans-serif;
   padding: 0 0 80px;

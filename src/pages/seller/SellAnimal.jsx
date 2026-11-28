@@ -6,6 +6,7 @@ import StepDetails from '../../components/listings/StepDetails';
 import StepPhotos from '../../components/listings/StepPhotos';
 import StepPricing from '../../components/listings/StepPricing';
 import StepReview from '../../components/listings/StepReview';
+import HomeNav from '../../components/HomeNav';
 import StepListingDone from '../../components/listings/StepListingDone';
 import './SellAnimal.css';
 
@@ -21,6 +22,7 @@ export default function SellAnimal() {
 
   return (
     <div className="sell-page">
+       <HomeNav variant="dashboard" />
       <div className="sell-inner">
 
         {/* Header */}
