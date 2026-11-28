@@ -363,18 +363,8 @@ useEffect(() => {
         </div>
 
         <div className="sd-topbar-right">
-          <button
-            className="sd-topbar-btn sd-topbar-btn-ghost"
-            onClick={() => navigate("/marketplace")}
-          >
-            🏪 Marketplace
-          </button>
-          <button
-            className="sd-topbar-btn sd-topbar-btn-primary"
-            onClick={() => requestPost()}
-          >
-            + New Listing
-          </button>
+        
+         
           <button
             className="sd-topbar-btn sd-topbar-btn-ghost"
             onClick={() => openVetRequest()}
