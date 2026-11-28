@@ -26,6 +26,7 @@ export default function Register() {
     else if (form.role === 'buyer')  navigate('/buyer', { replace: true });
     else if (form.role === 'vet')  navigate('/vet', { replace: true });
     else if (form.role === 'seller')  navigate('/seller/dashboard', { replace: true });
+    else if (form.role === 'auctioneer') navigate('/auctions', { replace: true });
     else                              navigate('/marketplace', { replace: true });
   };
 

@@ -121,6 +121,7 @@ export default function HomeNav({ variant = "default", actions = null }) {
             </Link>
           ))}
           <span className="nav-cats-spacer" />
+          <NavLink to="/auctions" className="nav-cat nav-cat-minor">{t("auctions")}</NavLink>  {/* new */}
           <NavLink to="/blog" className="nav-cat nav-cat-minor">{t("tips")}</NavLink>
           <NavLink to="/about" className="nav-cat nav-cat-minor">{t("about")}</NavLink>
           <NavLink to="/contact" className="nav-cat nav-cat-minor">{t("contact")}</NavLink>
@@ -163,6 +164,7 @@ export default function HomeNav({ variant = "default", actions = null }) {
 
         <p className="drawer-label">{t("kraal")}</p>
         <NavLink to="/sell">➕ {t("sell")}</NavLink>
+        <NavLink to="/auctions">📣 {t("auctions")}</NavLink>
         <NavLink to="/blog">🌾 {t("tips")}</NavLink>
         <NavLink to="/about">{t("about")}</NavLink>
         <NavLink to="/contact">{t("contact")}</NavLink>

@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import UserMenu from "../components/UserMenu";
 import logo from "../assets/kraal-logo-black.svg";
 import imgCattle from "../assets/pngegg__5.png";
 import imgGoats from "../assets/pngegg__6.png";
@@ -17,6 +16,7 @@ import imgTurkey from "../assets/pngegg__16.png";
 import imgPig from "../assets/pngegg__18.png";
 import imgDog from "../assets/pngegg__4.png";
 import imgDonkey from "../assets/pngegg__3.png";
+import AuctionsRow from "./auctions/AuctionsRow";
 import imgGeese from "../assets/geese.png";
 import imgCats from "../assets/cat.jpg";
 import imgPigeons from "../assets/pigeon.jpg";
@@ -33,7 +33,7 @@ import ListingGalleryModal from "../components/ListingGalleryModal";
 import "./Marketplace.css";
 import HomeNav from "../components/HomeNav";
 import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -82,27 +82,7 @@ const LOCATIONS = [
   "Kadoma",
   "Zvishavane",
 ];
-const RECENTLY_SOLD = [
-  { time: "2h ago",  qty: "15",  animal: "Boer Goats",      location: "Gweru"      },
-  { time: "4h ago",  qty: "3",   animal: "Brahman Bulls",   location: "Marondera"  },
-  { time: "5h ago",  qty: "200", animal: "Road Runners",    location: "Mutare"     },
-  { time: "6h ago",  qty: "8",   animal: "Duroc Piglets",   location: "Chinhoyi"   },
-  { time: "9h ago",  qty: "12",  animal: "Merino Ewes",     location: "Bulawayo"   },
-  { time: "11h ago", qty: "1",   animal: "Thoroughbred Mare", location: "Harare"   },
-  { time: "1d ago",  qty: "50",  animal: "Guinea Fowl",     location: "Masvingo"   },
-  { time: "1d ago",  qty: "6",   animal: "Nguni Cows",      location: "Bindura"    },
-];
-const PRICE_TICKER = [
-  { label: "Brahman Bull", price: "USD 1,200", trend: "up" },
-  { label: "Nguni Cow", price: "USD 850", trend: "up" },
-  { label: "Boer Goat", price: "USD 180", trend: "down" },
-  { label: "Road Runner", price: "USD 8", trend: "up" },
-  { label: "Merino Ewe", price: "USD 220", trend: "up" },
-  { label: "Duroc Pig", price: "USD 310", trend: "down" },
-  { label: "Muscovy Duck", price: "USD 18", trend: "up" },
-  { label: "Bronze Turkey", price: "USD 45", trend: "up" },
-  { label: "Ankole Bull", price: "USD 1,500", trend: "up" },
-];
+
 
 const BANNER_ADS = [
   {
@@ -246,7 +226,6 @@ export default function Marketplace() {
   const [sortBy, setSortBy] = useState("newest");
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [savedItems, setSavedItems] = useState(new Set());
   const [activeModal, setActiveModal] = useState(null);
@@ -506,6 +485,7 @@ export default function Marketplace() {
           ›
         </button>
       </div>
+       <AuctionsRow />
       {/* ── MAIN LAYOUT ── */}
       <div className="mp-layout">
         {/* ── SIDEBAR ── */}

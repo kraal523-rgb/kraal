@@ -30,6 +30,12 @@ export const ROLES = [
     desc: "List and sell your animals",
   },
   {
+    value: 'auctioneer',
+    label: 'Auctioneer',
+    emoji: '📣',
+    desc: 'Advertise livestock sales and publish results',
+  },
+  {
     value: "transporter",
     label: "Transport Provider",
     emoji: "🚚",

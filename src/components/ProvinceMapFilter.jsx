@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import phoneImg from "../assets/8.png";
 import phoneImg2 from "../assets/3.png";
@@ -152,7 +152,9 @@ export default function ProvinceMapFilter() {
   useEffect(() => {
     async function fetchProvinceCounts() {
       try {
-        const snapshot = await getDocs(collection(db, "listings"));
+        const snapshot = await getDocs(
+  query(collection(db, "listings"), where("status", "==", "active"))
+);
 
         // Build a map: provinceId -> { count, animalSet }
         const counts = {};

@@ -1,52 +1,45 @@
-// Expo exposes env vars prefixed with EXPO_PUBLIC_ at build time.
-import { postFormData } from "./postForm";
-
-// Expo replaces this public env reference at build time.
-// eslint-disable-next-line no-undef
-const WORKER_URL = import.meta.env.EXPO_PUBLIC_UPLOAD_WORKER_URL;
+// Web version: uploads a browser File to R2 through the Worker.
+const WORKER_URL = (import.meta.env.VITE_UPLOAD_WORKER_URL || "").replace(/\/$/, "");
 
 /**
- * Upload a single image to R2 through the Worker proxy.
- *
- * @param {string} uri      - Local file URI from expo-image-picker
- * @param {string} folder   - 'sellers' | 'listings'
+ * @param {File}   file     - File from an <input type="file">
+ * @param {string} folder   - e.g. 'sellers' | 'listings' | 'auctions'
  * @param {string} idToken  - Firebase ID token from user.getIdToken()
  * @returns {Promise<{ url: string, key: string }>}
  */
-export async function uploadImage(uri, folder, idToken) {
+export async function uploadImage(file, folder, idToken) {
   if (!WORKER_URL) {
-    throw new Error("EXPO_PUBLIC_UPLOAD_WORKER_URL is not defined in your .env file.");
+    throw new Error("VITE_UPLOAD_WORKER_URL is not defined in your .env file.");
   }
 
-  // Work out the file name and MIME type from the URI
-  const name = uri.split("/").pop() || `photo-${Date.now()}.jpg`;
-  const ext = (name.split(".").pop() || "jpg").toLowerCase();
-  const type =
-    ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
-
   const body = new FormData();
-  // React Native's FormData accepts { uri, name, type } in place of a File
-  body.append("file", { uri, name, type });
+  body.append("file", file);
   body.append("folder", folder);
 
-  const res = await postFormData(`${WORKER_URL}/upload`, body, {
-    Authorization: `Bearer ${idToken}`,
+  // Don't set Content-Type: the browser adds the multipart boundary itself
+  const res = await fetch(`${WORKER_URL}/upload`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${idToken}` },
+    body,
   });
-  const data = res.data || {};
+
+  let data = {};
+  try {
+    data = await res.json();
+  } catch {
+    /* non-JSON error response */
+  }
   if (!res.ok || !data.url) {
     throw new Error(data.error || `Upload failed (${res.status})`);
   }
   return { url: data.url, key: data.key };
 }
 
-/**
- * Upload multiple listing photos in parallel (same order as input).
- * @param {string[]} uris
- */
-export async function uploadListingPhotos(uris, idToken) {
-  if (uris.length > 10) throw new Error("Maximum 10 photos per listing.");
+/** Upload several listing photos in parallel (same order as input). */
+export async function uploadListingPhotos(files, idToken) {
+  if (files.length > 10) throw new Error("Maximum 10 photos per listing.");
   const results = await Promise.all(
-    uris.map((uri) => uploadImage(uri, "listings", idToken)),
+    files.map((f) => uploadImage(f, "listings", idToken)),
   );
   return results.map((r) => r.url);
 }

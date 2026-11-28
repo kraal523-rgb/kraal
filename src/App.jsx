@@ -23,11 +23,13 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import KraalMarketExplorer from "./pages/Kraalmarketexplorer";
 import Terms from "./pages/Terms";
+// eslint-disable-next-line no-unused-vars
 import VerifyIdentity, { VerificationGuard } from "./pages/VerifyIdentity";
 import DriverDashboard from "./pages/DriverDashboard";
 import BuyerDashboard from "./pages/Buyerdashboard";
 import VetDashboard from "./pages/VetDashboard"; 
-
+import Auctions from './pages/auctions/Auctions';
+import CreateAuction from './pages/auctions/CreateAuction';
 // ─── Shared spinner ───────────────────────────────────────────────────────────
 function KraalSpinner() {
   return (
@@ -248,7 +250,18 @@ function App() {
             </ProtectedRoute>
           }
         />
+<Route path="/auctions" element={<Auctions />} />
 
+<Route
+  path="/auctions/new"
+  element={
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["auctioneer"]} redirectTo="/auctions">
+        <CreateAuction />
+      </RoleGuard>
+    </ProtectedRoute>
+  }
+/>
         {/* ── Veterinarian dashboard ────────────────────────────────────── */}
         <Route
           path="/vet"

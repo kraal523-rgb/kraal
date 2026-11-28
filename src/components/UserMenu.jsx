@@ -34,7 +34,10 @@ export default function UserMenu() {
       navigate("/driver");
     } else if (role === "buyer") {
       navigate("/buyer");
-    }  else if (role === "vet") {
+    }  else if (role === "auctioneer") {
+      navigate("/auctions");
+    } 
+    else if (role === "vet") {
       navigate("/vet");
     }    
    else {
@@ -52,8 +55,9 @@ export default function UserMenu() {
     .slice(0, 2)
     .toUpperCase();
 
-  // Detect if this user is a transporter (adjust the field name to match your Firestore schema)
+
 const isTransporter = userProfile?.role === "transporter";
+
 
   if (!user) {
     // Not signed in — show the standard Sign In link

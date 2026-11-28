@@ -34,6 +34,7 @@ import ProfileSheet from "../components/ProfileSheet";
 import imgQuail from "../assets/quail.png";
 import CookieConsent from "../components/CookieConsent";
 import HomeNav from "../components/HomeNav";
+import AuctionsRow from "./auctions/AuctionsRow";
 import phoneImg from "../assets/1.png";
 import "./Home.css";
 import "./Marketplace.css";
@@ -159,18 +160,6 @@ const TRUST_ITEMS = [
   },
 ];
 
-const REGIONS = [
-  "Harare",
-  "Bulawayo",
-  "Mutare",
-  "Gweru",
-  "Kwekwe",
-  "Marondera",
-  "Chinhoyi",
-  "Masvingo",
-  "Bindura",
-  "Victoria Falls",
-];
 
 export default function Home() {
   const [featuredListings, setFeaturedListings] = useState([]);
@@ -728,7 +717,7 @@ const tickerItems =
  
 </section>
 <ProvinceMapFilter />
-
+<AuctionsRow />
 
 
 

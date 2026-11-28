@@ -1,8 +1,8 @@
-import React from "react";
 import { LIVESTOCK_TYPES } from "../../hooks/useRegister";
 
 function validateBusiness(form) {
-  if (!form.businessName.trim()) return "Farm or business name is required.";
+  if (!form.businessName.trim())
+    return `${(ROLE_COPY[form.role] ?? ROLE_COPY.seller).nameLabel} is required.`;
   if (!form.phone.trim()) return "Phone number is required.";
   // Only sellers need to pick livestock types
   if (form.role === "seller" && form.livestockTypes.length === 0)
@@ -20,6 +20,8 @@ const ROLE_COPY = {
     sub: "Tell buyers who you are and what you sell.",
     namePlaceholder: "e.g. Moyo Family Farm",
     nameLabel: "Farm or business name",
+    aboutLabel: "About your farm",
+    aboutPlaceholder: "Breed, grazing method, certifications…",
   },
   buyer: {
     title: "Your details",
@@ -32,6 +34,24 @@ const ROLE_COPY = {
     sub: "Tell farmers how you can move their livestock.",
     namePlaceholder: "e.g. Bvunzawabaya Transport",
     nameLabel: "Business or trading name",
+    aboutLabel: "About your service",
+    aboutPlaceholder: "Routes covered, experience, special equipment…",
+  },
+  auctioneer: {
+    title: "Your auction company",
+    sub: "We verify auctioneers before they can post sales.",
+    namePlaceholder: "e.g. Your Auctioneers (Pvt) Ltd",
+    nameLabel: "Company name",
+    aboutLabel: "About your company",
+    aboutPlaceholder: "Sale pens, branches, AMA registration number…",
+  },
+  vet: {
+    title: "Your practice",
+    sub: "Tell farmers about your veterinary services.",
+    namePlaceholder: "e.g. Dr. Ncube Veterinary Services",
+    nameLabel: "Practice or full name",
+    aboutLabel: "About your practice",
+    aboutPlaceholder: "Services, qualifications, areas covered…",
   },
 };
 
@@ -186,21 +206,17 @@ export default function StepBusiness({
         </>
       )}
 
-      {/* ── About — seller and transporter only ── */}
+      {/* ── About — every role except buyer ── */}
       {role !== "buyer" && (
         <div className="field">
           <label htmlFor="description">
-            {role === "transporter" ? "About your service" : "About your farm"}{" "}
+            {copy.aboutLabel}{" "}
             <span className="optional">(optional)</span>
           </label>
           <textarea
             id="description"
             rows={3}
-            placeholder={
-              role === "transporter"
-                ? "Routes covered, experience, special equipment…"
-                : "Breed, grazing method, certifications…"
-            }
+            placeholder={copy.aboutPlaceholder}
             value={form.description}
             onChange={(e) => update({ description: e.target.value })}
           />

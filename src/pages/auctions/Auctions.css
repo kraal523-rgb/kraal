@@ -1,0 +1,323 @@
+/* All classes start with "auc-" so they don't clash with your other styles */
+.auc-page {
+  --auc-cream: #f7f3e8;
+  --auc-soil: #2f2418;
+  --auc-sage: #3b6d11;
+  --auc-muted: #6f6b60;
+  --auc-line: rgba(0, 0, 0, 0.1);
+  --auc-danger: #a93226;
+
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 32px max(16px, calc((100% - 1080px) / 2)) 64px;
+  background: var(--auc-cream);
+  color: var(--auc-soil);
+  font-family: Sora, system-ui, sans-serif;
+  text-align: left;
+}
+.auc-page--narrow {
+  padding-inline: max(16px, calc((100% - 620px) / 2));
+}
+.auc-page *,
+.auc-page *::before,
+.auc-page *::after {
+  box-sizing: border-box;
+}
+.auc-page h1,
+.auc-page h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  color: var(--auc-soil);
+  margin: 0;
+}
+.auc-page h1 {
+  font-size: 2.2rem;
+}
+.auc-page h2 {
+  font-size: 1.45rem;
+}
+.auc-page p {
+  margin: 0;
+}
+
+.auc-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.auc-muted {
+  color: var(--auc-muted);
+  font-size: 0.875rem;
+}
+.auc-notes {
+  white-space: pre-line;
+}
+
+.auc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+  margin-top: 16px;
+}
+.auc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--auc-line);
+  border-radius: 16px;
+  overflow-wrap: anywhere;
+}
+.auc-card--cancelled {
+  opacity: 0.75;
+}
+
+.auc-badges {
+  display: flex;
+  gap: 8px;
+}
+.auc-badge {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(59, 109, 17, 0.1);
+  color: var(--auc-sage);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.auc-badge--cancelled {
+  background: #fdecec;
+  color: var(--auc-danger);
+}
+
+.auc-info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+.auc-info dt {
+  color: var(--auc-muted);
+}
+.auc-info dd {
+  margin: 0;
+}
+.auc-head {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.auc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.auc-page .auc-action {
+  padding: 8px 14px;
+  border: 1.5px solid var(--auc-line);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--auc-sage);
+  font:
+    700 0.8rem Sora,
+    system-ui,
+    sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+.auc-page .auc-action.is-active {
+  background: var(--auc-sage);
+  border-color: var(--auc-sage);
+  color: #fff;
+}
+.auc-page .auc-action--danger {
+  color: var(--auc-danger);
+}
+
+.auc-page .auc-button {
+  display: inline-block;
+  padding: 14px 22px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--auc-sage);
+  color: #fff;
+  font:
+    700 0.95rem Sora,
+    system-ui,
+    sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+.auc-page button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.auc-page :focus-visible {
+  outline: 3px solid var(--auc-sage);
+  outline-offset: 2px;
+}
+
+.auc-buyers {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--auc-line);
+}
+.auc-buyers li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 0.875rem;
+}
+.auc-buyers a,
+.auc-page .auc-back {
+  color: var(--auc-sage);
+  font-weight: 700;
+}
+.auc-page .auc-back {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
+}
+
+.auc-page .auc-notice,
+.auc-page .auc-error {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+.auc-page .auc-error {
+  background: #fdecec;
+  color: var(--auc-danger);
+}
+
+.auc-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+.auc-form label,
+.auc-form legend {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.auc-page .auc-form input,
+.auc-page .auc-form select,
+.auc-page .auc-form textarea {
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--auc-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--auc-soil);
+  font:
+    400 1rem Sora,
+    system-ui,
+    sans-serif; /* 1rem stops phones zooming in */
+}
+.auc-form textarea {
+  resize: vertical;
+}
+.auc-form fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.auc-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0 10px;
+}
+.auc-counts label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Photos ── */
+.auc-cover {
+  position: relative;
+  margin: -18px -18px 4px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  background: rgba(0, 0, 0, 0.05);
+}
+.auc-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.auc-cover-count {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.auc-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+.auc-photo {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--auc-line);
+  border-radius: 12px;
+  background: #fff;
+}
+.auc-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.auc-photo-cover {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--auc-sage);
+  color: #fff;
+  font: 700 0.65rem Sora, system-ui, sans-serif;
+}
+.auc-photo-cover--btn {
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+.auc-photo-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
